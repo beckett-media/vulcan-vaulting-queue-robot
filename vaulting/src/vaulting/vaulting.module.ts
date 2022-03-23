@@ -1,32 +1,36 @@
-import { BullModule } from '@nestjs/bull';
+import { BullModule, getQueueOptionsToken } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { BurnNFTConsumer, MintNFTConsumer } from './vaulting.consumer';
 import { VaultingController } from './vaulting.controller';
-import {
-  VaultingBurningService,
-  VaultingMintingService,
-} from './vaulting.service';
+import { VaultingService } from './vaulting.service';
+import configuration from './config/configuration';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Token, Vaulting } from './vaulting.entity';
 
 @Module({
   controllers: [VaultingController],
-  providers: [
-    VaultingBurningService,
-    VaultingMintingService,
-    MintNFTConsumer,
-    BurnNFTConsumer,
-  ],
+  providers: [VaultingService, MintNFTConsumer, BurnNFTConsumer],
   imports: [
-    BullModule.forRoot({
-      redis: {
-        host: 'localhost',
-        port: 6379,
-      },
+    TypeOrmModule.forRoot({
+      type: 'sqlite',
+      database: configuration()[process.env['runtime']]['db']['name'],
+      entities: [Vaulting, Token],
+      synchronize: configuration()[process.env['runtime']]['db']['sync'],
+    }),
+    TypeOrmModule.forFeature([Vaulting, Token]),
+    BullModule.forRoot(configuration()[process.env['runtime']]),
+    BullModule.registerQueue({
+      name: configuration()[process.env['runtime']]['queue']['mint'],
+      limiter: configuration()[process.env['runtime']]['queue']['limiter'],
     }),
     BullModule.registerQueue({
-      name: 'beckett_mint',
+      name: configuration()[process.env['runtime']]['queue']['burn'],
+      limiter: configuration()[process.env['runtime']]['queue']['limiter'],
     }),
-    BullModule.registerQueue({
-      name: 'beckett_burn',
+    ConfigModule.forRoot({
+      load: [configuration],
+      isGlobal: true,
     }),
   ],
 })

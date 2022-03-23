@@ -9,7 +9,7 @@ export class MintRequest {
   owner: string;
 
   @ApiProperty()
-  beckett_id: number;
+  beckett_id: string;
 
   @ApiProperty()
   name: string;
@@ -26,7 +26,7 @@ export class MintRequest {
 
 export class BurnRequest {
   @ApiProperty()
-  address: string;
+  collection: string;
 
   @ApiProperty()
   id: number;
@@ -37,7 +37,7 @@ export class JobStatus {
   id: number;
 
   @ApiProperty()
-  beckett_id: number;
+  beckett_id: string;
 
   @ApiProperty()
   status: number;

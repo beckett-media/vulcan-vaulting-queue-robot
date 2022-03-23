@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { BurnRequest, MintRequest } from './dtos/vaulting.dto';
@@ -9,19 +14,29 @@ import {
   DefenderRelaySigner,
 } from 'defender-relay-client/lib/ethers';
 import { isString } from 'class-validator';
-
-const JobStatusEnum = {
-  RequestReceived: 0,
-  RequestInProcessing: 1,
-  RequestProcessed: 2,
-  RequestFailed: 3,
-  TokenMinted: 4,
-  TokenBurned: 5,
-};
+import configuration from './config/configuration';
+import {
+  JobResult,
+  JobResultReadable,
+  TokenStatus,
+  TokenStatusReadable,
+} from './vaulting.consumer';
+import { Token, Vaulting } from './vaulting.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
-export class VaultingMintingService {
-  constructor(@InjectQueue('beckett_mint') private mintQueue: Queue) {}
+export class VaultingService {
+  private readonly logger = new Logger('VaultingServer');
+
+  constructor(
+    @InjectRepository(Token) private tokenRepo: Repository<Token>,
+    @InjectRepository(Vaulting) private vaultingRepo: Repository<Vaulting>,
+    @InjectQueue(configuration()[process.env['runtime']]['queue']['mint'])
+    private mintQueue: Queue,
+    @InjectQueue(configuration()[process.env['runtime']]['queue']['burn'])
+    private burnQueue: Queue,
+  ) {}
 
   nftContracts: {
     [key: string]: Contract;
@@ -65,37 +80,82 @@ export class VaultingMintingService {
 
   async mintJobStatus(id: number) {
     const job = await this.mintQueue.getJob(id);
-    console.log(job);
-    var status = JobStatusEnum.RequestReceived;
-    if (job.processedOn > 0) {
-      status = JobStatusEnum.RequestInProcessing;
+    if (job == undefined) {
+      throw new NotFoundException();
     }
+    this.logger.log(JSON.stringify(job));
+    var tx_hash: string;
+    var error: string;
+    var status: number;
+    // job status endpoint is called before job finishes
+    if (job.returnvalue == null) {
+      tx_hash = '';
+      error = '';
+      status = JobResult.JobReceived;
+    } else {
+      error = job.returnvalue['error'];
+      tx_hash = job.returnvalue['tx_hash'];
+      status = job.returnvalue['status'];
+    }
+    var token_status = TokenStatus.NotMinted;
+    var token_id: number;
     if (job.finishedOn > 0) {
-      status = JobStatusEnum.RequestProcessed;
-      const tokenMinted = this.mintNFTStatus(job.data.collection, job.data.id);
-      if (tokenMinted) {
-        status = JobStatusEnum.TokenMinted;
+      const vaulting = await this.vaultingRepo.findOne(job.data.beckett_id);
+      token_id = vaulting.token_id;
+
+      // check if it's minted
+      var tokenMinted: boolean;
+      if (vaulting != undefined) {
+        tokenMinted = await this.mintNFTStatus(
+          job.data.collection,
+          vaulting.token_id,
+        );
+      }
+      // There is difference between job status and token status
+      // update token status to 'minted' if job status is minted as well
+      if (tokenMinted == true) {
+        token_status = TokenStatus.Minted;
+        const token = await this.tokenRepo.findOne({
+          collection: job.data.collection,
+          id: vaulting.token_id,
+        });
+        if (token) {
+          Object.assign(token, { status: TokenStatus.Minted });
+          await this.tokenRepo.save(token);
+        }
       }
     }
     const jobStatus = {
-      id: job.id,
+      job_id: job.id,
       beckett_id: job.data.beckett_id,
-      status: status,
+      collection: job.data.collection,
+      token_id: token_id,
+      token_status: token_status,
+      token_status_desc: TokenStatusReadable[token_status],
+      job_status: status,
+      job_status_desc: JobResultReadable[status],
+      tx_hash: tx_hash,
+      error: error,
     };
     return jobStatus;
   }
 
   async mintNFTStatus(collection: string, id: number) {
     const nftContract = this.getContract(collection);
-    const owner = await nftContract.ownerOf(id);
-    return isString(owner);
+    try {
+      const owner = await nftContract.ownerOf(id);
+      return isString(owner);
+    } catch (error) {
+      return false;
+    }
   }
-}
 
-@Injectable()
-export class VaultingBurningService {
-  constructor(@InjectQueue('beckett_burn') private burnQueue: Queue) {}
+  //////////////////////////////////////////////////////
+  /// brun nft
+  //////////////////////////////////////////////////////
+
   async burnNFT(burn: BurnRequest) {
     const job = await this.burnQueue.add(burn);
+    return job;
   }
 }

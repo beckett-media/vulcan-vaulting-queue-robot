@@ -6,6 +6,12 @@ export module serviceConfig {
         '4wyC3hy256qXjUPQGo8oAZeY8vxXMhGCxxJ6eAjXksHAkKgKE5GousfTNoAeiWm9',
       apiKey: '9zPmBQBZ2dcps39csAaQvjtg2SswvJVa',
     },
+    polygon: {
+      address: '0xe9ca93679635e8ff8bd00bb5435c9dbc58145216',
+      apiKey: '34byXEtzSzaQ6jZKkL965PAAxuDzddmE',
+      apiSecret:
+        'XUqkd2S7wVCVvgAAhHZfYpHa1Tw2wgN8VhiTkkBweSK3Pg4kZZ82qeXXY9stF9Ko',
+    },
   };
 
   export const Pinata = {
@@ -23,7 +29,8 @@ export module serviceConfig {
     },
   };
 
-  export const ERC721Address = '0x1b293e987144D5fd7169BD95dA97387809DF58cc';
+  //export const ERC721Address = '0x1b293e987144D5fd7169BD95dA97387809DF58cc';
+  export const ERC721Address = '0x928cBCEBD513e34A361020A020779a31923f1D97';
 
   export const ERC721ABI = [
     {

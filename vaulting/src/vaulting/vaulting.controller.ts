@@ -14,19 +14,14 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { BurnRequest, JobStatus, MintRequest } from './dtos/vaulting.dto';
-import {
-  VaultingBurningService,
-  VaultingMintingService,
-} from './vaulting.service';
+import { JobResult, JobResultReadable } from './vaulting.consumer';
+import { VaultingService } from './vaulting.service';
 
 @Controller('vaulting')
 export class VaultingController {
-  constructor(
-    public VaultingMintingService: VaultingMintingService,
-    public VaultBurningService: VaultingBurningService,
-  ) {}
+  constructor(public VaultingService: VaultingService) {}
 
-  @Get('/mint/:id')
+  @Get('/mint/:job_id')
   @ApiOperation({
     summary: 'Get NFT minting job status',
   })
@@ -36,8 +31,8 @@ export class VaultingController {
     description: 'Return status of NFT minting job',
   })
   @ApiProduces('application/json')
-  async mintStatus(@Param('id') id: number) {
-    const jobStatus = await this.VaultingMintingService.mintJobStatus(id);
+  async mintStatus(@Param('job_id') job_id: number) {
+    const jobStatus = await this.VaultingService.mintJobStatus(job_id);
     return jobStatus;
   }
 
@@ -55,8 +50,12 @@ export class VaultingController {
   })
   @ApiProduces('application/json')
   async mintNFT(@Body() body: MintRequest) {
-    const job = await this.VaultingMintingService.mintNFT(body);
-    return { id: job.id, beckett_id: body.beckett_id, status: 0 };
+    const job = await this.VaultingService.mintNFT(body);
+    return {
+      job_id: job.id,
+      beckett_id: body.beckett_id,
+      status: JobResultReadable[JobResult.JobReceived],
+    };
   }
 
   @Get('/burn/:id')
@@ -86,7 +85,8 @@ export class VaultingController {
     description: 'Submission of NFT burnning job is failed',
   })
   @ApiProduces('application/json')
-  burnNFT(@Body() body: BurnRequest) {
-    return { id: 1111, beckett_id: 2222, status: 3333 };
+  async burnNFT(@Body() body: BurnRequest) {
+    const job = await this.VaultingService.burnNFT(body);
+    return { id: job.id, beckett_id: 0, status: 0 };
   }
 }
