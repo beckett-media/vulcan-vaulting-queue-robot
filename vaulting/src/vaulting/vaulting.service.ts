@@ -126,7 +126,7 @@ export class VaultingService {
       }
     }
     const jobStatus = {
-      job_id: job.id,
+      job_id: Number(job.id),
       beckett_id: job.data.beckett_id,
       collection: job.data.collection,
       token_id: token_id,

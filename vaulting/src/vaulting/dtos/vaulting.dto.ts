@@ -32,13 +32,45 @@ export class BurnRequest {
   id: number;
 }
 
-export class JobStatus {
+export class JobSubmit {
   @ApiProperty()
-  id: number;
+  job_id: number;
 
   @ApiProperty()
   beckett_id: string;
 
   @ApiProperty()
-  status: number;
+  status: string;
+}
+
+export class JobStatus {
+  @ApiProperty()
+  job_id: number;
+
+  @ApiProperty()
+  beckett_id: string;
+
+  @ApiProperty()
+  collection: string;
+
+  @ApiProperty()
+  token_id: number;
+
+  @ApiProperty()
+  token_status: number;
+
+  @ApiProperty()
+  token_status_desc: string;
+
+  @ApiProperty()
+  job_status: number;
+
+  @ApiProperty()
+  job_status_desc: string;
+
+  @ApiProperty()
+  tx_hash: string;
+
+  @ApiProperty()
+  error: string;
 }

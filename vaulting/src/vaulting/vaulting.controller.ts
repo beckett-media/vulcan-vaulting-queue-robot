@@ -1,19 +1,16 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Delete,
-  Body,
-  Param,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import {
   ApiOperation,
   ApiResponse,
   ApiProduces,
   ApiTags,
 } from '@nestjs/swagger';
-import { BurnRequest, JobStatus, MintRequest } from './dtos/vaulting.dto';
+import {
+  BurnRequest,
+  JobSubmit,
+  JobStatus,
+  MintRequest,
+} from './dtos/vaulting.dto';
 import { JobResult, JobResultReadable } from './vaulting.consumer';
 import { VaultingService } from './vaulting.service';
 
@@ -30,6 +27,10 @@ export class VaultingController {
     type: JobStatus,
     description: 'Return status of NFT minting job',
   })
+  @ApiResponse({
+    status: 404,
+    description: 'Can not find minting job',
+  })
   @ApiProduces('application/json')
   async mintStatus(@Param('job_id') job_id: number) {
     const jobStatus = await this.VaultingService.mintJobStatus(job_id);
@@ -42,6 +43,7 @@ export class VaultingController {
   })
   @ApiResponse({
     status: 201,
+    type: JobSubmit,
     description: 'The NFT has been successfully authenticated.',
   })
   @ApiResponse({
@@ -52,7 +54,7 @@ export class VaultingController {
   async mintNFT(@Body() body: MintRequest) {
     const job = await this.VaultingService.mintNFT(body);
     return {
-      job_id: job.id,
+      job_id: Number(job.id),
       beckett_id: body.beckett_id,
       status: JobResultReadable[JobResult.JobReceived],
     };
