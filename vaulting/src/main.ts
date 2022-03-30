@@ -1,13 +1,22 @@
 import { NestFactory } from '@nestjs/core';
 import { VaultingModule } from './vaulting/vaulting.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { BullModule } from '@nestjs/bull';
-import { Logger } from '@nestjs/common';
 import configuration from './vaulting/config/configuration';
+import * as bodyParser from 'body-parser';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(VaultingModule);
+
+  // increase body size
+  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
+  // cors
   app.enableCors();
+
+  // pipes
+  app.useGlobalPipes(new ValidationPipe());
 
   const docConfig = new DocumentBuilder()
     .setTitle('Vaulting API')

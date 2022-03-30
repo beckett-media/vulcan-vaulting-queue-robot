@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { BurnRequest, MintRequest } from './dtos/vaulting.dto';
+import { BurnJobStatus, BurnRequest, MintRequest } from './dtos/vaulting.dto';
 import { Contract, ethers } from 'ethers';
 import { serviceConfig } from './vaulting.service.config';
 import {
@@ -16,8 +16,9 @@ import {
 import { isString } from 'class-validator';
 import configuration from './config/configuration';
 import {
-  JobResult,
-  JobResultReadable,
+  MintJobResult,
+  MintJobResultReadable,
+  BurnJobResult,
   TokenStatus,
   TokenStatusReadable,
 } from './vaulting.consumer';
@@ -52,7 +53,11 @@ export class VaultingService {
       return this.nftContracts[address];
     } else {
       try {
-        const relayConfig = serviceConfig.RelayConfig['mumbai'];
+        const relayConfig =
+          serviceConfig.RelayConfig[
+            configuration()[process.env['runtime']]['network_mint_relayer']
+          ];
+        this.logger.log(`relay config: ${JSON.stringify(relayConfig)}`);
         const credentials = {
           apiKey: relayConfig['apiKey'],
           apiSecret: relayConfig['apiSecret'],
@@ -91,7 +96,7 @@ export class VaultingService {
     if (job.returnvalue == null) {
       tx_hash = '';
       error = '';
-      status = JobResult.JobReceived;
+      status = MintJobResult.JobReceived;
     } else {
       error = job.returnvalue['error'];
       tx_hash = job.returnvalue['tx_hash'];
@@ -133,7 +138,7 @@ export class VaultingService {
       token_status: token_status,
       token_status_desc: TokenStatusReadable[token_status],
       job_status: status,
-      job_status_desc: JobResultReadable[status],
+      job_status_desc: MintJobResultReadable[status],
       tx_hash: tx_hash,
       error: error,
     };
@@ -157,5 +162,38 @@ export class VaultingService {
   async burnNFT(burn: BurnRequest) {
     const job = await this.burnQueue.add(burn);
     return job;
+  }
+
+  async burnJobStatus(id: number) {
+    const job = await this.burnQueue.getJob(id);
+    const collection = job.data['collection'];
+    const token_id = job.data['token_id'];
+    const beckett_id = job.data['beckett_id'];
+    var jobStatus = BurnJobResult.JobReceived;
+    this.logger.log(job.returnvalue);
+    if (job.returnvalue != null && job.returnvalue['status'] != undefined) {
+      jobStatus = job.returnvalue['status'];
+    }
+
+    try {
+      const nftContract = this.getContract(collection);
+      this.logger.log(`burn job status: ${collection}, ${token_id}`);
+      await nftContract.ownerOf(token_id);
+    } catch (error) {
+      // if there is exception which means we can't find the token
+      // and we sent the burn tx (passed all checks before sending burn tx)
+      // then the token is burned
+      if (jobStatus == BurnJobResult.TxSent) {
+        jobStatus = BurnJobResult.TokenBurned;
+      }
+    }
+
+    return {
+      job_id: job.id,
+      collection: collection,
+      token_id: token_id,
+      beckett_id: beckett_id,
+      status: jobStatus,
+    };
   }
 }

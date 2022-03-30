@@ -1,17 +1,13 @@
 import { Controller, Get, Post, Body, Param } from '@nestjs/common';
-import {
-  ApiOperation,
-  ApiResponse,
-  ApiProduces,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiProduces } from '@nestjs/swagger';
 import {
   BurnRequest,
-  JobSubmit,
-  JobStatus,
+  MintStatus,
   MintRequest,
+  BurnJobStatus,
+  MintJobStatus,
 } from './dtos/vaulting.dto';
-import { JobResult, JobResultReadable } from './vaulting.consumer';
+import { BurnJobResult, MintJobResult } from './vaulting.consumer';
 import { VaultingService } from './vaulting.service';
 
 @Controller('vaulting')
@@ -24,7 +20,7 @@ export class VaultingController {
   })
   @ApiResponse({
     status: 200,
-    type: JobStatus,
+    type: MintStatus,
     description: 'Return status of NFT minting job',
   })
   @ApiResponse({
@@ -43,7 +39,7 @@ export class VaultingController {
   })
   @ApiResponse({
     status: 201,
-    type: JobSubmit,
+    type: MintJobStatus,
     description: 'The NFT has been successfully authenticated.',
   })
   @ApiResponse({
@@ -56,22 +52,27 @@ export class VaultingController {
     return {
       job_id: Number(job.id),
       beckett_id: body.beckett_id,
-      status: JobResultReadable[JobResult.JobReceived],
+      status: MintJobResult.JobReceived,
     };
   }
 
-  @Get('/burn/:id')
+  @Get('/burn/:job_id')
   @ApiOperation({
     summary: 'Get NFT burning job status',
   })
   @ApiResponse({
     status: 200,
-    type: JobStatus,
+    type: BurnJobStatus,
     description: 'Return status of NFT burning job',
   })
+  @ApiResponse({
+    status: 404,
+    description: 'Can not find burning job',
+  })
   @ApiProduces('application/json')
-  burnStatus() {
-    return { id: 111, beckett_id: 222, status: 333 };
+  async burnStatus(@Param('job_id') job_id: number) {
+    const jobStatus = await this.VaultingService.burnJobStatus(job_id);
+    return jobStatus;
   }
 
   @Post('/burn')
@@ -89,6 +90,12 @@ export class VaultingController {
   @ApiProduces('application/json')
   async burnNFT(@Body() body: BurnRequest) {
     const job = await this.VaultingService.burnNFT(body);
-    return { id: job.id, beckett_id: 0, status: 0 };
+    return {
+      id: job.id,
+      beckett_id: body.beckett_id,
+      collection: body.collection,
+      token_id: body.token_id,
+      status: BurnJobResult.JobReceived,
+    };
   }
 }
