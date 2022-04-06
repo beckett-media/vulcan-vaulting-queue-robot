@@ -3,6 +3,7 @@ import {
   InternalServerErrorException,
   Logger,
   NotFoundException,
+  ShutdownSignal,
 } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
@@ -98,20 +99,22 @@ export class VaultingService {
       error = '';
       status = MintJobResult.JobReceived;
     } else {
-      error = job.returnvalue['error'];
       tx_hash = job.returnvalue['tx_hash'];
+      error = job.returnvalue['error'];
       status = job.returnvalue['status'];
     }
     var token_status = TokenStatus.NotMinted;
     var token_id: number;
+    var jobFinished = false;
     if (job.finishedOn > 0) {
+      jobFinished = true;
       const vaulting = await this.vaultingRepo.findOne(job.data.beckett_id);
       token_id = vaulting.token_id;
 
       // check if it's minted
       var tokenMinted: boolean;
       if (vaulting != undefined) {
-        tokenMinted = await this.mintNFTStatus(
+        tokenMinted = await this.nftMinted(
           job.data.collection,
           vaulting.token_id,
         );
@@ -120,14 +123,11 @@ export class VaultingService {
       // update token status to 'minted' if job status is minted as well
       if (tokenMinted == true) {
         token_status = TokenStatus.Minted;
-        const token = await this.tokenRepo.findOne({
-          collection: job.data.collection,
-          id: vaulting.token_id,
-        });
-        if (token) {
-          Object.assign(token, { status: TokenStatus.Minted });
-          await this.tokenRepo.save(token);
-        }
+        this.updateTokenStatus(
+          job.data.collection,
+          vaulting.token_id,
+          token_status,
+        );
       }
     }
     const jobStatus = {
@@ -140,12 +140,13 @@ export class VaultingService {
       job_status: status,
       job_status_desc: MintJobResultReadable[status],
       tx_hash: tx_hash,
+      processed: jobFinished,
       error: error,
     };
     return jobStatus;
   }
 
-  async mintNFTStatus(collection: string, id: number) {
+  async nftMinted(collection: string, id: number) {
     const nftContract = this.getContract(collection);
     try {
       const owner = await nftContract.ownerOf(id);
@@ -175,6 +176,11 @@ export class VaultingService {
       jobStatus = job.returnvalue['status'];
     }
 
+    var jobFinished = false;
+    if (job.finishedOn > 0) {
+      jobFinished = true;
+    }
+
     try {
       const nftContract = this.getContract(collection);
       this.logger.log(`burn job status: ${collection}, ${token_id}`);
@@ -193,7 +199,65 @@ export class VaultingService {
       collection: collection,
       token_id: token_id,
       beckett_id: beckett_id,
+      processed: jobFinished,
       status: jobStatus,
     };
+  }
+
+  async updateTokenStatus(collection: string, tokenId: number, status: number) {
+    // update token table for burned nft
+    const token = await this.tokenRepo.findOne({
+      collection: collection,
+      id: tokenId,
+    });
+    if (token) {
+      Object.assign(token, { status: status });
+      await this.tokenRepo.save(token);
+    }
+  }
+
+  async handleMintEvent(collection: string, tokenId: number, reason: any) {
+    this.logger.log(`Event safeMint: ${collection}, ${tokenId}`);
+    const minted = await this.nftMinted(collection, tokenId);
+    if (minted) {
+      await this.updateTokenStatus(collection, tokenId, TokenStatus.Minted);
+    }
+  }
+
+  async handleBurnEvent(collection: string, tokenId: number, reason: any) {
+    this.logger.log(`Event burn: ${collection}, params: ${tokenId}`);
+    const burned = !(await this.nftMinted(collection, tokenId));
+    if (burned) {
+      await this.updateTokenStatus(collection, tokenId, TokenStatus.Burned);
+    }
+  }
+
+  async handleTransferEvent(collection: string, reason: any) {
+    this.logger.log(
+      `Event Transfer: ${collection}, params: ${JSON.stringify(
+        reason['params'],
+      )}`,
+    );
+  }
+
+  async callbackHandler(notification: any) {
+    const events = notification['events'];
+    for (var i = 0; i < events.length; i++) {
+      const event = events[i];
+      const collection = event['matchedAddresses'][0].toLowerCase();
+      for (var j = 0; j < event['matchReasons'].length; j++) {
+        const reason = event['matchReasons'][j];
+        this.logger.log(`Event received: ${JSON.stringify(reason)}`);
+        if (reason['signature'].includes('Transfer')) {
+          await this.handleTransferEvent(collection, reason);
+        } else if (reason['signature'].includes('safeMint')) {
+          const tokenId = Number(reason['params']['tokenId_']);
+          await this.handleMintEvent(collection, tokenId, reason);
+        } else if (reason['signature'].includes('burn')) {
+          const tokenId = Number(reason['params']['tokenId_']);
+          await this.handleBurnEvent(collection, tokenId, reason);
+        }
+      }
+    }
   }
 }

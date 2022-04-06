@@ -74,7 +74,7 @@ export const TokenStatusReadable = {
   2: 'Burned',
 };
 
-const min_token_id = 100;
+const min_token_id = 200;
 
 @Processor(configuration()[process.env['runtime']]['queue']['mint'])
 export class MintNFTConsumer {
@@ -274,7 +274,7 @@ export class MintNFTConsumer {
     //TODO: check if token id already minted
     this.logger.log(`Mint consumer: ${JSON.stringify(job.data)}`);
     const beckett_id = job.data['beckett_id'];
-    const collection = job.data['collection'];
+    const collection = job.data['collection'].toLowerCase();
     var progress = MintJobResult.JobReceived;
     var tx_hash: string;
     try {
@@ -407,13 +407,14 @@ export class BurnNFTConsumer {
   @Process()
   async burnNFT(job: Job<unknown>) {
     console.log('burn nft:', job.data);
-    const collection = job.data['collection'] as string;
+    const collection = job.data['collection'].toLowerCase() as string;
     const token_id = job.data['token_id'] as Number;
     const beckett_id = job.data['beckett_id'] as string;
     var nftContract: Contract;
     var owner: string;
     var progress = BurnJobResult.JobReceived;
 
+    //TODO: put everything into one try block
     try {
       nftContract = this.getContract(collection);
     } catch (error) {

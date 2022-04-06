@@ -1,6 +1,7 @@
 export default () => ({
   prod: {
-    port: 3002,
+    port: 5000,
+    https_port: 5001,
     redis: {
       host: 'localhost',
       port: 6379,
@@ -18,7 +19,8 @@ export default () => ({
     pinata: 'prod',
   },
   stage: {
-    port: 3001,
+    port: 4000,
+    https_port: 4001,
     redis: {
       host: 'localhost',
       port: 6379,
@@ -37,6 +39,7 @@ export default () => ({
   },
   dev: {
     port: 3000,
+    https_port: 3001,
     redis: {
       host: 'localhost',
       port: 6379,

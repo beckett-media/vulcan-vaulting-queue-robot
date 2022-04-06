@@ -52,6 +52,7 @@ export class VaultingController {
     return {
       job_id: Number(job.id),
       beckett_id: body.beckett_id,
+      processed: false,
       status: MintJobResult.JobReceived,
     };
   }
@@ -95,7 +96,13 @@ export class VaultingController {
       beckett_id: body.beckett_id,
       collection: body.collection,
       token_id: body.token_id,
+      processed: false,
       status: BurnJobResult.JobReceived,
     };
+  }
+
+  @Post('/callback')
+  async callback(@Body() notification: any) {
+    await this.VaultingService.callbackHandler(notification);
   }
 }
