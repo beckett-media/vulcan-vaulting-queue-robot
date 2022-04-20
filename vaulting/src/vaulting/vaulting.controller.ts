@@ -57,7 +57,7 @@ export class VaultingController {
     const job = await this.VaultingService.mintNFT(body);
     return {
       job_id: Number(job.id),
-      beckett_id: body.beckett_id,
+      beckett_id: body.nft_record_uid,
       processed: false,
       status: MintJobResult.JobReceived,
     };
@@ -99,7 +99,7 @@ export class VaultingController {
     const job = await this.VaultingService.burnNFT(body);
     return {
       id: job.id,
-      beckett_id: body.beckett_id,
+      nft_record_uid: body.nft_record_uid,
       collection: body.collection.toLowerCase(),
       token_id: body.token_id,
       processed: false,

@@ -23,7 +23,7 @@ export class MintNFTConsumer {
   async mintNFT(job: Job<unknown>) {
     //TODO: check if token id already minted
     this.logger.log(`Mint consumer: ${JSON.stringify(job.data)}`);
-    const beckett_id = job.data['beckett_id'];
+    const beckett_id = job.data['nft_record_uid'];
     const collection = job.data['collection'].toLowerCase();
     var progress = MintJobResult.JobReceived;
     var tx_hash: string;
@@ -129,7 +129,7 @@ export class BurnNFTConsumer {
     console.log('burn nft:', job.data);
     const collection = job.data['collection'].toLowerCase() as string;
     const token_id = job.data['token_id'] as number;
-    const beckett_id = job.data['beckett_id'] as string;
+    const beckett_id = job.data['nft_record_uid'] as string;
     var progress = BurnJobResult.JobReceived;
 
     // check if nft is minted on chain

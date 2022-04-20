@@ -15,7 +15,7 @@ export class MintRequest {
   @ApiProperty()
   @IsString()
   @MinLength(1)
-  beckett_id: string;
+  nft_record_uid: string;
 
   @ApiProperty()
   @IsString()
@@ -59,7 +59,7 @@ export class BurnRequest {
   @ApiProperty()
   @IsString()
   @MinLength(1)
-  beckett_id: string;
+  nft_record_uid: string;
 }
 
 export class MintJobStatus {
@@ -70,7 +70,7 @@ export class MintJobStatus {
   @ApiProperty()
   @IsString()
   @MinLength(1)
-  beckett_id: string;
+  nft_record_uid: string;
 
   @ApiProperty()
   @IsString()
@@ -95,7 +95,7 @@ export class BurnJobStatus {
   @ApiProperty()
   @IsString()
   @MinLength(1)
-  beckett_id: string;
+  nft_record_uid: string;
 
   @ApiProperty()
   @IsNumber()
@@ -110,7 +110,7 @@ export class MintStatus {
   @ApiProperty()
   @IsString()
   @MinLength(1)
-  beckett_id: string;
+  nft_redord_uid: string;
 
   @ApiProperty()
   @IsString()

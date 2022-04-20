@@ -66,7 +66,7 @@ export class VaultingService {
     if (job.finishedOn > 0) {
       jobFinished = true;
       const vaulting = await this.databaseService.getVaultingById(
-        job.data.beckett_id,
+        job.data.nft_record_uid,
       );
       token_id = vaulting.token_id;
 
@@ -91,7 +91,7 @@ export class VaultingService {
     }
     const jobStatus = {
       job_id: Number(job.id),
-      beckett_id: job.data.beckett_id,
+      nft_record_uid: job.data.nft_record_uid,
       collection: job.data.collection,
       token_id: token_id,
       token_status: token_status,
@@ -122,7 +122,7 @@ export class VaultingService {
     }
     const collection = job.data['collection'].toLowerCase();
     const token_id = job.data['token_id'] as number;
-    const beckett_id = job.data['beckett_id'];
+    const beckett_id = job.data['nft_record_uid'];
     var jobStatus = BurnJobResult.JobReceived;
     this.logger.log(job.returnvalue);
     if (job.returnvalue != null && job.returnvalue['status'] != undefined) {
@@ -158,7 +158,7 @@ export class VaultingService {
       job_id: job.id,
       collection: collection,
       token_id: token_id,
-      beckett_id: beckett_id,
+      nft_record_uid: beckett_id,
       processed: jobFinished,
       status: jobStatus,
     };
