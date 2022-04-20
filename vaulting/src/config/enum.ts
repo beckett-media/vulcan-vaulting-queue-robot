@@ -1,0 +1,51 @@
+export enum MintJobResult {
+  JobReceived = 0,
+  VaultDuplicated = 1,
+  TokenIdSet = 2,
+  VaultingSaved = 3,
+  TokenStatusSaved = 4,
+  ImagePined = 5,
+  MetadataPined = 6,
+  TxSent = 7,
+  TokenMinted = 8,
+}
+
+export enum BurnJobResult {
+  JobReceived = 0,
+  NFTVerified = 1,
+  BeckettVerified = 2,
+  TxSent = 3,
+  TokenBurned = 4,
+}
+
+export const MintJobResultReadable = {
+  0: 'JobReceived',
+  1: 'VaultDuplicated',
+  2: 'TokenIdSet',
+  3: 'VaultingSaved',
+  4: 'TokenStatusSaved',
+  5: 'ImagePined',
+  6: 'MetadataPined',
+  7: 'TxSent',
+  8: 'TokenMinted',
+};
+
+export const BurnJobResultReadable = {
+  0: 'JobReceived',
+  1: 'NFTExists',
+  2: 'BeckettVaultingRecordExists',
+  3: 'TxSend',
+  4: 'TokenBurned',
+};
+
+export const TokenStatusReadable = {
+  0: 'NotMinted',
+  1: 'Minted',
+  2: 'Burned',
+};
+
+export enum TokenStatus {
+  NotMinted = 0,
+  Minted = 1,
+  Burned = 2,
+}

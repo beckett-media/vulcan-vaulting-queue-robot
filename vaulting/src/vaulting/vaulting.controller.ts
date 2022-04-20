@@ -1,18 +1,24 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiProduces } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
+import { BurnJobResult, MintJobResult } from 'src/config/enum';
+
 import {
-  BurnRequest,
-  MintStatus,
-  MintRequest,
   BurnJobStatus,
+  BurnRequest,
   MintJobStatus,
+  MintRequest,
+  MintStatus,
 } from './dtos/vaulting.dto';
-import { BurnJobResult, MintJobResult } from './vaulting.consumer';
 import { VaultingService } from './vaulting.service';
 
 @Controller('vaulting')
 export class VaultingController {
   constructor(public VaultingService: VaultingService) {}
+
+  @Get('/health')
+  health() {
+    return;
+  }
 
   @Get('/mint/:job_id')
   @ApiOperation({
@@ -94,15 +100,10 @@ export class VaultingController {
     return {
       id: job.id,
       beckett_id: body.beckett_id,
-      collection: body.collection,
+      collection: body.collection.toLowerCase(),
       token_id: body.token_id,
       processed: false,
       status: BurnJobResult.JobReceived,
     };
-  }
-
-  @Post('/callback')
-  async callback(@Body() notification: any) {
-    await this.VaultingService.callbackHandler(notification);
   }
 }

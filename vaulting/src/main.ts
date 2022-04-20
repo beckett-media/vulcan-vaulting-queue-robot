@@ -1,11 +1,16 @@
-import { NestFactory } from '@nestjs/core';
-import { VaultingModule } from './vaulting/vaulting.module';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import configuration from './vaulting/config/configuration';
 import * as bodyParser from 'body-parser';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import express from 'express';
+import http from 'http';
 import { readFileSync } from 'fs';
+
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
+import configuration from './config/configuration';
+import { VaultingModule } from './vaulting/vaulting.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
+import { WebhooksModule } from './webhooks/webhooks.module';
 
 function setupApp(app: INestApplication) {
   // increase body size
@@ -28,14 +33,26 @@ function setupApp(app: INestApplication) {
 }
 
 async function bootstrap() {
-  const httpsOptions = {
-    key: readFileSync(process.env.SSL_SERVER_KEY),
-    cert: readFileSync(process.env.SSL_SERVER_CERT),
-  };
-  const app = await NestFactory.create(VaultingModule, { httpsOptions });
-  setupApp(app);
-
   const config = configuration()[process.env['runtime']];
-  await app.listen(config['https_port'], '0.0.0.0');
+
+  // create and setup vaulting server
+  const vaultingServer = express();
+  const vaultingApp = await NestFactory.create(
+    VaultingModule,
+    new ExpressAdapter(vaultingServer),
+  );
+  await vaultingApp.init();
+  setupApp(vaultingApp);
+  http.createServer(vaultingServer).listen(config['api_port'], '0.0.0.0');
+
+  // create and setup webhook server
+  const webhookServer = express();
+  const webhookApp = await NestFactory.create(
+    WebhooksModule,
+    new ExpressAdapter(webhookServer),
+  );
+  await webhookApp.init();
+  setupApp(webhookApp);
+  http.createServer(vaultingServer).listen(config['webhook_port'], '0.0.0.0');
 }
 bootstrap();

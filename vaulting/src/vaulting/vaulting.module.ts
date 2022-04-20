@@ -1,24 +1,21 @@
 import { BullModule, getQueueOptionsToken } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+
+import configuration from '../config/configuration';
 import { BurnNFTConsumer, MintNFTConsumer } from './vaulting.consumer';
 import { VaultingController } from './vaulting.controller';
 import { VaultingService } from './vaulting.service';
-import configuration from './config/configuration';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Token, Vaulting } from './vaulting.entity';
+import { BlockchainModule } from 'src/blockchain/blockchain.module';
+import { IPFSModule } from 'src/ipfs/ipfs.module';
+import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
   controllers: [VaultingController],
   providers: [VaultingService, MintNFTConsumer, BurnNFTConsumer],
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: configuration()[process.env['runtime']]['db']['name'],
-      entities: [Vaulting, Token],
-      synchronize: configuration()[process.env['runtime']]['db']['sync'],
-    }),
-    TypeOrmModule.forFeature([Vaulting, Token]),
+    BlockchainModule,
+    IPFSModule,
+    DatabaseModule,
     BullModule.forRoot(configuration()[process.env['runtime']]),
     BullModule.registerQueue({
       name: configuration()[process.env['runtime']]['queue']['mint'],
@@ -27,10 +24,6 @@ import { Token, Vaulting } from './vaulting.entity';
     BullModule.registerQueue({
       name: configuration()[process.env['runtime']]['queue']['burn'],
       limiter: configuration()[process.env['runtime']]['queue']['limiter'],
-    }),
-    ConfigModule.forRoot({
-      load: [configuration],
-      isGlobal: true,
     }),
   ],
 })

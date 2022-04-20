@@ -1,4 +1,5 @@
 import { Test } from '@nestjs/testing';
+
 import { VaultingService } from './vaulting.service';
 
 it('can enqueue a new job', async () => {

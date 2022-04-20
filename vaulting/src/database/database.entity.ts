@@ -1,4 +1,4 @@
-import { Entity, Index, Column, PrimaryColumn } from 'typeorm';
+import { Entity, Index, Column, PrimaryColumn, BeforeInsert } from 'typeorm';
 
 @Entity()
 @Index(['collection', 'token_id'], { unique: true })
@@ -11,6 +11,11 @@ export class Vaulting {
 
   @Column()
   token_id: number;
+
+  @BeforeInsert()
+  toLowerCaseCollection() {
+    this.collection = this.collection.toLowerCase();
+  }
 }
 
 @Entity()
@@ -24,4 +29,9 @@ export class Token {
   @Index()
   @Column()
   status: number;
+
+  @BeforeInsert()
+  toLowerCaseCollection() {
+    this.collection = this.collection.toLowerCase();
+  }
 }
