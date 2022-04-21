@@ -51,11 +51,28 @@ export class DatabaseService {
     return vaulting;
   }
 
-  async updateTokenStatus(collection: string, tokenId: number, status: number) {
+  async getTokenStatus(collection: string, token_id: number) {
+    const token = await this.tokenRepo.findOne({
+      collection: collection,
+      id: token_id,
+    });
+    // by default, return not minted
+    if (token) {
+      return token.status;
+    } else {
+      TokenStatus.NotMinted;
+    }
+  }
+
+  async updateTokenStatus(
+    collection: string,
+    token_id: number,
+    status: number,
+  ) {
     // update token table for burned nft
     const token = await this.tokenRepo.findOne({
       collection: collection,
-      id: tokenId,
+      id: token_id,
     });
     if (token) {
       Object.assign(token, { status: status });
@@ -65,6 +82,13 @@ export class DatabaseService {
 
   // TODO: switch to check blockchain directly
   async isVaultingDuplicated(beckett_id: string) {
+    // if we can find existing db records and
+    // the token status is either minted or burned,
+    // then this is a duplication of vaulting
+    // it's possible that token status is not up-to-date
+    // immediately after previous transaction, but subsequent
+    // mint will use the same token id. This tx will fail but
+    // it avoids minting two tokens for the same beckett item.
     const vaulting = await this.vaultingRepo.findOne({
       beckett_id: beckett_id,
     });

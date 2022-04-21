@@ -1,6 +1,6 @@
 export module serviceConfig {
   export const RetrievalManagerAddress =
-    '0xf5ae30203df30C8FACe9a4AF9a6cd318De4a4E78';
+    '0x49c2376F01016362e41F23170ca2DB668C7f3b34';
 
   export const RelayConfig = {
     mumbai: {

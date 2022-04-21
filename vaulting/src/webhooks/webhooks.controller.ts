@@ -12,7 +12,7 @@ export class WebhooksController {
       'Webhook for receiving blockchain events from Openzepplin sentinel',
   })
   async callback(@Body() event: any) {
-    await this.WebhookService.callbackHandler(event);
-    return { status: 'ok' };
+    const status = await this.WebhookService.callbackHandler(event);
+    return { status: status };
   }
 }

@@ -23,6 +23,8 @@ export class BlockchainService {
     [key: string]: Contract;
   };
   private retrievalManager: Contract;
+  private relaySigner: DefenderRelaySigner;
+  private relayProvider: DefenderRelayProvider;
 
   constructor() {
     // TODO: move this to its own function
@@ -95,6 +97,36 @@ export class BlockchainService {
     }
   }
 
+  async getTransactionReceipt(tx_hash: string) {
+    const { provider } = this.getRelaySigner();
+    const receipt = await provider.getTransactionReceipt(tx_hash);
+    return receipt;
+  }
+
+  getRelaySigner() {
+    if (this.relaySigner == undefined || this.relayProvider == undefined) {
+      const relayConfig =
+        serviceConfig.RelayConfig[
+          configuration()[process.env['runtime']]['network_mint_relayer']
+        ];
+      this.logger.log(`relay config: ${JSON.stringify(relayConfig)}`);
+      const credentials = {
+        apiKey: relayConfig['apiKey'],
+        apiSecret: relayConfig['apiSecret'],
+      };
+      this.relayProvider = new DefenderRelayProvider(credentials);
+      this.relaySigner = new DefenderRelaySigner(
+        credentials,
+        this.relayProvider,
+        {
+          speed: 'fast',
+        },
+      );
+    }
+
+    return { provider: this.relayProvider, signer: this.relaySigner };
+  }
+
   // TODO: make get contract a service
   getContract(address: string): Contract {
     // cache the contract obj in class variable
@@ -106,19 +138,7 @@ export class BlockchainService {
       return this.nftContracts[address];
     } else {
       try {
-        const relayConfig =
-          serviceConfig.RelayConfig[
-            configuration()[process.env['runtime']]['network_mint_relayer']
-          ];
-        this.logger.log(`relay config: ${JSON.stringify(relayConfig)}`);
-        const credentials = {
-          apiKey: relayConfig['apiKey'],
-          apiSecret: relayConfig['apiSecret'],
-        };
-        const provider = new DefenderRelayProvider(credentials);
-        const signer = new DefenderRelaySigner(credentials, provider, {
-          speed: 'fast',
-        });
+        const { signer } = this.getRelaySigner();
         this.nftContracts[address] = new ethers.Contract(
           address,
           serviceConfig.ERC721ABI,

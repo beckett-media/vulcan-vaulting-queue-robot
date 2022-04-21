@@ -2,13 +2,14 @@
 ## dev
 
 ### mint nft
+## 0x2d0f5b62b39cfaf6266e31f0a2f3c33142739596
 POST http://127.0.0.1:3000/vaulting/mint
 Content-Type: application/json
 
 {
   "collection": "0x17E95B844F8BDb32f0bcf57542F1E5CD79A2B342",
-  "owner": "0x2D0f5b62b39CFaF6266E31F0a2F3C33142739596",
-  "nft_record_uid": "WYFF12032",
+  "owner": "0x2d0f5b62b39cfaf6266e31f0a2f3c33142739596",
+  "nft_record_uid": "WYFF12039",
   "name": "fake BAYC",
   "description": "fake bayc desc",
   "image_format": "png",

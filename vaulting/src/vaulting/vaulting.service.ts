@@ -11,6 +11,7 @@ import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { IPFSService } from 'src/ipfs/ipfs.service';
 import {
   BurnJobResult,
+  BurnJobResultReadable,
   MintJobResult,
   MintJobResultReadable,
   TokenStatus,
@@ -28,7 +29,6 @@ export class VaultingService {
     private burnQueue: Queue,
     private databaseService: DatabaseService,
     private blockchainService: BlockchainService,
-    private ipfsService: IPFSService,
   ) {}
 
   nftContracts: {
@@ -123,44 +123,65 @@ export class VaultingService {
     const collection = job.data['collection'].toLowerCase();
     const token_id = job.data['token_id'] as number;
     const beckett_id = job.data['nft_record_uid'];
-    var jobStatus = BurnJobResult.JobReceived;
+
     this.logger.log(job.returnvalue);
-    if (job.returnvalue != null && job.returnvalue['status'] != undefined) {
-      jobStatus = job.returnvalue['status'];
+
+    var tx_hash: string;
+    var error: string;
+    var status: number;
+    // job status endpoint is called before job finishes
+    if (job.returnvalue == null) {
+      tx_hash = '';
+      error = '';
+      status = MintJobResult.JobReceived;
+    } else {
+      tx_hash = job.returnvalue['tx_hash'];
+      error = job.returnvalue['error'];
+      status = job.returnvalue['status'];
     }
 
+    var token_status = await this.databaseService.getTokenStatus(
+      collection,
+      token_id,
+    );
     var jobFinished = false;
     if (job.finishedOn > 0) {
       jobFinished = true;
-    }
 
-    // if we can't find the token
-    // and we sent the burn tx (passed all checks before sending burn tx)
-    // then the token is burned
-    const isNFTMinted = await this.blockchainService.nftMinted(
-      collection,
-      token_id,
-    );
-    if (!isNFTMinted) {
-      if (jobStatus == BurnJobResult.TxSent) {
-        jobStatus = BurnJobResult.TokenBurned;
+      // if we can't find the token
+      // and we sent the burn tx (passed all checks before sending burn tx)
+      // then the token is burned
+      const isNFTMinted = await this.blockchainService.nftMinted(
+        collection,
+        token_id,
+      );
+      if (!isNFTMinted) {
+        if (status == BurnJobResult.TxSent) {
+          token_status = TokenStatus.Burned;
+
+          //TODO: update token status table
+          //TODO: try catch this
+          await this.databaseService.updateTokenStatus(
+            collection,
+            token_id,
+            token_status,
+          );
+        }
       }
     }
 
-    //TODO: update token status table
-    await this.databaseService.updateTokenStatus(
-      collection,
-      token_id,
-      TokenStatus.Burned,
-    );
-
     return {
-      job_id: job.id,
+      job_id: Number(job.id),
+      nft_record_uid: beckett_id,
       collection: collection,
       token_id: token_id,
-      nft_record_uid: beckett_id,
+      token_status: token_status,
+      token_status_desc: TokenStatusReadable[TokenStatus.Burned],
+      job_status: status,
+      job_status_desc: BurnJobResultReadable[status],
+      tx_hash: tx_hash,
       processed: jobFinished,
-      status: jobStatus,
+      error: error,
     };
   }
 

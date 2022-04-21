@@ -3,7 +3,7 @@ import { Contract } from 'ethers';
 import configuration from 'src/config/configuration';
 
 import { Process, Processor } from '@nestjs/bull';
-import { Logger } from '@nestjs/common';
+import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { DatabaseService } from 'src/database/database.service';
 import { IPFSService } from 'src/ipfs/ipfs.service';
@@ -33,7 +33,7 @@ export class MintNFTConsumer {
         await this.databaseService.isVaultingDuplicated(beckett_id);
       if (vaultingDuplicated == true) {
         progress = MintJobResult.VaultDuplicated;
-        throw new Error('beckett item already vaulted');
+        throw new InternalServerErrorException('beckett item already vaulted');
       }
 
       // step 1: determine token id
@@ -121,7 +121,6 @@ export class BurnNFTConsumer {
   constructor(
     private blockchainService: BlockchainService,
     private databaseService: DatabaseService,
-    private ipfsService: IPFSService,
   ) {}
 
   @Process()
