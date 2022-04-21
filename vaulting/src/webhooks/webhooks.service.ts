@@ -1,7 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
+import configuration from 'src/config/configuration';
 import { TokenStatus } from 'src/config/enum';
 import { DatabaseService } from 'src/database/database.service';
+import { createHash } from 'crypto';
 
 @Injectable()
 export class WebhooksService {
@@ -47,8 +53,35 @@ export class WebhooksService {
     );
   }
 
+  verifyHash(hash: string, request: any) {
+    const env = process.env['runtime'];
+    const config = configuration()[env];
+    const webhookSharedSecret = config['webhook_shared_secret'];
+    const toHash = JSON.stringify({
+      secret: webhookSharedSecret,
+      request: request,
+    });
+    this.logger.log(toHash);
+    const localHash = createHash('sha256').update(toHash).digest('hex');
+    this.logger.log(hash, localHash);
+    if (hash === localHash) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   async callbackHandler(notification: any) {
-    const events = notification['events'];
+    const hash = notification['hash'];
+    const request = notification['request'];
+
+    if (!this.verifyHash(hash, request)) {
+      throw new InternalServerErrorException(
+        `Hash not match: ${hash}, ${request}`,
+      );
+    }
+
+    const events = request['body']['events'];
     for (var i = 0; i < events.length; i++) {
       const event = events[i];
       const collection = event['matchedAddresses'][0].toLowerCase();

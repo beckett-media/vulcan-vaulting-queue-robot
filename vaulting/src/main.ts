@@ -23,6 +23,7 @@ function setupApp(app: INestApplication) {
   // pipes
   app.useGlobalPipes(new ValidationPipe());
 
+  // swagger documents
   const docConfig = new DocumentBuilder()
     .setTitle('Vaulting API')
     .setDescription('The Vaulting API documents')
@@ -41,8 +42,8 @@ async function bootstrap() {
     VaultingModule,
     new ExpressAdapter(vaultingServer),
   );
-  await vaultingApp.init();
   setupApp(vaultingApp);
+  await vaultingApp.init();
   http.createServer(vaultingServer).listen(config['api_port'], '0.0.0.0');
 
   // create and setup webhook server
@@ -51,8 +52,8 @@ async function bootstrap() {
     WebhooksModule,
     new ExpressAdapter(webhookServer),
   );
-  await webhookApp.init();
   setupApp(webhookApp);
-  http.createServer(vaultingServer).listen(config['webhook_port'], '0.0.0.0');
+  await webhookApp.init();
+  http.createServer(webhookServer).listen(config['webhook_port'], '0.0.0.0');
 }
 bootstrap();

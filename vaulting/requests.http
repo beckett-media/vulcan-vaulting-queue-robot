@@ -2,13 +2,13 @@
 ## dev
 
 ### mint nft
-POST https://127.0.0.1:3000/vaulting/mint
+POST http://127.0.0.1:3000/vaulting/mint
 Content-Type: application/json
 
 {
-  "collection": "0xD8304C67b0Bd40346e6E18E7e5D975a10fCfC11e",
-  "owner": "0xf5ae30203df30C8FACe9a4AF9a6cd318De4a4E78",
-  "beckett_id": "WYF2025",
+  "collection": "0x17E95B844F8BDb32f0bcf57542F1E5CD79A2B342",
+  "owner": "0x2D0f5b62b39CFaF6266E31F0a2F3C33142739596",
+  "nft_record_uid": "WYFF12032",
   "name": "fake BAYC",
   "description": "fake bayc desc",
   "image_format": "png",
@@ -18,10 +18,10 @@ Content-Type: application/json
 }
 
 ### mint job id
-Get https://127.0.0.1:3000/vaulting/mint/36
+Get http://127.0.0.1:3000/vaulting/mint/38
 
 ### burn nft
-POST https://127.0.0.1:3000/vaulting/burn
+POST http://127.0.0.1:3000/vaulting/burn
 Content-Type: application/json
 
 {
@@ -31,10 +31,10 @@ Content-Type: application/json
 }
 
 ### burn job id
-Get https://127.0.0.1:3000/vaulting/burn/26
+Get http://127.0.0.1:3000/vaulting/burn/26
 
 ### callback mint
-POST https://dev.yifan.io:3001/vaulting/callback/mint
+POST http://127.0.0.1:3000/webhooks/callback
 Content-Type: application/json
 
 {

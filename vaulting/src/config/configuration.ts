@@ -17,6 +17,7 @@ export default () => ({
     },
     network_mint_relayer: 'polygon_prod_mint',
     pinata: 'prod',
+    webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET,
   },
   stage: {
     api_port: 4000,
@@ -36,6 +37,7 @@ export default () => ({
     },
     network_mint_relayer: 'polygon_stage',
     pinata: 'stage',
+    webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET,
   },
   awsdev: {
     api_port: 3000,
@@ -60,6 +62,7 @@ export default () => ({
     network_mint_relayer: 'mumbai',
     pinata: 'dev',
     retrieval_manager: '0x49c2376F01016362e41F23170ca2DB668C7f3b34',
+    webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET,
   },
   dev: {
     api_port: 3000,
@@ -80,5 +83,6 @@ export default () => ({
     network_mint_relayer: 'mumbai',
     pinata: 'dev',
     retrieval_manager: '0x49c2376F01016362e41F23170ca2DB668C7f3b34',
+    webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET,
   },
 });

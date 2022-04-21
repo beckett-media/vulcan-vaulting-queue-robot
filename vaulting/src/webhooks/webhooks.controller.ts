@@ -6,12 +6,13 @@ import { WebhooksService } from './webhooks.service';
 export class WebhooksController {
   constructor(private WebhookService: WebhooksService) {}
 
-  @Post('/callback')
+  @Post('/sentinel')
   @ApiOperation({
     summary:
       'Webhook for receiving blockchain events from Openzepplin sentinel',
   })
   async callback(@Body() event: any) {
     await this.WebhookService.callbackHandler(event);
+    return { status: 'ok' };
   }
 }
