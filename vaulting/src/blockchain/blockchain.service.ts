@@ -73,14 +73,18 @@ export class BlockchainService {
   ) {
     const nftContract = this.getContract(collection);
     this.logger.log(`Safe mint: ${owner}, ${id}, ${tokenURI}`);
-    const mintTx = await nftContract.safeMint(owner, id, tokenURI);
+    const tx_config =
+      configuration()[process.env['runtime']]['blockchain']['tx_config'];
+    const mintTx = await nftContract.safeMint(owner, id, tokenURI, tx_config);
     return mintTx.hash;
   }
 
   async burnToken(token_id: number) {
     // TODO retrieval manager
     try {
-      const burnTx = await this.retrievalManager.burn(token_id);
+      const tx_config =
+        configuration()[process.env['runtime']]['blockchain']['tx_config'];
+      const burnTx = await this.retrievalManager.burn(token_id, tx_config);
       this.logger.log(`burn tx: ${burnTx.hash}`);
       return {
         tx_hash: burnTx.hash,

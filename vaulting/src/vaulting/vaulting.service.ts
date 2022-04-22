@@ -8,7 +8,6 @@ import { BurnRequest, MintRequest } from './dtos/vaulting.dto';
 
 import { DatabaseService } from 'src/database/database.service';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
-import { IPFSService } from 'src/ipfs/ipfs.service';
 import {
   BurnJobResult,
   BurnJobResultReadable,
@@ -176,7 +175,7 @@ export class VaultingService {
       collection: collection,
       token_id: token_id,
       token_status: token_status,
-      token_status_desc: TokenStatusReadable[TokenStatus.Burned],
+      token_status_desc: TokenStatusReadable[token_status],
       job_status: status,
       job_status_desc: BurnJobResultReadable[status],
       tx_hash: tx_hash,

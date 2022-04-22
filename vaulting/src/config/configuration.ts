@@ -15,6 +15,10 @@ export default () => ({
       name: 'beckett_db_prod.sqlite',
       sync: false,
     },
+    blockchain: {
+      tx_config: {},
+    },
+    min_token_id: 1,
     network_mint_relayer: 'polygon_prod_mint',
     pinata: 'prod',
     webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET,
@@ -35,6 +39,10 @@ export default () => ({
       name: 'beckett_db_stage.sqlite',
       sync: false,
     },
+    blockchain: {
+      tx_config: {},
+    },
+    min_token_id: 1,
     network_mint_relayer: 'polygon_stage',
     pinata: 'stage',
     webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET,
@@ -59,6 +67,10 @@ export default () => ({
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
     },
+    blockchain: {
+      tx_config: {},
+    },
+    min_token_id: 1000000,
     network_mint_relayer: 'mumbai',
     pinata: 'dev',
     retrieval_manager: '0x49c2376F01016362e41F23170ca2DB668C7f3b34',
@@ -80,6 +92,10 @@ export default () => ({
       name: 'beckett_db_dev.sqlite',
       sync: true,
     },
+    blockchain: {
+      tx_config: {},
+    },
+    min_token_id: 1,
     network_mint_relayer: 'mumbai',
     pinata: 'dev',
     retrieval_manager: '0x49c2376F01016362e41F23170ca2DB668C7f3b34',
