@@ -1,14 +1,12 @@
 import { Job } from 'bull';
-import { Contract } from 'ethers';
-import configuration from 'src/config/configuration';
+import configuration from '../config/configuration';
 
 import { Process, Processor } from '@nestjs/bull';
 import { InternalServerErrorException, Logger } from '@nestjs/common';
-import { BlockchainService } from 'src/blockchain/blockchain.service';
-import { DatabaseService } from 'src/database/database.service';
-import { IPFSService } from 'src/ipfs/ipfs.service';
-import { BurnJobResult, MintJobResult } from 'src/config/enum';
-import { isString } from 'class-validator';
+import { BlockchainService } from '../blockchain/blockchain.service';
+import { DatabaseService } from '../database/database.service';
+import { IPFSService } from '../ipfs/ipfs.service';
+import { BurnJobResult, MintJobResult } from '../config/enum';
 
 @Processor(configuration()[process.env['runtime']]['queue']['mint'])
 export class MintNFTConsumer {
@@ -27,6 +25,7 @@ export class MintNFTConsumer {
     const collection = job.data['collection'].toLowerCase();
     var progress = MintJobResult.JobReceived;
     var tx_hash: string;
+    var token_id: number;
     try {
       // step 0: check if we already vaulted the item
       const vaultingDuplicated =
@@ -36,23 +35,16 @@ export class MintNFTConsumer {
         throw new InternalServerErrorException('beckett item already vaulted');
       }
 
+      // TODO: given token id in job if it is previously reserved
       // step 1: determine token id
-      // TODO: given token id in job
-      const token_id = await this.databaseService.getTokenId(
-        beckett_id,
-        collection,
-      );
-      this.logger.log(`token id: ${token_id}`);
-      progress = MintJobResult.TokenIdSet;
-
-      // Step 2 & 3 in one db transaction
       // step 2: save the beckket_id <=> token id mapping
       // step 3: save the token id used
-      progress = await this.databaseService.createNewVaulting(
+      const result = await this.databaseService.createNewVaulting(
         beckett_id,
         collection,
-        token_id,
       );
+      progress = result.progress;
+      token_id = result.token_id;
 
       // step 4: pin image and media
       const imagePin = await this.ipfsService.pinMedia(

@@ -6,8 +6,8 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import configuration from '../config/configuration';
 import { BurnRequest, MintRequest } from './dtos/vaulting.dto';
 
-import { DatabaseService } from 'src/database/database.service';
-import { BlockchainService } from 'src/blockchain/blockchain.service';
+import { DatabaseService } from '../database/database.service';
+import { BlockchainService } from '../blockchain/blockchain.service';
 import {
   BurnJobResult,
   BurnJobResultReadable,
@@ -15,7 +15,7 @@ import {
   MintJobResultReadable,
   TokenStatus,
   TokenStatusReadable,
-} from 'src/config/enum';
+} from '../config/enum';
 
 @Injectable()
 export class VaultingService {
@@ -81,7 +81,7 @@ export class VaultingService {
       // update token status to 'minted' if job status is minted as well
       if (tokenMinted == true) {
         token_status = TokenStatus.Minted;
-        this.databaseService.updateTokenStatus(
+        await this.databaseService.updateTokenStatus(
           job.data.collection,
           vaulting.token_id,
           token_status,

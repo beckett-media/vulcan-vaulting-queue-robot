@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import configuration from 'src/config/configuration';
+import configuration from '../config/configuration';
 import { Token, Vaulting } from './database.entity';
 import { DatabaseService } from './database.service';
 

@@ -3,7 +3,7 @@ import {
   DefenderRelaySigner,
 } from 'defender-relay-client/lib/ethers';
 import { Contract, ethers } from 'ethers';
-import configuration from 'src/config/configuration';
+import configuration from '../config/configuration';
 
 import {
   Injectable,
@@ -13,8 +13,7 @@ import {
 
 import { serviceConfig } from './blockchain.service.config';
 import { isString } from 'class-validator';
-import { BurnJobStatus } from 'src/vaulting/dtos/vaulting.dto';
-import { BurnJobResult } from 'src/config/enum';
+import { BurnJobResult } from '../config/enum';
 
 @Injectable()
 export class BlockchainService {

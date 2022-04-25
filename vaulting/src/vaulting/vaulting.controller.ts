@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
-import { BurnJobResult, MintJobResult } from 'src/config/enum';
+import { BurnJobResult, MintJobResult } from '../config/enum';
 
 import {
   BurnJobStatus,

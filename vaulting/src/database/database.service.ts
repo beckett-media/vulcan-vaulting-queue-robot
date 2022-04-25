@@ -1,11 +1,11 @@
-import { Token, Vaulting } from 'src/database/database.entity';
+import { Token, Vaulting } from '../database/database.entity';
 import { Repository, getManager } from 'typeorm';
 
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNumber } from 'class-validator';
-import { MintJobResult, TokenStatus } from 'src/config/enum';
-import configuration from 'src/config/configuration';
+import { MintJobResult, TokenStatus } from '../config/enum';
+import configuration from '../config/configuration';
 
 @Injectable()
 export class DatabaseService {
@@ -16,33 +16,66 @@ export class DatabaseService {
     @InjectRepository(Vaulting) private vaultingRepo: Repository<Vaulting>,
   ) {}
 
-  async createNewVaulting(
-    beckett_id: string,
-    collection: string,
-    token_id: number,
-  ) {
-    var progress;
-    await getManager().transaction(async (transactionalEntityManager) => {
-      // step 2: save the beckket_id <=> token id mapping
-      const vaulting = this.vaultingRepo.create({
-        beckett_id,
-        collection,
-        token_id,
-      });
-      await this.vaultingRepo.save(vaulting);
-      progress = MintJobResult.VaultingSaved;
+  async createNewVaulting(beckett_id: string, collection: string) {
+    var progress: MintJobResult;
+    var token_id: number;
+    await getManager().transaction(
+      'SERIALIZABLE',
+      async (transactionalEntityManager) => {
+        // step 1
+        // if we have the beckett_id <=> token id mapping stored, return its token id
+        // so that beckett_id will always map to the same token id
+        const existingVaulting = await this.vaultingRepo.findOne({
+          beckett_id: beckett_id,
+        });
+        if (
+          existingVaulting != undefined &&
+          isNumber(existingVaulting.token_id)
+        ) {
+          token_id = existingVaulting.token_id;
+        } else {
+          // otherwise, this is the first time we see this beckett id
+          // then issue a new token id
+          const min_token_id =
+            configuration()[process.env['runtime']]['min_token_id'];
+          const result = await this.tokenRepo
+            .createQueryBuilder('token')
+            .select('MAX(id)', 'max')
+            .where('collection = :collection', { collection: collection })
+            .groupBy('collection')
+            .getRawOne();
+          if (result == undefined) {
+            this.logger.log(`Max id: ${min_token_id}`);
+            token_id = min_token_id;
+          } else {
+            const max_id = result['max'] as number;
+            this.logger.log(`Max id: ${max_id}`);
+            token_id = max_id + 1;
+          }
+        }
+        progress = MintJobResult.TokenIdSet;
 
-      // step 3: save the token id used
-      const token = this.tokenRepo.create({
-        collection: collection,
-        id: token_id,
-        status: TokenStatus.NotMinted,
-      });
-      this.tokenRepo.save(token);
-      progress = MintJobResult.TokenStatusSaved;
-    });
+        // step 2: save the beckket_id <=> token id mapping
+        const vaulting = this.vaultingRepo.create({
+          beckett_id,
+          collection,
+          token_id,
+        });
+        await this.vaultingRepo.save(vaulting);
+        progress = MintJobResult.VaultingSaved;
 
-    return progress;
+        // step 3: save the token id used
+        const token = this.tokenRepo.create({
+          collection: collection,
+          id: token_id,
+          status: TokenStatus.NotMinted,
+        });
+        this.tokenRepo.save(token);
+        progress = MintJobResult.TokenStatusSaved;
+      },
+    );
+
+    return { progress: progress, token_id: token_id };
   }
 
   async getVaultingById(beckett_id: string) {
@@ -126,33 +159,5 @@ export class DatabaseService {
 
   //TODO: better token id management
   //what if mint into a unknown collection, what's its max id
-  async getTokenId(beckett_id: string, collection: string) {
-    // if we have the beckett_id <=> token id mapping stored, return its token id
-    // so that beckett_id will always map to the same token id
-    const vaulting = await this.vaultingRepo.findOne({
-      beckett_id: beckett_id,
-    });
-    if (vaulting != undefined && isNumber(vaulting.token_id)) {
-      return vaulting.token_id;
-    }
-
-    // otherwise, this is the first time we see this beckett id
-    // then issue a new token id
-    const min_token_id =
-      configuration()[process.env['runtime']]['min_token_id'];
-    const result = await this.tokenRepo
-      .createQueryBuilder('token')
-      .select('MAX(id)', 'max')
-      .where('collection = :collection', { collection: collection })
-      .groupBy('collection')
-      .getRawOne();
-    if (result == undefined) {
-      this.logger.log(`Max id: ${min_token_id}`);
-      return min_token_id;
-    } else {
-      const max_id = result['max'] as number;
-      this.logger.log(`Max id: ${max_id}`);
-      return max_id + 1;
-    }
-  }
+  async getTokenId(beckett_id: string, collection: string) {}
 }
