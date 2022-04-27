@@ -8,6 +8,7 @@ import configuration from 'src/config/configuration';
 import { TokenStatus } from 'src/config/enum';
 import { DatabaseService } from 'src/database/database.service';
 import { createHash } from 'crypto';
+import { DeltaService } from 'src/delta/delta.service';
 
 @Injectable()
 export class WebhooksService {
@@ -16,13 +17,22 @@ export class WebhooksService {
   constructor(
     private databaseService: DatabaseService,
     private blockchainService: BlockchainService,
+    private deltaService: DeltaService,
   ) {}
 
   async handleMintEvent(collection: string, tokenId: number, reason: any) {
     this.logger.log(`Event safeMint: ${collection}, ${tokenId}`);
     const minted = await this.blockchainService.nftMinted(collection, tokenId);
     if (minted) {
+      // update local database
       await this.databaseService.updateTokenStatus(
+        collection,
+        tokenId,
+        TokenStatus.Minted,
+      );
+
+      // foward to delta API & palantir
+      this.deltaService.updateTokenStatus(
         collection,
         tokenId,
         TokenStatus.Minted,

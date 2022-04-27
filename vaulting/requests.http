@@ -75,13 +75,17 @@ Content-Type: application/json
 #############################################################################################################
 ## DELTA API
 
-POST https://wagopxisb6.execute-api.us-west-1.amazonaws.com/dev/updatenftrecords
-x-api-key: 32FwwS1KcoRYa1OCIRt334OkIdzGKeJ19bdVQig0
+# t79s0u1m5e
+# wagopxisb6
+# w5gai56fii   *****
+# x-api-key: IRwE5R1s2H5rGdnafdSlL941l7fdCp3x2AO68LCy
+# 32FwwS1KcoRYa1OCIRt334OkIdzGKeJ19bdVQig0
+PUT https://w5gai56fii.execute-api.us-west-1.amazonaws.com/dev/updatenftrecords
 Content-Type: application/json
 
 {
-  "VulcanNftRecord": "68b33b44-f5f6-4a54-a6ad-2bd4867d40f8",
-  "status": "MOCK_MINTED",
-  "nft_token_ID": "1",
+  "nft_record_uid": "c19ce128-6cc8-4882-8e10-789e3701f953",
+  "status": "MOCK_MINTED_YW",
+  "nft_token_id": 1000006,
   "nft_collection_address": "0x17E95B844F8BDb32f0bcf57542F1E5CD79A2B342"
 }

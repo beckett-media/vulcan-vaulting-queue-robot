@@ -1,5 +1,17 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+} from '@nestjs/common';
+import {
+  ApiExcludeEndpoint,
+  ApiOperation,
+  ApiProduces,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { BurnJobResult, LockJobResult, MintJobResult } from '../config/enum';
 
 import {
@@ -12,6 +24,10 @@ import {
   MintStatus,
 } from './dtos/vaulting.dto';
 import { VaultingService } from './vaulting.service';
+
+function InProd() {
+  return 'prod' == process.env.runtime;
+}
 
 @Controller('vaulting')
 export class VaultingController {
@@ -100,7 +116,7 @@ export class VaultingController {
   async burnNFT(@Body() body: BurnRequest) {
     const job = await this.VaultingService.burnNFT(body);
     return {
-      id: Number(job.id),
+      job_id: Number(job.id),
       nft_record_uid: body.nft_record_uid,
       collection: body.collection.toLowerCase(),
       token_id: body.token_id,
@@ -110,6 +126,7 @@ export class VaultingController {
   }
 
   @Get('/lock/:job_id')
+  @ApiExcludeEndpoint(InProd())
   @ApiOperation({
     summary: 'Get NFT locking job status',
   })
@@ -129,6 +146,7 @@ export class VaultingController {
   }
 
   @Post('/lock')
+  @ApiExcludeEndpoint(InProd())
   @ApiOperation({
     summary: 'Lock a NFT token with the retrieval manager',
   })
