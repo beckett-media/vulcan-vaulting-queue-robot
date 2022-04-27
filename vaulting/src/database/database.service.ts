@@ -71,6 +71,7 @@ export class DatabaseService {
           status: TokenStatus.NotMinted,
         });
         this.tokenRepo.save(token);
+        this.logger.log(`11111111111 ${JSON.stringify(token)}`);
         progress = MintJobResult.TokenStatusSaved;
       },
     );
@@ -83,16 +84,31 @@ export class DatabaseService {
     return vaulting;
   }
 
-  async getTokenStatus(collection: string, token_id: number) {
-    const token = await this.tokenRepo.findOne({
+  async getVaultingUUID(collection: string, token_id: number) {
+    const vaulting = await this.vaultingRepo.findOne({
       collection: collection,
-      id: token_id,
+      token_id: token_id,
     });
+    if (vaulting != undefined) {
+      return vaulting.beckett_id;
+    } else {
+      return null;
+    }
+  }
+
+  async getTokenStatus(collection: string, token_id: number) {
+    const token = await this.tokenRepo
+      .createQueryBuilder('token')
+      .where('token.collection = :collection AND token.id = id ', {
+        collection: collection,
+        id: token_id,
+      })
+      .getOne();
     // by default, return not minted
     if (token) {
       return token.status;
     } else {
-      TokenStatus.NotMinted;
+      return TokenStatus.NotMinted;
     }
   }
 
@@ -101,6 +117,9 @@ export class DatabaseService {
     token_id: number,
     status: number,
   ) {
+    this.logger.log(
+      `updated token status: ${collection}, ${token_id}, ${status}`,
+    );
     // update token table for burned nft
     const token = await this.tokenRepo.findOne({
       collection: collection,
@@ -143,21 +162,4 @@ export class DatabaseService {
 
     return false;
   }
-
-  async createVaulting(
-    beckett_id: string,
-    collection: string,
-    token_id: number,
-  ) {
-    const vaulting = this.vaultingRepo.create({
-      beckett_id,
-      collection,
-      token_id,
-    });
-    await this.vaultingRepo.save(vaulting);
-  }
-
-  //TODO: better token id management
-  //what if mint into a unknown collection, what's its max id
-  async getTokenId(beckett_id: string, collection: string) {}
 }

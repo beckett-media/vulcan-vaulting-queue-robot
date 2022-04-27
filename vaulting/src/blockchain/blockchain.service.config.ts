@@ -2,6 +2,9 @@ export module serviceConfig {
   export const RetrievalManagerAddress =
     '0x49c2376F01016362e41F23170ca2DB668C7f3b34';
 
+  export const MinimalForwarderAddress =
+    '0x8F932dDCbAc96d7ae25053f3308FADe02936404a';
+
   export const RelayConfig = {
     mumbai: {
       address: '0x18003c4f9eeae987b3899fe5136c85305e0e6749',
@@ -28,6 +31,150 @@ export module serviceConfig {
         '3GAexMRSLVK89hECZrMNu43dnjfbdnbBM1FDQwjKKg3rKQsgsHPHoNraou8inCUH',
     },
   };
+
+  export const MinimalForwarderABI = [
+    {
+      inputs: [],
+      stateMutability: 'nonpayable',
+      type: 'constructor',
+    },
+    {
+      inputs: [
+        {
+          components: [
+            {
+              internalType: 'address',
+              name: 'from',
+              type: 'address',
+            },
+            {
+              internalType: 'address',
+              name: 'to',
+              type: 'address',
+            },
+            {
+              internalType: 'uint256',
+              name: 'value',
+              type: 'uint256',
+            },
+            {
+              internalType: 'uint256',
+              name: 'gas',
+              type: 'uint256',
+            },
+            {
+              internalType: 'uint256',
+              name: 'nonce',
+              type: 'uint256',
+            },
+            {
+              internalType: 'bytes',
+              name: 'data',
+              type: 'bytes',
+            },
+          ],
+          internalType: 'struct MinimalForwarder.ForwardRequest',
+          name: 'req',
+          type: 'tuple',
+        },
+        {
+          internalType: 'bytes',
+          name: 'signature',
+          type: 'bytes',
+        },
+      ],
+      name: 'execute',
+      outputs: [
+        {
+          internalType: 'bool',
+          name: '',
+          type: 'bool',
+        },
+        {
+          internalType: 'bytes',
+          name: '',
+          type: 'bytes',
+        },
+      ],
+      stateMutability: 'payable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'from',
+          type: 'address',
+        },
+      ],
+      name: 'getNonce',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          components: [
+            {
+              internalType: 'address',
+              name: 'from',
+              type: 'address',
+            },
+            {
+              internalType: 'address',
+              name: 'to',
+              type: 'address',
+            },
+            {
+              internalType: 'uint256',
+              name: 'value',
+              type: 'uint256',
+            },
+            {
+              internalType: 'uint256',
+              name: 'gas',
+              type: 'uint256',
+            },
+            {
+              internalType: 'uint256',
+              name: 'nonce',
+              type: 'uint256',
+            },
+            {
+              internalType: 'bytes',
+              name: 'data',
+              type: 'bytes',
+            },
+          ],
+          internalType: 'struct MinimalForwarder.ForwardRequest',
+          name: 'req',
+          type: 'tuple',
+        },
+        {
+          internalType: 'bytes',
+          name: 'signature',
+          type: 'bytes',
+        },
+      ],
+      name: 'verify',
+      outputs: [
+        {
+          internalType: 'bool',
+          name: '',
+          type: 'bool',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+  ];
 
   export const RetrievalManagerABI = [
     {
@@ -151,6 +298,31 @@ export module serviceConfig {
         },
       ],
       name: 'RoleRevoked',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'uint256',
+          name: 'tokenId',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'bytes32',
+          name: 'tokenHash',
+          type: 'bytes32',
+        },
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'owner',
+          type: 'address',
+        },
+      ],
+      name: 'TokenLocked',
       type: 'event',
     },
     {
@@ -308,8 +480,64 @@ export module serviceConfig {
     {
       inputs: [
         {
+          internalType: 'uint256',
+          name: 'tokenId_',
+          type: 'uint256',
+        },
+        {
+          internalType: 'bytes32',
+          name: 'hash_',
+          type: 'bytes32',
+        },
+      ],
+      name: 'lock',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      name: 'lockedTokenHash',
+      outputs: [
+        {
+          internalType: 'bytes32',
+          name: '',
+          type: 'bytes32',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      name: 'lockedTokenOwner',
+      outputs: [
+        {
           internalType: 'address',
           name: '',
+          type: 'address',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'caller_',
           type: 'address',
         },
         {
@@ -336,7 +564,7 @@ export module serviceConfig {
           type: 'bytes4',
         },
       ],
-      stateMutability: 'pure',
+      stateMutability: 'view',
       type: 'function',
     },
     {

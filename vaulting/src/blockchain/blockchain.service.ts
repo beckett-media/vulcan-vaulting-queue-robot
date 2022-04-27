@@ -2,7 +2,7 @@ import {
   DefenderRelayProvider,
   DefenderRelaySigner,
 } from 'defender-relay-client/lib/ethers';
-import { Contract, ethers } from 'ethers';
+import { Contract, ethers, utils } from 'ethers';
 import configuration from '../config/configuration';
 
 import {
@@ -13,7 +13,12 @@ import {
 
 import { serviceConfig } from './blockchain.service.config';
 import { isString } from 'class-validator';
-import { BurnJobResult } from '../config/enum';
+import {
+  BurnJobResult,
+  ExecJobResult,
+  LockJobResult,
+  TokenStatus,
+} from '../config/enum';
 
 @Injectable()
 export class BlockchainService {
@@ -22,12 +27,16 @@ export class BlockchainService {
     [key: string]: Contract;
   };
   private retrievalManager: Contract;
+  private minimalForwarder: Contract;
   private relaySigner: DefenderRelaySigner;
   private relayProvider: DefenderRelayProvider;
 
   constructor() {
     // TODO: move this to its own function
-    if (this.retrievalManager == undefined) {
+    if (
+      this.retrievalManager == undefined ||
+      this.minimalForwarder == undefined
+    ) {
       try {
         //TODO: move to burn relayer
         const relayConfig =
@@ -48,13 +57,32 @@ export class BlockchainService {
           serviceConfig.RetrievalManagerABI,
           signer,
         );
+        this.minimalForwarder = new ethers.Contract(
+          serviceConfig.MinimalForwarderAddress,
+          serviceConfig.MinimalForwarderABI,
+          signer,
+        );
       } catch (error) {
         throw new InternalServerErrorException(error.toString());
       }
     }
   }
 
-  async nftMinted(collection: string, id: Number) {
+  async nftLocked(collection: string, id: number) {
+    const nftContract = this.getContract(collection);
+    try {
+      const owner = await nftContract.ownerOf(id);
+      if (isString(owner) && owner == this.retrievalManager.address) {
+        return true;
+      }
+    } catch (error) {
+      return false;
+    }
+
+    return false;
+  }
+
+  async nftMinted(collection: string, id: number) {
     const nftContract = this.getContract(collection);
     try {
       const owner = await nftContract.ownerOf(id);
@@ -62,6 +90,23 @@ export class BlockchainService {
     } catch (error) {
       return false;
     }
+  }
+
+  async getTokenStatus(collection: string, token_id: number) {
+    const isNFTMinted = await this.nftMinted(collection, token_id);
+    if (isNFTMinted) {
+      const isNFTLocked = await this.nftLocked(collection, token_id);
+      this.logger.log(
+        `token status: minted: ${isNFTMinted}, locked: ${isNFTLocked}`,
+      );
+      if (isNFTLocked) {
+        return TokenStatus.Locked;
+      } else {
+        return TokenStatus.Minted;
+      }
+    }
+
+    return TokenStatus.NotMinted;
   }
 
   async mintToken(
@@ -76,6 +121,73 @@ export class BlockchainService {
       configuration()[process.env['runtime']]['blockchain']['tx_config'];
     const mintTx = await nftContract.safeMint(owner, id, tokenURI, tx_config);
     return mintTx.hash;
+  }
+
+  async lockToken(collection: string, token_id: number, hash: string) {
+    try {
+      const nftContract = this.getContract(collection);
+      const tx_config =
+        configuration()[process.env['runtime']]['blockchain']['tx_config'];
+      var progress: number;
+
+      // # 1: call retrieval manager's lock function
+      const hashBytes32 = utils.arrayify(hash);
+      const lockTx = await this.retrievalManager.lock(token_id, hashBytes32);
+      progress = LockJobResult.HashStoreTxSend;
+      const lockReceipt = await lockTx.wait(1);
+      this.logger.log(
+        `lock tx: ${lockTx.hash}, receipt status: ${lockReceipt.status}`,
+      );
+
+      // # 2: call nft contract's transferFrom to actually transfer the token
+      const from = nftContract.signer.getAddress();
+      const transferTx = await nftContract.transferFrom(
+        from,
+        this.retrievalManager.address,
+        token_id,
+        tx_config,
+      );
+      this.logger.log(`transferFrom tx: ${transferTx.hash}`);
+      progress = LockJobResult.TransferTxSend;
+
+      return {
+        tx_hash: transferTx.hash,
+        error: null,
+        status: progress,
+      };
+    } catch (error) {
+      this.logger.log(`lock/tranferFrom error: ${error}`);
+      return {
+        tx_hash: null,
+        error: error.toString(),
+        status: progress,
+      };
+    }
+  }
+
+  async execute(forwardRequest, signature: Uint8Array) {
+    try {
+      const tx_config =
+        configuration()[process.env['runtime']]['blockchain']['tx_config'];
+      const execTx = await this.minimalForwarder.execute(
+        forwardRequest,
+        signature,
+        tx_config,
+      );
+      this.logger.log(`execute forward request tx: ${execTx.hash}`);
+      return {
+        tx_hash: execTx.hash,
+        error: null,
+        status: ExecJobResult.TxSent,
+      };
+    } catch (error) {
+      this.logger.log(`execute forward request error: ${error}`);
+      return {
+        tx_hash: null,
+        error: error.toString(),
+        status: null,
+      };
+    }
   }
 
   async burnToken(token_id: number) {

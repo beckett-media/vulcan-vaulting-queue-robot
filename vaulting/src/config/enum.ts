@@ -18,6 +18,17 @@ export enum BurnJobResult {
   TokenBurned = 4,
 }
 
+export enum LockJobResult {
+  JobReceived = 0,
+  HashStoreTxSend = 1,
+  TransferTxSend = 2,
+}
+
+export enum ExecJobResult {
+  JobReceived = 0,
+  TxSent = 1,
+}
+
 export const MintJobResultReadable = {
   0: 'JobReceived',
   1: 'VaultDuplicated',
@@ -38,14 +49,27 @@ export const BurnJobResultReadable = {
   4: 'TokenBurned',
 };
 
+export const LockJobResultReadable = {
+  0: 'JobReceived',
+  1: 'HashStoreTxSend',
+  2: 'TransferTxSend',
+};
+
+export const ExecJobResultReadable = {
+  0: 'JobReceived',
+  1: 'TxSend',
+};
+
 export const TokenStatusReadable = {
   0: 'NotMinted',
   1: 'Minted',
   2: 'Burned',
+  3: 'Locked',
 };
 
 export enum TokenStatus {
   NotMinted = 0,
   Minted = 1,
   Burned = 2,
+  Locked = 3,
 }

@@ -6,7 +6,8 @@ import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { BlockchainService } from '../blockchain/blockchain.service';
 import { DatabaseService } from '../database/database.service';
 import { IPFSService } from '../ipfs/ipfs.service';
-import { BurnJobResult, MintJobResult } from '../config/enum';
+import { BurnJobResult, LockJobResult, MintJobResult } from '../config/enum';
+import { BigNumber, utils } from 'ethers';
 
 @Processor(configuration()[process.env['runtime']]['queue']['mint'])
 export class MintNFTConsumer {
@@ -117,7 +118,7 @@ export class BurnNFTConsumer {
 
   @Process()
   async burnNFT(job: Job<unknown>) {
-    console.log('burn nft:', job.data);
+    this.logger.log('burn nft:', job.data);
     const collection = job.data['collection'].toLowerCase() as string;
     const token_id = job.data['token_id'] as number;
     const beckett_id = job.data['nft_record_uid'] as string;
@@ -154,5 +155,48 @@ export class BurnNFTConsumer {
         status: progress,
       };
     }
+  }
+}
+
+@Processor(configuration()[process.env['runtime']]['queue']['lock'])
+export class LockNFTConsumer {
+  private readonly logger = new Logger('LockNFTConsumer');
+  constructor(private blockchainService: BlockchainService) {}
+
+  @Process()
+  async lockNFT(job: Job<unknown>) {
+    this.logger.log('lock nft:', job.data);
+    const result = await this.blockchainService.lockToken(
+      job.data['collection'],
+      job.data['token_id'],
+      job.data['hash'],
+    );
+    return result;
+  }
+}
+
+@Processor(configuration()[process.env['runtime']]['queue']['exec'])
+export class ExecConsumer {
+  private readonly logger = new Logger('ExecConsumer');
+
+  constructor(private blockchainService: BlockchainService) {}
+
+  @Process()
+  async execute(job: Job<unknown>) {
+    this.logger.log('execute forward request:', job.data);
+    const forwardRequest = {
+      from: job.data['from'],
+      to: job.data['to'],
+      value: BigNumber.from(job.data['value']),
+      gas: BigNumber.from(job.data['gas']),
+      nonce: BigNumber.from(job.data['nonce']),
+      data: utils.arrayify(job.data['data']),
+    };
+    const signature = utils.arrayify(job.data['signature']);
+    const result = await this.blockchainService.execute(
+      forwardRequest,
+      signature,
+    );
+    return result;
   }
 }

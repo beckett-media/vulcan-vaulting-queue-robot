@@ -11,4 +11,19 @@ const BullBurnQueueModule = BullModule.registerQueue({
   limiter: configuration()[process.env['runtime']]['queue']['limiter'],
 });
 
-export { BullMintQueueModule, BullBurnQueueModule };
+const BullLockQueueModule = BullModule.registerQueue({
+  name: configuration()[process.env['runtime']]['queue']['lock'],
+  limiter: configuration()[process.env['runtime']]['queue']['limiter'],
+});
+
+const BullExecQueueModule = BullModule.registerQueue({
+  name: configuration()[process.env['runtime']]['queue']['exec'],
+  limiter: configuration()[process.env['runtime']]['queue']['limiter'],
+});
+
+export {
+  BullMintQueueModule,
+  BullBurnQueueModule,
+  BullLockQueueModule,
+  BullExecQueueModule,
+};

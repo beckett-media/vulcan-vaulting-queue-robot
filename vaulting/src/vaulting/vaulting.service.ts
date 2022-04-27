@@ -1,21 +1,31 @@
 import { Queue } from 'bull';
-import { Contract } from 'ethers';
+import { Contract, utils } from 'ethers';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 import configuration from '../config/configuration';
-import { BurnRequest, MintRequest } from './dtos/vaulting.dto';
+import {
+  BurnRequest,
+  ForwardRequest,
+  LockRequest,
+  MintRequest,
+} from './dtos/vaulting.dto';
 
 import { DatabaseService } from '../database/database.service';
 import { BlockchainService } from '../blockchain/blockchain.service';
 import {
   BurnJobResult,
   BurnJobResultReadable,
+  ExecJobResult,
+  ExecJobResultReadable,
+  LockJobResult,
+  LockJobResultReadable,
   MintJobResult,
   MintJobResultReadable,
   TokenStatus,
   TokenStatusReadable,
 } from '../config/enum';
+import { Token } from 'src/database/database.entity';
 
 @Injectable()
 export class VaultingService {
@@ -26,6 +36,10 @@ export class VaultingService {
     private mintQueue: Queue,
     @InjectQueue(configuration()[process.env['runtime']]['queue']['burn'])
     private burnQueue: Queue,
+    @InjectQueue(configuration()[process.env['runtime']]['queue']['lock'])
+    private lockQueue: Queue,
+    @InjectQueue(configuration()[process.env['runtime']]['queue']['exec'])
+    private execQueue: Queue,
     private databaseService: DatabaseService,
     private blockchainService: BlockchainService,
   ) {}
@@ -34,14 +48,69 @@ export class VaultingService {
     [key: string]: Contract;
   };
 
+  /////////////////////////
+  // All queue operations
+
   async mintNFT(mint: MintRequest) {
     mint.collection = mint.collection.toLowerCase();
     const job = await this.mintQueue.add(mint);
     return job;
   }
 
+  async burnNFT(burn: BurnRequest) {
+    burn.collection = burn.collection.toLowerCase();
+    const job = await this.burnQueue.add(burn);
+    return job;
+  }
+
+  async lockNFT(lock: LockRequest) {
+    lock.collection = lock.collection.toLowerCase();
+    const job = await this.lockQueue.add(lock);
+    return job;
+  }
+
+  async execute(forwardRequest: ForwardRequest) {
+    const job = await this.execQueue.add(forwardRequest);
+    return job;
+  }
+
+  async getTokenStatus(collection: string, token_id: number) {
+    const token_status_db = await this.databaseService.getTokenStatus(
+      collection,
+      token_id,
+    );
+    const token_status_bc = await this.blockchainService.getTokenStatus(
+      collection,
+      token_id,
+    );
+    this.logger.log(`token status: ${token_status_db}, ${token_status_bc}`);
+
+    // final token status, no change
+    if (token_status_db == TokenStatus.Burned) {
+      return TokenStatus.Burned;
+    }
+
+    // if we can't find the token on blockchan but db record exists, then it's burned
+    if (
+      token_status_bc == TokenStatus.NotMinted &&
+      (token_status_db == TokenStatus.Minted ||
+        token_status_db == TokenStatus.Locked)
+    ) {
+      return TokenStatus.Burned;
+    }
+
+    if (token_status_db != TokenStatus.NotMinted) {
+      return token_status_bc;
+    } else {
+      // otherwise, token entity does not exist, it is not minted
+      return TokenStatus.NotMinted;
+    }
+  }
+
   async mintJobStatus(id: number) {
     const job = await this.mintQueue.getJob(id);
+    const collection = job.data['collection'].toLowerCase();
+    const beckett_id = job.data['nft_record_uid'];
     if (job == undefined) {
       throw new NotFoundException(`mint job ${id} can not be found`);
     }
@@ -59,35 +128,20 @@ export class VaultingService {
       error = job.returnvalue['error'];
       status = job.returnvalue['status'];
     }
-    var token_status = TokenStatus.NotMinted;
-    var token_id: number;
+
+    const vaulting = await this.databaseService.getVaultingById(beckett_id);
+    const token_id = vaulting.token_id;
+    var token_status = await this.getTokenStatus(collection, token_id);
     var jobFinished = false;
     if (job.finishedOn > 0) {
       jobFinished = true;
-      const vaulting = await this.databaseService.getVaultingById(
-        job.data.nft_record_uid,
+      await this.databaseService.updateTokenStatus(
+        collection,
+        token_id,
+        token_status,
       );
-      token_id = vaulting.token_id;
-
-      // check if it's minted
-      var tokenMinted: boolean;
-      if (vaulting != undefined) {
-        tokenMinted = await this.blockchainService.nftMinted(
-          job.data.collection,
-          vaulting.token_id,
-        );
-      }
-      // There is difference between job status and token status
-      // update token status to 'minted' if job status is minted as well
-      if (tokenMinted == true) {
-        token_status = TokenStatus.Minted;
-        await this.databaseService.updateTokenStatus(
-          job.data.collection,
-          vaulting.token_id,
-          token_status,
-        );
-      }
     }
+
     const jobStatus = {
       job_id: Number(job.id),
       nft_record_uid: job.data.nft_record_uid,
@@ -102,16 +156,6 @@ export class VaultingService {
       error: error,
     };
     return jobStatus;
-  }
-
-  //////////////////////////////////////////////////////
-  /// brun nft
-  //////////////////////////////////////////////////////
-
-  async burnNFT(burn: BurnRequest) {
-    burn.collection = burn.collection.toLowerCase();
-    const job = await this.burnQueue.add(burn);
-    return job;
   }
 
   async burnJobStatus(id: number) {
@@ -139,34 +183,15 @@ export class VaultingService {
       status = job.returnvalue['status'];
     }
 
-    var token_status = await this.databaseService.getTokenStatus(
-      collection,
-      token_id,
-    );
+    var token_status = await this.getTokenStatus(collection, token_id);
     var jobFinished = false;
     if (job.finishedOn > 0) {
       jobFinished = true;
-
-      // if we can't find the token
-      // and we sent the burn tx (passed all checks before sending burn tx)
-      // then the token is burned
-      const isNFTMinted = await this.blockchainService.nftMinted(
+      await this.databaseService.updateTokenStatus(
         collection,
         token_id,
+        token_status,
       );
-      if (!isNFTMinted) {
-        if (status == BurnJobResult.TxSent) {
-          token_status = TokenStatus.Burned;
-
-          //TODO: update token status table
-          //TODO: try catch this
-          await this.databaseService.updateTokenStatus(
-            collection,
-            token_id,
-            token_status,
-          );
-        }
-      }
     }
 
     return {
@@ -178,6 +203,114 @@ export class VaultingService {
       token_status_desc: TokenStatusReadable[token_status],
       job_status: status,
       job_status_desc: BurnJobResultReadable[status],
+      tx_hash: tx_hash,
+      processed: jobFinished,
+      error: error,
+    };
+  }
+
+  async lockJobStatus(id: number) {
+    const job = await this.lockQueue.getJob(id);
+    if (job == undefined) {
+      throw new NotFoundException(`lock job ${id} can not be found`);
+    }
+    const collection = job.data['collection'].toLowerCase();
+    const token_id = job.data['token_id'] as number;
+    const nft_record_uid = await this.databaseService.getVaultingUUID(
+      collection,
+      token_id,
+    );
+
+    this.logger.log(job.returnvalue);
+
+    var tx_hash: string;
+    var error: string;
+    var status: number;
+    // job status endpoint is called before job finishes
+    if (job.returnvalue == null) {
+      tx_hash = '';
+      error = '';
+      status = LockJobResult.JobReceived;
+    } else {
+      tx_hash = job.returnvalue['tx_hash'];
+      error = job.returnvalue['error'];
+      status = job.returnvalue['status'];
+    }
+
+    var token_status = await this.getTokenStatus(collection, token_id);
+    var jobFinished = false;
+    if (job.finishedOn > 0) {
+      jobFinished = true;
+      await this.databaseService.updateTokenStatus(
+        collection,
+        token_id,
+        token_status,
+      );
+    }
+
+    return {
+      job_id: Number(job.id),
+      nft_record_uid: nft_record_uid,
+      collection: collection,
+      token_id: token_id,
+      token_status: token_status,
+      token_status_desc: TokenStatusReadable[token_status],
+      job_status: status,
+      job_status_desc: LockJobResultReadable[status],
+      tx_hash: tx_hash,
+      processed: jobFinished,
+      error: error,
+    };
+  }
+
+  async execJobStatus(id: number) {
+    const job = await this.execQueue.getJob(id);
+    if (job == undefined) {
+      throw new NotFoundException(`lock job ${id} can not be found`);
+    }
+    const collection = job.data['collection'];
+    const token_id = job.data['token_id'];
+    const nft_record_uid = await this.databaseService.getVaultingUUID(
+      collection,
+      token_id,
+    );
+
+    this.logger.log(job.returnvalue);
+
+    var tx_hash: string;
+    var error: string;
+    var status: number;
+    // job status endpoint is called before job finishes
+    if (job.returnvalue == null) {
+      tx_hash = '';
+      error = '';
+      status = ExecJobResult.JobReceived;
+    } else {
+      tx_hash = job.returnvalue['tx_hash'];
+      error = job.returnvalue['error'];
+      status = job.returnvalue['status'];
+    }
+
+    var token_status = await this.getTokenStatus(collection, token_id);
+    var jobFinished = false;
+    if (job.finishedOn > 0) {
+      jobFinished = true;
+      await this.databaseService.updateTokenStatus(
+        collection,
+        token_id,
+        token_status,
+      );
+    }
+
+    return {
+      job_id: Number(job.id),
+      nft_record_uid: nft_record_uid,
+      collection: collection,
+      token_id: token_id,
+      token_status: token_status,
+      token_status_desc: TokenStatusReadable[token_status],
+      job_status: status,
+      job_status_desc: ExecJobResultReadable[status],
       tx_hash: tx_hash,
       processed: jobFinished,
       error: error,

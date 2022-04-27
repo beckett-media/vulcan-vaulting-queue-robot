@@ -8,8 +8,8 @@ Content-Type: application/json
 
 {
   "collection": "0x17E95B844F8BDb32f0bcf57542F1E5CD79A2B342",
-  "owner": "0x2d0f5b62b39cfaf6266e31f0a2f3c33142739596",
-  "nft_record_uid": "WYFF12039",
+  "owner": "0x18003c4f9eeae987b3899fe5136c85305e0e6749",
+  "nft_record_uid": "WYF25005",
   "name": "fake BAYC",
   "description": "fake bayc desc",
   "image_format": "png",
@@ -19,20 +19,33 @@ Content-Type: application/json
 }
 
 ### mint job id
-Get http://127.0.0.1:3000/vaulting/mint/38
+Get http://127.0.0.1:3000/vaulting/mint/68
+
+### lock nft
+POST http://127.0.0.1:3000/vaulting/lock
+Content-Type: application/json
+
+{
+  "collection": "0x17E95B844F8BDb32f0bcf57542F1E5CD79A2B342",
+  "token_id": 221,
+  "hash": "0x17E95B844F8BDb32f0bcf57542F1E5CD79A2B34217E95B844F8BDb32f0bcf575"
+}
+
+### lock job id
+Get http://127.0.0.1:3000/vaulting/lock/8
 
 ### burn nft
 POST http://127.0.0.1:3000/vaulting/burn
 Content-Type: application/json
 
 {
-  "collection": "0xD8304C67b0Bd40346e6E18E7e5D975a10fCfC11e",
-  "token_id": 101,
-  "beckett_id": "WYF2025"
+  "collection": "0x17E95B844F8BDb32f0bcf57542F1E5CD79A2B342",
+  "token_id": 221,
+  "nft_record_uid": "WYF25004"
 }
 
 ### burn job id
-Get http://127.0.0.1:3000/vaulting/burn/26
+Get http://127.0.0.1:3000/vaulting/burn/30
 
 ### callback mint
 POST http://127.0.0.1:3000/webhooks/callback

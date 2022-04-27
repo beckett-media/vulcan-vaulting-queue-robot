@@ -1,10 +1,12 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
-import { BurnJobResult, MintJobResult } from '../config/enum';
+import { BurnJobResult, LockJobResult, MintJobResult } from '../config/enum';
 
 import {
   BurnJobStatus,
   BurnRequest,
+  ForwardRequest,
+  LockRequest,
   MintJobStatus,
   MintRequest,
   MintStatus,
@@ -57,7 +59,7 @@ export class VaultingController {
     const job = await this.VaultingService.mintNFT(body);
     return {
       job_id: Number(job.id),
-      beckett_id: body.nft_record_uid,
+      nft_record_uid: body.nft_record_uid,
       processed: false,
       status: MintJobResult.JobReceived,
     };
@@ -98,12 +100,97 @@ export class VaultingController {
   async burnNFT(@Body() body: BurnRequest) {
     const job = await this.VaultingService.burnNFT(body);
     return {
-      id: job.id,
+      id: Number(job.id),
       nft_record_uid: body.nft_record_uid,
       collection: body.collection.toLowerCase(),
       token_id: body.token_id,
       processed: false,
       status: BurnJobResult.JobReceived,
     };
+  }
+
+  @Get('/lock/:job_id')
+  @ApiOperation({
+    summary: 'Get NFT locking job status',
+  })
+  @ApiResponse({
+    status: 200,
+    type: MintStatus,
+    description: 'Return status of NFT locking job',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Can not find locking job',
+  })
+  @ApiProduces('application/json')
+  async lockStatus(@Param('job_id') job_id: number) {
+    const jobStatus = await this.VaultingService.lockJobStatus(job_id);
+    return jobStatus;
+  }
+
+  @Post('/lock')
+  @ApiOperation({
+    summary: 'Lock a NFT token with the retrieval manager',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'The NFT locking job is successfully submitted.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Submission of NFT locking job is failed',
+  })
+  @ApiProduces('application/json')
+  async lockNFT(@Body() body: LockRequest) {
+    const job = await this.VaultingService.lockNFT(body);
+    return {
+      job_id: Number(job.id),
+      collection: body.collection,
+      token_id: body.token_id,
+      processed: false,
+      status: LockJobResult.JobReceived,
+    };
+  }
+
+  @Post('/execute')
+  @ApiOperation({
+    summary: 'Submit gas-less transaction to trusted forwarder for execution.',
+  })
+  @ApiResponse({
+    status: 201,
+    description:
+      'The gas-less transaction for execution is submitted successfully',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Submission for gas-less transaction failed',
+  })
+  @ApiProduces('application/json')
+  async execute(@Body() body: ForwardRequest) {
+    const job = await this.VaultingService.execute(body);
+    return {
+      job_id: Number(job.id),
+      processed: false,
+      status: LockJobResult.JobReceived,
+    };
+  }
+
+  @Get('/execute/:job_id')
+  @ApiOperation({
+    summary: 'Get execution job status',
+  })
+  @ApiResponse({
+    status: 200,
+    type: MintStatus,
+    description: 'Return status of execution job',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Can not find execution job',
+  })
+  @ApiProduces('application/json')
+  async execStatus(@Param('job_id') job_id: number) {
+    const jobStatus = await this.VaultingService.execJobStatus(job_id);
+    return jobStatus;
   }
 }

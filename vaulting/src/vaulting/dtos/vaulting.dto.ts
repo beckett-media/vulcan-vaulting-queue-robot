@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsNumber, IsString, MinLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  Length,
+  MinLength,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class MintRequest {
@@ -89,7 +95,7 @@ export class BurnJobStatus {
   collection: string;
 
   @ApiProperty()
-  @IsString()
+  @IsNumber()
   token_id: number;
 
   @ApiProperty()
@@ -148,4 +154,66 @@ export class MintStatus {
   @IsString()
   @MinLength(1)
   error: string;
+}
+
+export class ForwardRequest {
+  @ApiProperty()
+  @IsString()
+  @MinLength(40)
+  from: string;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(40)
+  to: string;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(1)
+  value: string;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(1)
+  gas: string;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(1)
+  nonce: string;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(1)
+  data: string;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(32)
+  signature: string;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(1)
+  collection: string;
+
+  @ApiProperty()
+  @IsNumber()
+  token_id: string;
+}
+
+export class LockRequest {
+  @ApiProperty()
+  @IsString()
+  @MinLength(40)
+  collection: string;
+
+  @ApiProperty()
+  @IsNumber()
+  token_id: number;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(64)
+  hash: string;
 }

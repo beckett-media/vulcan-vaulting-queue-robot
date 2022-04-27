@@ -9,6 +9,7 @@ export default () => ({
     queue: {
       mint: 'beckett_mint_prod',
       burn: 'beckett_burn_prod',
+      lock: 'beckett_lock_dev',
       limiter: { max: 1, duration: 10 },
     },
     db: {
@@ -33,6 +34,7 @@ export default () => ({
     queue: {
       mint: 'beckett_mint_stage',
       burn: 'beckett_burn_stage',
+      lock: 'beckett_lock_dev',
       limiter: { max: 1, duration: 10 },
     },
     db: {
@@ -57,6 +59,7 @@ export default () => ({
     queue: {
       mint: 'beckett_mint_dev',
       burn: 'beckett_burn_dev',
+      lock: 'beckett_lock_dev',
       limiter: { max: 1, duration: 10 },
     },
     db: {
@@ -86,6 +89,7 @@ export default () => ({
     queue: {
       mint: 'beckett_mint_dev',
       burn: 'beckett_burn_dev',
+      lock: 'beckett_lock_dev',
       limiter: { max: 1, duration: 10 },
     },
     db: {
