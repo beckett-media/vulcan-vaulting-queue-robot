@@ -199,7 +199,7 @@ export class ForwardRequest {
 
   @ApiProperty()
   @IsNumber()
-  token_id: string;
+  token_id: number;
 }
 
 export class LockRequest {
