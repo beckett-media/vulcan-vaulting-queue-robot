@@ -190,9 +190,14 @@ export class ExecConsumer {
       value: BigNumber.from(job.data['value']),
       gas: BigNumber.from(job.data['gas']),
       nonce: BigNumber.from(job.data['nonce']),
-      data: utils.arrayify(job.data['data']),
+      data: job.data['data'],
     };
-    const signature = utils.arrayify(job.data['signature']);
+    const signature = job.data['signature'];
+    this.logger.log(
+      `call blockchain service /execute: ${JSON.stringify(
+        forwardRequest,
+      )}, ${signature}`,
+    );
     const result = await this.blockchainService.execute(
       forwardRequest,
       signature,

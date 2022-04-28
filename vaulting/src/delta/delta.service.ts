@@ -28,27 +28,18 @@ export class DeltaService {
       nft_token_id: token_id,
       nft_collection_address: collection,
     };
-    /**
-     * {
-  "nft_record_uid": "c19ce128-6cc8-4882-8e10-789e3701f953",
-  "status": "MOCK_MINTED_YW",
-  "nft_token_id": 1000006,
-  "nft_collection_address": "0x17E95B844F8BDb32f0bcf57542F1E5CD79A2B342"
-}
-     */
-    const payload2 = {
-      nft_record_uid: 'c19ce128-6cc8-4882-8e10-789e3701f953',
-      status: 'MOCK_MINTED_YW2',
-      nft_token_id: 1000006,
-      nft_collection_address: '0x17E95B844F8BDb32f0bcf57542F1E5CD79A2B342',
-    };
-    const response = await got
-      .put(url, { json: payload2, headers: headers })
-      .json();
     this.logger.log(
-      `update token status: payload => ${JSON.stringify(
-        payload,
-      )}, response => ${JSON.stringify(response)}`,
+      `update token status to Delta API: url => ${url}, header => ${JSON.stringify(
+        headers,
+      )} payload => ${JSON.stringify(payload)}`,
     );
+    try {
+      const response = await got
+        .put(url, { json: payload, headers: headers })
+        .json();
+      this.logger.log(`update token status delta response => ${response}`);
+    } catch (error) {
+      this.logger.error(`update token status to Delta API error: ${error}`);
+    }
   }
 }

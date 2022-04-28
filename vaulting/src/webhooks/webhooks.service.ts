@@ -32,7 +32,7 @@ export class WebhooksService {
       );
 
       // foward to delta API & palantir
-      this.deltaService.updateTokenStatus(
+      await this.deltaService.updateTokenStatus(
         collection,
         tokenId,
         TokenStatus.Minted,
@@ -54,7 +54,7 @@ export class WebhooksService {
       );
 
       // foward to delta API & palantir
-      this.deltaService.updateTokenStatus(
+      await this.deltaService.updateTokenStatus(
         collection,
         tokenId,
         TokenStatus.Burned,

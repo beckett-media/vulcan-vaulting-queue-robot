@@ -1,6 +1,8 @@
 import {
+  IsBoolean,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   Length,
   MinLength,
@@ -216,4 +218,75 @@ export class LockRequest {
   @IsString()
   @MinLength(64)
   hash: string;
+}
+
+export class JobSubmitResponse {
+  @IsNumber()
+  job_id: number;
+
+  @IsString()
+  @IsOptional()
+  nft_record_uid: string;
+
+  @IsNumber()
+  @IsOptional()
+  token_id: number;
+
+  @IsString()
+  @IsOptional()
+  collection: string;
+
+  @IsBoolean()
+  processed: boolean;
+
+  @IsNumber()
+  status: number;
+
+  @IsString()
+  status_desc: string;
+
+  constructor(partial: Partial<JobSubmitResponse>) {
+    Object.assign(this, partial);
+  }
+}
+
+export class JobStatusResponse {
+  @IsNumber()
+  job_id: number;
+
+  @IsString()
+  nft_record_uid: string;
+
+  @IsString()
+  collection: string;
+
+  @IsNumber()
+  token_id: number;
+
+  @IsNumber()
+  token_status: number;
+
+  @IsString()
+  token_status_desc: string;
+
+  @IsNumber()
+  job_status: number;
+
+  @IsString()
+  job_status_desc: string;
+
+  @IsString()
+  @IsOptional()
+  tx_hash: string;
+
+  @IsBoolean()
+  processed: boolean;
+
+  @IsString()
+  @IsOptional()
+  error: string;
+
+  constructor(partial: Partial<JobStatusResponse>) {
+    Object.assign(this, partial);
+  }
 }

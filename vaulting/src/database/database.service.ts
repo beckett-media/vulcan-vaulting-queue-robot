@@ -150,10 +150,9 @@ export class DatabaseService {
       this.logger.log(`vaulting duplicate: ${JSON.stringify(vaulting)}`);
       this.logger.log(`token duplicate: ${JSON.stringify(token)}`);
       if (token != undefined) {
-        if (
-          token.status == TokenStatus.Minted ||
-          token.status == TokenStatus.Burned
-        ) {
+        //TODO check for burn as well
+        // currently can not detect minting failed vs burned
+        if (token.status == TokenStatus.Minted) {
           return true;
         }
       }

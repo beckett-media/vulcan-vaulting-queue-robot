@@ -165,6 +165,7 @@ export class BlockchainService {
   }
 
   async execute(forwardRequest, signature: Uint8Array) {
+    var progress = ExecJobResult.JobReceived;
     try {
       const tx_config =
         configuration()[process.env['runtime']]['blockchain']['tx_config'];
@@ -174,17 +175,18 @@ export class BlockchainService {
         tx_config,
       );
       this.logger.log(`execute forward request tx: ${execTx.hash}`);
+      progress = ExecJobResult.TxSent;
       return {
         tx_hash: execTx.hash,
         error: null,
-        status: ExecJobResult.TxSent,
+        status: progress,
       };
     } catch (error) {
       this.logger.log(`execute forward request error: ${error}`);
       return {
         tx_hash: null,
         error: error.toString(),
-        status: null,
+        status: progress,
       };
     }
   }

@@ -70,6 +70,7 @@ export class VaultingService {
   }
 
   async execute(forwardRequest: ForwardRequest) {
+    forwardRequest.collection = forwardRequest.collection.toLowerCase();
     const job = await this.execQueue.add(forwardRequest);
     return job;
   }
@@ -109,11 +110,11 @@ export class VaultingService {
 
   async mintJobStatus(id: number) {
     const job = await this.mintQueue.getJob(id);
-    const collection = job.data['collection'].toLowerCase();
-    const beckett_id = job.data['nft_record_uid'];
     if (job == undefined) {
       throw new NotFoundException(`mint job ${id} can not be found`);
     }
+    const collection = job.data['collection'].toLowerCase();
+    const beckett_id = job.data['nft_record_uid'];
     this.logger.log(JSON.stringify(job));
     var tx_hash: string;
     var error: string;
@@ -176,7 +177,7 @@ export class VaultingService {
     if (job.returnvalue == null) {
       tx_hash = '';
       error = '';
-      status = MintJobResult.JobReceived;
+      status = BurnJobResult.JobReceived;
     } else {
       tx_hash = job.returnvalue['tx_hash'];
       error = job.returnvalue['error'];
@@ -270,12 +271,21 @@ export class VaultingService {
     }
     const collection = job.data['collection'];
     const token_id = job.data['token_id'];
+    //const collection = '0x17e95b844f8bdb32f0bcf57542f1e5cd79a2b342';
+    //const token_id = 227;
     const nft_record_uid = await this.databaseService.getVaultingUUID(
       collection,
       token_id,
     );
+    if (nft_record_uid == undefined) {
+      throw new NotFoundException(
+        `nft record uid can not be found for collection: ${collection}, token_id: ${token_id}`,
+      );
+    }
 
-    this.logger.log(job.returnvalue);
+    this.logger.log(
+      `exec job: ${id} return value: ${JSON.stringify(job.returnvalue)}`,
+    );
 
     var tx_hash: string;
     var error: string;
