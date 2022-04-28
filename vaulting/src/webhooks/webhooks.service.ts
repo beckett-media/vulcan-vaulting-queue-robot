@@ -52,6 +52,13 @@ export class WebhooksService {
         tokenId,
         TokenStatus.Burned,
       );
+
+      // foward to delta API & palantir
+      this.deltaService.updateTokenStatus(
+        collection,
+        tokenId,
+        TokenStatus.Burned,
+      );
     }
   }
 

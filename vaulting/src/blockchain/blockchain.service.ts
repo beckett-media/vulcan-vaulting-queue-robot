@@ -43,7 +43,6 @@ export class BlockchainService {
           serviceConfig.RelayConfig[
             configuration()[process.env['runtime']]['network_mint_relayer']
           ];
-        this.logger.log(`relay config: ${JSON.stringify(relayConfig)}`);
         const credentials = {
           apiKey: relayConfig['apiKey'],
           apiSecret: relayConfig['apiSecret'],
@@ -224,7 +223,6 @@ export class BlockchainService {
         serviceConfig.RelayConfig[
           configuration()[process.env['runtime']]['network_mint_relayer']
         ];
-      this.logger.log(`relay config: ${JSON.stringify(relayConfig)}`);
       const credentials = {
         apiKey: relayConfig['apiKey'],
         apiSecret: relayConfig['apiSecret'],

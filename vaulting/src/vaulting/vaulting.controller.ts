@@ -12,7 +12,12 @@ import {
   ApiProduces,
   ApiResponse,
 } from '@nestjs/swagger';
-import { BurnJobResult, LockJobResult, MintJobResult } from '../config/enum';
+import {
+  BurnJobResult,
+  ExecJobResult,
+  LockJobResult,
+  MintJobResult,
+} from '../config/enum';
 
 import {
   BurnJobStatus,
@@ -189,7 +194,7 @@ export class VaultingController {
     return {
       job_id: Number(job.id),
       processed: false,
-      status: LockJobResult.JobReceived,
+      status: ExecJobResult.JobReceived,
     };
   }
 

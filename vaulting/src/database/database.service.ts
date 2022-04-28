@@ -71,7 +71,6 @@ export class DatabaseService {
           status: TokenStatus.NotMinted,
         });
         this.tokenRepo.save(token);
-        this.logger.log(`11111111111 ${JSON.stringify(token)}`);
         progress = MintJobResult.TokenStatusSaved;
       },
     );
