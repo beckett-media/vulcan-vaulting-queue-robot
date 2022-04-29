@@ -2,16 +2,17 @@ import { Job } from 'bull';
 import configuration from '../config/configuration';
 
 import { Process, Processor } from '@nestjs/bull';
-import { InternalServerErrorException, Logger } from '@nestjs/common';
+import { InternalServerErrorException } from '@nestjs/common';
 import { BlockchainService } from '../blockchain/blockchain.service';
 import { DatabaseService } from '../database/database.service';
 import { IPFSService } from '../ipfs/ipfs.service';
 import { BurnJobResult, MintJobResult } from '../config/enum';
 import { BigNumber } from 'ethers';
+import { DetailedLogger } from 'src/logger/detailed.logger';
 
 @Processor(configuration()[process.env['runtime']]['queue']['mint'])
 export class MintNFTConsumer {
-  private readonly logger = new Logger('MintNFTConsumer');
+  private readonly logger = new DetailedLogger('MintNFTConsumer');
   constructor(
     private blockchainService: BlockchainService,
     private databaseService: DatabaseService,
@@ -97,7 +98,7 @@ export class MintNFTConsumer {
         status: progress,
       };
     } catch (error) {
-      this.logger.log(`MintNFT Error: ${error}`);
+      this.logger.error(`MintNFT Error: ${error}`);
       return {
         tx_hash: tx_hash,
         error: error.toString(),
@@ -109,7 +110,7 @@ export class MintNFTConsumer {
 
 @Processor(configuration()[process.env['runtime']]['queue']['burn'])
 export class BurnNFTConsumer {
-  private readonly logger = new Logger('BurnNFTConsumer');
+  private readonly logger = new DetailedLogger('BurnNFTConsumer');
 
   constructor(
     private blockchainService: BlockchainService,
@@ -118,7 +119,7 @@ export class BurnNFTConsumer {
 
   @Process()
   async burnNFT(job: Job<unknown>) {
-    this.logger.log('burn nft:', job.data);
+    this.logger.log(`burn nft: ${JSON.stringify(job.data)}`);
     const collection = job.data['collection'].toLowerCase() as string;
     const token_id = job.data['token_id'] as number;
     const beckett_id = job.data['nft_record_uid'] as string;
@@ -161,12 +162,12 @@ export class BurnNFTConsumer {
 
 @Processor(configuration()[process.env['runtime']]['queue']['lock'])
 export class LockNFTConsumer {
-  private readonly logger = new Logger('LockNFTConsumer');
+  private readonly logger = new DetailedLogger('LockNFTConsumer');
   constructor(private blockchainService: BlockchainService) {}
 
   @Process()
   async lockNFT(job: Job<unknown>) {
-    this.logger.log('lock nft:', job.data);
+    this.logger.log(`lock nft: ${JSON.stringify(job.data)}`);
     const result = await this.blockchainService.lockToken(
       job.data['collection'],
       job.data['token_id'],
@@ -178,18 +179,19 @@ export class LockNFTConsumer {
 
 @Processor(configuration()[process.env['runtime']]['queue']['exec'])
 export class ExecConsumer {
-  private readonly logger = new Logger('ExecConsumer');
+  private readonly logger = new DetailedLogger('ExecConsumer');
 
   constructor(private blockchainService: BlockchainService) {}
 
   @Process()
   async execute(job: Job<unknown>) {
-    this.logger.log('execute forward request:', job.data);
+    this.logger.log(`execute forward request: ${JSON.stringify(job.data)}`);
     const forwardRequest = {
       from: job.data['from'],
       to: job.data['to'],
       value: BigNumber.from(job.data['value']),
       gas: BigNumber.from(job.data['gas']),
+      //gas: BigNumber.from('100000'),
       nonce: BigNumber.from(job.data['nonce']),
       data: job.data['data'],
     };

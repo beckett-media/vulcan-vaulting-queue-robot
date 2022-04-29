@@ -5,11 +5,7 @@ import {
 import { Contract, ethers, utils } from 'ethers';
 import configuration from '../config/configuration';
 
-import {
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 
 import { serviceConfig } from './blockchain.service.config';
 import { isString } from 'class-validator';
@@ -19,10 +15,13 @@ import {
   LockJobResult,
   TokenStatus,
 } from '../config/enum';
+import { DetailedLogger } from 'src/logger/detailed.logger';
 
 @Injectable()
 export class BlockchainService {
-  private readonly logger = new Logger('BlockchainService');
+  private readonly logger = new DetailedLogger('BlockchainService', {
+    timestamp: true,
+  });
   nftContracts: {
     [key: string]: Contract;
   };
@@ -206,30 +205,16 @@ export class BlockchainService {
       // # 1: call retrieval manager's lock function
       const hashBytes32 = utils.arrayify(hash);
       const lockTx = await retrievalManager.lock(token_id, hashBytes32);
-      progress = LockJobResult.HashStoreTxSend;
-      const lockReceipt = await lockTx.wait(1);
-      this.logger.log(
-        `lock tx: ${lockTx.hash}, receipt status: ${lockReceipt.status}`,
-      );
-
-      // # 2: call nft contract's transferFrom to actually transfer the token
-      const from = nftContract.signer.getAddress();
-      const transferTx = await nftContract.transferFrom(
-        from,
-        retrievalManager.address,
-        token_id,
-        tx_config,
-      );
-      this.logger.log(`transferFrom tx: ${transferTx.hash}`);
-      progress = LockJobResult.TransferTxSend;
+      progress = LockJobResult.LockTxSend;
+      this.logger.log(`lock tx: ${lockTx.hash}`);
 
       return {
-        tx_hash: transferTx.hash,
+        tx_hash: lockTx.hash,
         error: null,
         status: progress,
       };
     } catch (error) {
-      this.logger.log(`lock/tranferFrom error: ${error}`);
+      this.logger.error(`lock/tranferFrom error: ${error}`);
       return {
         tx_hash: null,
         error: error.toString(),
@@ -256,7 +241,7 @@ export class BlockchainService {
         status: progress,
       };
     } catch (error) {
-      this.logger.log(`execute forward request error: ${error}`);
+      this.logger.error(`execute forward request error: ${error}`);
       return {
         tx_hash: null,
         error: error.toString(),
@@ -279,7 +264,7 @@ export class BlockchainService {
         status: BurnJobResult.TxSent,
       };
     } catch (error) {
-      this.logger.log(`burn error: token not transfered yet? ${error}`);
+      this.logger.error(`burn error: token not transfered yet? ${error}`);
       return {
         tx_hash: null,
         error: error.toString(),

@@ -9,10 +9,13 @@ import { TokenStatus } from 'src/config/enum';
 import { DatabaseService } from 'src/database/database.service';
 import { createHash } from 'crypto';
 import { DeltaService } from 'src/delta/delta.service';
+import { DetailedLogger } from 'src/logger/detailed.logger';
 
 @Injectable()
 export class WebhooksService {
-  private readonly logger = new Logger('WebhookServer');
+  private readonly logger = new DetailedLogger('WebhookServer', {
+    timestamp: true,
+  });
 
   constructor(
     private databaseService: DatabaseService,

@@ -1,5 +1,5 @@
 import { BullModule } from '@nestjs/bull';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 
 import configuration from '../config/configuration';
 import {
@@ -19,6 +19,9 @@ import {
   BullLockQueueModule,
   BullExecQueueModule,
 } from '../queue/queue.module';
+import { RequestLoggerMiddleware } from 'src/middleware/logger';
+import { ResponseInterceptor } from 'src/interceptors/response';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   controllers: [VaultingController],
@@ -28,6 +31,10 @@ import {
     BurnNFTConsumer,
     LockNFTConsumer,
     ExecConsumer,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
+    },
   ],
   imports: [
     BlockchainModule,
@@ -40,4 +47,8 @@ import {
     BullExecQueueModule,
   ],
 })
-export class VaultingModule {}
+export class VaultingModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestLoggerMiddleware).forRoutes('*');
+  }
+}

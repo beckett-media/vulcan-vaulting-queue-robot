@@ -7,10 +7,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import pinataClient, * as Pinata from '@pinata/sdk';
 
 import { serviceConfig } from './ipfs.service.config';
+import { DetailedLogger } from 'src/logger/detailed.logger';
 
 @Injectable()
 export class IPFSService {
-  private readonly logger = new Logger('IPFSService');
+  private readonly logger = new DetailedLogger('IPFSService', {
+    timestamp: true,
+  });
   pinataClient: Pinata.PinataClient;
 
   getPinataClient() {

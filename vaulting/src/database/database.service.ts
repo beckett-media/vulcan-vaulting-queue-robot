@@ -1,15 +1,18 @@
 import { Token, Vaulting } from '../database/database.entity';
 import { Repository, getManager } from 'typeorm';
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNumber } from 'class-validator';
 import { MintJobResult, TokenStatus } from '../config/enum';
 import configuration from '../config/configuration';
+import { DetailedLogger } from 'src/logger/detailed.logger';
 
 @Injectable()
 export class DatabaseService {
-  private readonly logger = new Logger('DatabaseService');
+  private readonly logger = new DetailedLogger('DatabaseService', {
+    timestamp: true,
+  });
 
   constructor(
     @InjectRepository(Token) private tokenRepo: Repository<Token>,

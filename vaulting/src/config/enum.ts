@@ -20,8 +20,7 @@ export enum BurnJobResult {
 
 export enum LockJobResult {
   JobReceived = 0,
-  HashStoreTxSend = 1,
-  TransferTxSend = 2,
+  LockTxSend = 1,
 }
 
 export enum ExecJobResult {

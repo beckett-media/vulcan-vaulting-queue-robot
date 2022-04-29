@@ -3,11 +3,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import got from 'got/dist/source';
 import { TokenStatusReadable } from 'src/config/enum';
 import { DatabaseService } from 'src/database/database.service';
+import { DetailedLogger } from 'src/logger/detailed.logger';
 import { deltaConfig } from './delta.service.config';
 
 @Injectable()
 export class DeltaService {
-  private readonly logger = new Logger('DeltaService');
+  private readonly logger = new DetailedLogger('DeltaService');
 
   constructor(private databaseService: DatabaseService) {}
 
@@ -37,7 +38,9 @@ export class DeltaService {
       const response = await got
         .put(url, { json: payload, headers: headers })
         .json();
-      this.logger.log(`update token status delta response => ${response}`);
+      this.logger.log(
+        `update token status delta response => ${JSON.stringify(response)}`,
+      );
     } catch (error) {
       this.logger.error(`update token status to Delta API error: ${error}`);
     }

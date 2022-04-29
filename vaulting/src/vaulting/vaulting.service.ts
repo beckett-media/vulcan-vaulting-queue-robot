@@ -26,10 +26,13 @@ import {
   TokenStatusReadable,
 } from '../config/enum';
 import { Token } from 'src/database/database.entity';
+import { DetailedLogger } from 'src/logger/detailed.logger';
 
 @Injectable()
 export class VaultingService {
-  private readonly logger = new Logger('VaultingServer');
+  private readonly logger = new DetailedLogger('VaultingService', {
+    timestamp: true,
+  });
 
   constructor(
     @InjectQueue(configuration()[process.env['runtime']]['queue']['mint'])
@@ -130,10 +133,16 @@ export class VaultingService {
       status = job.returnvalue['status'];
     }
 
+    var token_id: number;
     const vaulting = await this.databaseService.getVaultingById(beckett_id);
-    const token_id = vaulting.token_id;
-    var token_status = await this.getTokenStatus(collection, token_id);
+    if (vaulting == undefined) {
+      token_id = null;
+    } else {
+      token_id = vaulting.token_id;
+    }
+
     var jobFinished = false;
+    const token_status = await this.getTokenStatus(collection, token_id);
     if (job.finishedOn > 0) {
       jobFinished = true;
       await this.databaseService.updateTokenStatus(
@@ -168,7 +177,7 @@ export class VaultingService {
     const token_id = job.data['token_id'] as number;
     const beckett_id = job.data['nft_record_uid'];
 
-    this.logger.log(job.returnvalue);
+    this.logger.log(`<burnJobStatus> ${JSON.stringify(job.returnvalue)}`);
 
     var tx_hash: string;
     var error: string;
@@ -222,7 +231,7 @@ export class VaultingService {
       token_id,
     );
 
-    this.logger.log(job.returnvalue);
+    this.logger.log(JSON.stringify(job.returnvalue));
 
     var tx_hash: string;
     var error: string;
