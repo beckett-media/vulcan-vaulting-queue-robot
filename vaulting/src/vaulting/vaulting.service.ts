@@ -1,5 +1,5 @@
 import { Queue } from 'bull';
-import { Contract, utils } from 'ethers';
+import { Contract } from 'ethers';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
@@ -271,8 +271,6 @@ export class VaultingService {
     }
     const collection = job.data['collection'];
     const token_id = job.data['token_id'];
-    //const collection = '0x17e95b844f8bdb32f0bcf57542f1e5cd79a2b342';
-    //const token_id = 227;
     const nft_record_uid = await this.databaseService.getVaultingUUID(
       collection,
       token_id,

@@ -26,17 +26,16 @@ export class BlockchainService {
   nftContracts: {
     [key: string]: Contract;
   };
-  private retrievalManager: Contract;
+  retrievalManagers: {
+    [key: string]: Contract;
+  };
   private minimalForwarder: Contract;
   private relaySigner: DefenderRelaySigner;
   private relayProvider: DefenderRelayProvider;
 
   constructor() {
     // TODO: move this to its own function
-    if (
-      this.retrievalManager == undefined ||
-      this.minimalForwarder == undefined
-    ) {
+    if (this.minimalForwarder == undefined) {
       try {
         //TODO: move to burn relayer
         const relayConfig =
@@ -51,11 +50,12 @@ export class BlockchainService {
         const signer = new DefenderRelaySigner(credentials, provider, {
           speed: 'fast',
         });
+        /*
         this.retrievalManager = new ethers.Contract(
           serviceConfig.RetrievalManagerAddress,
           serviceConfig.RetrievalManagerABI,
           signer,
-        );
+        );*/
         this.minimalForwarder = new ethers.Contract(
           serviceConfig.MinimalForwarderAddress,
           serviceConfig.MinimalForwarderABI,
@@ -67,11 +67,84 @@ export class BlockchainService {
     }
   }
 
+  getRelaySigner() {
+    if (this.relaySigner == undefined || this.relayProvider == undefined) {
+      const relayConfig =
+        serviceConfig.RelayConfig[
+          configuration()[process.env['runtime']]['network_mint_relayer']
+        ];
+      const credentials = {
+        apiKey: relayConfig['apiKey'],
+        apiSecret: relayConfig['apiSecret'],
+      };
+      this.relayProvider = new DefenderRelayProvider(credentials);
+      this.relaySigner = new DefenderRelaySigner(
+        credentials,
+        this.relayProvider,
+        {
+          speed: 'fast',
+        },
+      );
+    }
+
+    return { provider: this.relayProvider, signer: this.relaySigner };
+  }
+
+  // TODO: make get contract a service
+  getContract(address: string): Contract {
+    // cache the contract obj in class variable
+    if (this.nftContracts == undefined) {
+      this.nftContracts = {};
+    }
+    // return cached contract obj if we already have it, otherwise create one
+    if (this.nftContracts[address] != undefined) {
+      return this.nftContracts[address];
+    } else {
+      try {
+        const { signer } = this.getRelaySigner();
+        this.nftContracts[address] = new ethers.Contract(
+          address,
+          serviceConfig.ERC721ABI,
+          signer,
+        );
+      } catch (error) {
+        throw new InternalServerErrorException(error.toString());
+      }
+      return this.nftContracts[address];
+    }
+  }
+
+  async getRetrievalManager(collectionAddress: string): Promise<Contract> {
+    // cache the contract obj in class variable
+    if (this.retrievalManagers == undefined) {
+      this.retrievalManagers = {};
+    }
+    // return cached contract obj if we already have it, otherwise create one
+    if (this.retrievalManagers[collectionAddress] != undefined) {
+      return this.retrievalManagers[collectionAddress];
+    } else {
+      try {
+        const nftContract = this.getContract(collectionAddress);
+        const retrievalManagerAddress = await nftContract.retrievalManager();
+        const { signer } = this.getRelaySigner();
+        this.retrievalManagers[collectionAddress] = new ethers.Contract(
+          retrievalManagerAddress,
+          serviceConfig.RetrievalManagerABI,
+          signer,
+        );
+      } catch (error) {
+        throw new InternalServerErrorException(error.toString());
+      }
+      return this.retrievalManagers[collectionAddress];
+    }
+  }
+
   async nftLocked(collection: string, id: number) {
     const nftContract = this.getContract(collection);
+    const retrievalManager = await this.getRetrievalManager(collection);
     try {
       const owner = await nftContract.ownerOf(id);
-      if (isString(owner) && owner == this.retrievalManager.address) {
+      if (isString(owner) && owner == retrievalManager.address) {
         return true;
       }
     } catch (error) {
@@ -125,13 +198,14 @@ export class BlockchainService {
   async lockToken(collection: string, token_id: number, hash: string) {
     try {
       const nftContract = this.getContract(collection);
+      const retrievalManager = await this.getRetrievalManager(collection);
       const tx_config =
         configuration()[process.env['runtime']]['blockchain']['tx_config'];
       var progress: number;
 
       // # 1: call retrieval manager's lock function
       const hashBytes32 = utils.arrayify(hash);
-      const lockTx = await this.retrievalManager.lock(token_id, hashBytes32);
+      const lockTx = await retrievalManager.lock(token_id, hashBytes32);
       progress = LockJobResult.HashStoreTxSend;
       const lockReceipt = await lockTx.wait(1);
       this.logger.log(
@@ -142,7 +216,7 @@ export class BlockchainService {
       const from = nftContract.signer.getAddress();
       const transferTx = await nftContract.transferFrom(
         from,
-        this.retrievalManager.address,
+        retrievalManager.address,
         token_id,
         tx_config,
       );
@@ -191,12 +265,13 @@ export class BlockchainService {
     }
   }
 
-  async burnToken(token_id: number) {
+  async burnToken(collection: string, token_id: number) {
     // TODO retrieval manager
     try {
+      const retrievalManager = await this.getRetrievalManager(collection);
       const tx_config =
         configuration()[process.env['runtime']]['blockchain']['tx_config'];
-      const burnTx = await this.retrievalManager.burn(token_id, tx_config);
+      const burnTx = await retrievalManager.burn(token_id, tx_config);
       this.logger.log(`burn tx: ${burnTx.hash}`);
       return {
         tx_hash: burnTx.hash,
@@ -217,52 +292,5 @@ export class BlockchainService {
     const { provider } = this.getRelaySigner();
     const receipt = await provider.getTransactionReceipt(tx_hash);
     return receipt;
-  }
-
-  getRelaySigner() {
-    if (this.relaySigner == undefined || this.relayProvider == undefined) {
-      const relayConfig =
-        serviceConfig.RelayConfig[
-          configuration()[process.env['runtime']]['network_mint_relayer']
-        ];
-      const credentials = {
-        apiKey: relayConfig['apiKey'],
-        apiSecret: relayConfig['apiSecret'],
-      };
-      this.relayProvider = new DefenderRelayProvider(credentials);
-      this.relaySigner = new DefenderRelaySigner(
-        credentials,
-        this.relayProvider,
-        {
-          speed: 'fast',
-        },
-      );
-    }
-
-    return { provider: this.relayProvider, signer: this.relaySigner };
-  }
-
-  // TODO: make get contract a service
-  getContract(address: string): Contract {
-    // cache the contract obj in class variable
-    if (this.nftContracts == undefined) {
-      this.nftContracts = {};
-    }
-    // return cached contract obj if we already have it, otherwise create one
-    if (this.nftContracts[address] != undefined) {
-      return this.nftContracts[address];
-    } else {
-      try {
-        const { signer } = this.getRelaySigner();
-        this.nftContracts[address] = new ethers.Contract(
-          address,
-          serviceConfig.ERC721ABI,
-          signer,
-        );
-      } catch (error) {
-        throw new InternalServerErrorException(error.toString());
-      }
-      return this.nftContracts[address];
-    }
   }
 }

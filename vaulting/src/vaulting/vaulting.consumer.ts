@@ -6,8 +6,8 @@ import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { BlockchainService } from '../blockchain/blockchain.service';
 import { DatabaseService } from '../database/database.service';
 import { IPFSService } from '../ipfs/ipfs.service';
-import { BurnJobResult, LockJobResult, MintJobResult } from '../config/enum';
-import { BigNumber, utils } from 'ethers';
+import { BurnJobResult, MintJobResult } from '../config/enum';
+import { BigNumber } from 'ethers';
 
 @Processor(configuration()[process.env['runtime']]['queue']['mint'])
 export class MintNFTConsumer {
@@ -139,9 +139,10 @@ export class BurnNFTConsumer {
     this.logger.log(`db result ${token_id}, ${collection}`);
     this.logger.log(`db result ${entity.token_id}, ${entity.collection}`);
 
+    // sanity check the database record match
     if (entity.token_id == token_id && entity.collection == collection) {
       progress = BurnJobResult.BeckettVerified;
-      var result = await this.blockchainService.burnToken(token_id);
+      var result = await this.blockchainService.burnToken(collection, token_id);
       if (result.status == BurnJobResult.TxSent) {
         return result;
       } else {

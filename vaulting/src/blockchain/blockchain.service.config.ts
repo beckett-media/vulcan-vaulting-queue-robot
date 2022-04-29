@@ -1,7 +1,4 @@
 export module serviceConfig {
-  export const RetrievalManagerAddress =
-    '0x49c2376F01016362e41F23170ca2DB668C7f3b34';
-
   export const MinimalForwarderAddress =
     '0x8F932dDCbAc96d7ae25053f3308FADe02936404a';
 
@@ -669,6 +666,19 @@ export module serviceConfig {
   ];
 
   export const ERC721ABI = [
+    {
+      inputs: [],
+      name: 'retrievalManager',
+      outputs: [
+        {
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
     {
       anonymous: false,
       inputs: [

@@ -76,7 +76,6 @@ export default () => ({
     min_token_id: 1000000,
     network_mint_relayer: 'mumbai',
     pinata: 'dev',
-    retrieval_manager: '0x49c2376F01016362e41F23170ca2DB668C7f3b34',
     webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET,
   },
   dev: {
@@ -102,7 +101,6 @@ export default () => ({
     min_token_id: 1,
     network_mint_relayer: 'mumbai',
     pinata: 'dev',
-    retrieval_manager: '0x49c2376F01016362e41F23170ca2DB668C7f3b34',
     webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET,
   },
 });
