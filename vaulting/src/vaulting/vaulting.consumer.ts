@@ -191,7 +191,6 @@ export class ExecConsumer {
       to: job.data['to'],
       value: BigNumber.from(job.data['value']),
       gas: BigNumber.from(job.data['gas']),
-      //gas: BigNumber.from('100000'),
       nonce: BigNumber.from(job.data['nonce']),
       data: job.data['data'],
     };

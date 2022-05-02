@@ -2,7 +2,7 @@ import {
   DefenderRelayProvider,
   DefenderRelaySigner,
 } from 'defender-relay-client/lib/ethers';
-import { Contract, ethers, utils } from 'ethers';
+import { BigNumber, Contract, ethers, utils } from 'ethers';
 import configuration from '../config/configuration';
 
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
@@ -16,6 +16,8 @@ import {
   TokenStatus,
 } from '../config/enum';
 import { DetailedLogger } from 'src/logger/detailed.logger';
+
+const executeGas = 50000;
 
 @Injectable()
 export class BlockchainService {
@@ -226,8 +228,19 @@ export class BlockchainService {
   async execute(forwardRequest, signature: Uint8Array) {
     var progress = ExecJobResult.JobReceived;
     try {
-      const tx_config =
+      // gas estimate is wrong for execute transaction
+      // add extra gas to gas limit
+      var tx_config =
         configuration()[process.env['runtime']]['blockchain']['tx_config'];
+      if (tx_config == undefined) {
+        tx_config = {};
+      }
+      const gasLimit =
+        (forwardRequest['gas'] as BigNumber).toNumber() + executeGas;
+      // if no forced gas limit is used
+      if (tx_config['gasLimit'] == undefined) {
+        tx_config['gasLimit'] = gasLimit;
+      }
       const execTx = await this.minimalForwarder.execute(
         forwardRequest,
         signature,
