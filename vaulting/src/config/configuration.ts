@@ -9,20 +9,27 @@ export default () => ({
     queue: {
       mint: 'beckett_mint_prod',
       burn: 'beckett_burn_prod',
-      lock: 'beckett_lock_dev',
+      lock: 'beckett_lock_prod',
       limiter: { max: 1, duration: 10 },
     },
     db: {
-      name: 'beckett_db_prod.sqlite',
+      name: 'beckett_prod',
       sync: false,
+      host: 'prod-beckett-vaulting-database.cluster-cgq6lc7ttzjk.us-west-1.rds.amazonaws.com',
+      port: 3306,
+      username: process.env.DB_PROD_USERNAME,
+      password: process.env.DB_PROD_PASSWORD,
     },
     blockchain: {
       tx_config: {},
     },
     min_token_id: 1,
     network_mint_relayer: 'polygon_prod_mint',
+    network_lock_relayer: 'polygon_prod_lock',
+    network_burn_relayer: 'polygon_prod_burn',
     pinata: 'prod',
-    webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET,
+    webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET_PROD,
+    check_palantir_request_auth: true,
   },
   stage: {
     api_port: 4000,
@@ -34,12 +41,16 @@ export default () => ({
     queue: {
       mint: 'beckett_mint_stage',
       burn: 'beckett_burn_stage',
-      lock: 'beckett_lock_dev',
+      lock: 'beckett_lock_stage',
       limiter: { max: 1, duration: 10 },
     },
     db: {
-      name: 'beckett_db_stage.sqlite',
+      name: 'beckett_stage',
       sync: false,
+      host: 'vaulting-api-dev-stage.cluster-cgq6lc7ttzjk.us-west-1.rds.amazonaws.com',
+      port: 3306,
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
     },
     blockchain: {
       tx_config: {},
@@ -48,6 +59,7 @@ export default () => ({
     network_mint_relayer: 'polygon_stage',
     pinata: 'stage',
     webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET,
+    check_palantir_request_auth: false,
   },
   awsdev: {
     api_port: 3000,
@@ -77,6 +89,7 @@ export default () => ({
     network_mint_relayer: 'mumbai',
     pinata: 'dev',
     webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET,
+    check_palantir_request_auth: false,
   },
   dev: {
     api_port: 3000,
@@ -102,5 +115,6 @@ export default () => ({
     network_mint_relayer: 'mumbai',
     pinata: 'dev',
     webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET,
+    check_palantir_request_auth: false,
   },
 });

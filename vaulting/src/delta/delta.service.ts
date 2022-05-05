@@ -17,7 +17,7 @@ export class DeltaService {
     token_id: number,
     status: number,
   ) {
-    const url = deltaConfig.updateTokenStatusURL;
+    const url = deltaConfig.updateTokenStatusURL[process.env.runtime];
     const headers = deltaConfig.updateTokenStatusHeaders;
     const nft_record_uid = await this.databaseService.getVaultingUUID(
       collection,

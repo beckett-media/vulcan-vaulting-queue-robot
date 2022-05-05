@@ -51,12 +51,6 @@ export class BlockchainService {
         const signer = new DefenderRelaySigner(credentials, provider, {
           speed: 'fast',
         });
-        /*
-        this.retrievalManager = new ethers.Contract(
-          serviceConfig.RetrievalManagerAddress,
-          serviceConfig.RetrievalManagerABI,
-          signer,
-        );*/
         this.minimalForwarder = new ethers.Contract(
           serviceConfig.MinimalForwarderAddress,
           serviceConfig.MinimalForwarderABI,

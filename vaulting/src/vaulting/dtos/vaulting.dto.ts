@@ -52,6 +52,10 @@ export class MintRequest {
   @ApiProperty()
   @IsString()
   animation: string;
+
+  @IsString()
+  @IsOptional()
+  auth: string;
 }
 
 export class BurnRequest {
@@ -68,6 +72,10 @@ export class BurnRequest {
   @IsString()
   @MinLength(1)
   nft_record_uid: string;
+
+  @IsString()
+  @IsOptional()
+  auth: string;
 }
 
 export class MintJobStatus {
@@ -218,6 +226,10 @@ export class LockRequest {
   @IsString()
   @MinLength(64)
   hash: string;
+
+  @IsString()
+  @IsOptional()
+  auth: string;
 }
 
 export class JobSubmitResponse {

@@ -11,21 +11,23 @@ export module serviceConfig {
     },
     polygon_stage: {
       address: '0xb9e2ce59feb1848db71fc31304db613a9fe1bbf9',
-      apiKey: '4Uh4cNDbnKXuYJj8x5EwKTmhkTCTLceC',
-      apiSecret:
-        '5MXGfZ6whBhmapGMdAADgy1JxNVxf17exUW6MZhdJKCqoBxNFJSZkotzPkwVUtQe',
+      apiKey: process.env.BECKETT_RELAYER_STAGE_API_KEY,
+      apiSecret: process.env.ECKETT_RELAYER_STAGE_API_SECRET,
     },
     polygon_prod_mint: {
       address: '0xe000e4235975851085c0cd48fe1b207bd06b1c27',
-      apiKey: '4WjB9XmKoycqiSukibvNLB3oMWpKWiZb',
-      apiSecret:
-        '5GFQpKQauve3mZmtgdqAUfP7ieYLi344eb9WR5T1tyyhmNuVjXzRwm4Lv31j1DW7',
+      apiKey: process.env.BECKETT_RELAYER_PROD_MINT_API_KEY,
+      apiSecret: process.env.BECKETT_RELAYER_PROD_MINT_API_SECRET,
+    },
+    polygon_prod_lock: {
+      address: '0x1ef86a41cc4b18241bea02403eef5bd37f7be34e',
+      apiKey: process.env.BECKETT_RELAYER_PROD_LOCK_API_KEY,
+      apiSecret: process.env.BECKETT_RELAYER_PROD_LOCK_API_SECRET,
     },
     polygon_prod_burn: {
       address: '0xc125a594974308f952b56948d2871318c49ab796',
-      apiKey: 'GHWUDgodCAbUtxAAkjG2fG7L92kARHhq',
-      apiSecret:
-        '3GAexMRSLVK89hECZrMNu43dnjfbdnbBM1FDQwjKKg3rKQsgsHPHoNraou8inCUH',
+      apiKey: process.env.BECKETT_RELAYER_PROD_BURN_API_KEY,
+      apiSecret: process.env.BECKETT_RELAYER_PROD_BURN_API_SECRET,
     },
   };
 

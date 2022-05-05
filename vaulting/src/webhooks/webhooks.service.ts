@@ -71,6 +71,19 @@ export class WebhooksService {
         reason['params'],
       )}`,
     );
+
+    const tokenId = Number(reason['params']['tokenId']);
+    await this.databaseService.updateTokenStatus(
+      collection,
+      tokenId,
+      TokenStatus.Locked,
+    );
+    // foward to delta API & palantir
+    await this.deltaService.updateTokenStatus(
+      collection,
+      tokenId,
+      TokenStatus.Locked,
+    );
   }
 
   verifyHash(hash: string, request: any) {

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -13,6 +14,7 @@ import {
   ApiProduces,
   ApiResponse,
 } from '@nestjs/swagger';
+import configuration from 'src/config/configuration';
 import {
   BurnJobResult,
   BurnJobResultReadable,
@@ -39,6 +41,17 @@ import { VaultingService } from './vaulting.service';
 
 function InProd() {
   return 'prod' == process.env.runtime;
+}
+
+function check_auth(request: any) {
+  const should_check_auth =
+    configuration()[process.env['runtime']]['check_palantir_request_auth'];
+  const auth = configuration()[process.env['runtime']]['palantir_request_auth'];
+  if (should_check_auth) {
+    return request.auth == auth;
+  } else {
+    return true;
+  }
 }
 
 @Controller('vaulting')
@@ -87,6 +100,9 @@ export class VaultingController {
   })
   @ApiProduces('application/json')
   async mintNFT(@Body() body: MintRequest): Promise<JobSubmitResponse> {
+    if (!check_auth(body)) {
+      throw new BadRequestException('Auth fields missing');
+    }
     const job = await this.VaultingService.mintNFT(body);
     return new JobSubmitResponse({
       job_id: Number(job.id),
@@ -133,6 +149,9 @@ export class VaultingController {
   })
   @ApiProduces('application/json')
   async burnNFT(@Body() body: BurnRequest): Promise<JobSubmitResponse> {
+    if (!check_auth(body)) {
+      throw new BadRequestException('Auth fields missing');
+    }
     const job = await this.VaultingService.burnNFT(body);
     return new JobSubmitResponse({
       job_id: Number(job.id),

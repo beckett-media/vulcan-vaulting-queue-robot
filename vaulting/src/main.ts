@@ -1,7 +1,6 @@
 import * as bodyParser from 'body-parser';
 import express from 'express';
 import http from 'http';
-import { readFileSync } from 'fs';
 
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -11,6 +10,7 @@ import configuration from './config/configuration';
 import { VaultingModule } from './vaulting/vaulting.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { WebhooksModule } from './webhooks/webhooks.module';
+import { check_env } from './util/env';
 
 function setupApp(app: INestApplication) {
   // increase body size
@@ -27,7 +27,7 @@ function setupApp(app: INestApplication) {
   const docConfig = new DocumentBuilder()
     .setTitle('Vaulting API')
     .setDescription('The Vaulting API documents')
-    .setVersion('0.1')
+    .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, docConfig);
   SwaggerModule.setup('api', app, document);
@@ -35,6 +35,11 @@ function setupApp(app: INestApplication) {
 
 async function bootstrap() {
   const config = configuration()[process.env['runtime']];
+  if (!check_env()) {
+    throw new Error(
+      'Missing env variables in prod. See check_env() for details',
+    );
+  }
 
   // create and setup vaulting server
   const vaultingServer = express();
