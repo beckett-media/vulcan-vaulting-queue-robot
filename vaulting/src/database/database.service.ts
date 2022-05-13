@@ -71,7 +71,7 @@ export class DatabaseService {
         const token = this.tokenRepo.create({
           collection: collection,
           id: token_id,
-          status: TokenStatus.NotMinted,
+          status: TokenStatus.Minting,
         });
         this.tokenRepo.save(token);
         progress = MintJobResult.TokenStatusSaved;

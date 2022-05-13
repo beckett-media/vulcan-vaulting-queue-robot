@@ -9,7 +9,7 @@ Content-Type: application/json
 {
   "collection": "0x17E95B844F8BDb32f0bcf57542F1E5CD79A2B342",
   "owner": "0x18003c4f9eeae987b3899fe5136c85305e0e6749",
-  "nft_record_uid": "WYF25010",
+  "nft_record_uid": "00000001-7e3a-4623-a496-0117f324a521",
   "name": "fake BAYC",
   "description": "fake bayc desc",
   "image_format": "png",

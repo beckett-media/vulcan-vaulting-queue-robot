@@ -89,25 +89,60 @@ export class VaultingService {
     );
     this.logger.log(`token status: ${token_status_db}, ${token_status_bc}`);
 
-    // final token status, no change
-    if (token_status_db == TokenStatus.Burned) {
-      return TokenStatus.Burned;
-    }
-
-    // if we can't find the token on blockchan but db record exists, then it's burned
-    if (
-      token_status_bc == TokenStatus.NotMinted &&
-      (token_status_db == TokenStatus.Minted ||
-        token_status_db == TokenStatus.Locked)
-    ) {
-      return TokenStatus.Burned;
-    }
-
-    if (token_status_db != TokenStatus.NotMinted) {
-      return token_status_bc;
-    } else {
-      // otherwise, token entity does not exist, it is not minted
-      return TokenStatus.NotMinted;
+    // a finite-state machine with 5 status: not-minted, minting, minted, locked, burned
+    switch (token_status_db) {
+      case TokenStatus.NotMinted:
+        if (
+          token_status_bc == TokenStatus.Minted ||
+          token_status_bc == TokenStatus.Locked
+        ) {
+          return token_status_bc;
+        } else {
+          return TokenStatus.NotMinted;
+        }
+      case TokenStatus.Minting:
+        if (
+          token_status_bc == TokenStatus.Minted ||
+          token_status_bc == TokenStatus.Locked
+        ) {
+          return token_status_bc;
+        } else {
+          // if we can not find token on chain, then it is still being minted
+          return TokenStatus.Minting;
+        }
+      case TokenStatus.Minted:
+        if (
+          token_status_bc == TokenStatus.Minted ||
+          token_status_bc == TokenStatus.Locked
+        ) {
+          return token_status_bc;
+        } else {
+          // if we can not find token on chain, but it is already marked as minted
+          //  then it is burned
+          return TokenStatus.Burned;
+        }
+      case TokenStatus.Locked:
+        if (
+          token_status_bc == TokenStatus.Minted ||
+          token_status_bc == TokenStatus.Locked
+        ) {
+          // on-chain status should not be minted again if db status is locked
+          // but we will take the on-chain status as the source of truth
+          return token_status_bc;
+        } else {
+          return TokenStatus.Burned;
+        }
+      case TokenStatus.Burned:
+        if (
+          token_status_bc == TokenStatus.Minted ||
+          token_status_bc == TokenStatus.Locked
+        ) {
+          // on-chain status should not be minted or locked again if db status is burned
+          // but we will take the on-chain status as the source of truth
+          return token_status_bc;
+        } else {
+          return TokenStatus.Burned;
+        }
     }
   }
 

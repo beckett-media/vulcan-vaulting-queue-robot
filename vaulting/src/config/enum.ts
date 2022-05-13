@@ -64,6 +64,7 @@ export const TokenStatusReadable = {
   1: 'Minted',
   2: 'Burned',
   3: 'Locked',
+  4: 'Minting',
 };
 
 export enum TokenStatus {
@@ -71,4 +72,5 @@ export enum TokenStatus {
   Minted = 1,
   Burned = 2,
   Locked = 3,
+  Minting = 4,
 }

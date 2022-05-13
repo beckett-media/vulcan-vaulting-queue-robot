@@ -159,6 +159,7 @@ export class BlockchainService {
     }
   }
 
+  // on-chain token status only has 3 values: not minted, minted, locked
   async getTokenStatus(collection: string, token_id: number) {
     const isNFTMinted = await this.nftMinted(collection, token_id);
     if (isNFTMinted) {
