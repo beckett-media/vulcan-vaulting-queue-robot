@@ -87,7 +87,9 @@ export class VaultingService {
       collection,
       token_id,
     );
-    this.logger.log(`token status: ${token_status_db}, ${token_status_bc}`);
+    this.logger.log(
+      `token status: ${collection}, ${token_id}, db: ${token_status_db}, blockchain: ${token_status_bc}`,
+    );
 
     // a finite-state machine with 5 status: not-minted, minting, minted, locked, burned
     switch (token_status_db) {
@@ -171,12 +173,17 @@ export class VaultingService {
     var token_id: number;
     const vaulting = await this.databaseService.getVaultingById(beckett_id);
     if (vaulting == undefined) {
-      token_id = null;
+      throw new NotFoundException(
+        `vaulting/token record can not be found for ${beckett_id}`,
+      );
     } else {
       token_id = vaulting.token_id;
     }
 
     var jobFinished = false;
+    this.logger.log(
+      `vaulting: ${vaulting.beckett_id}, ${vaulting.collection}, ${vaulting.token_id}`,
+    );
     const token_status = await this.getTokenStatus(collection, token_id);
     if (job.finishedOn > 0) {
       jobFinished = true;

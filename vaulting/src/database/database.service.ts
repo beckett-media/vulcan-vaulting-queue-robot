@@ -1,7 +1,7 @@
 import { Token, Vaulting } from '../database/database.entity';
 import { Repository, getManager } from 'typeorm';
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNumber } from 'class-validator';
 import { MintJobResult, TokenStatus } from '../config/enum';
@@ -64,7 +64,7 @@ export class DatabaseService {
           collection,
           token_id,
         });
-        await this.vaultingRepo.save(vaulting);
+        const vaultingSaved = await this.vaultingRepo.save(vaulting);
         progress = MintJobResult.VaultingSaved;
 
         // step 3: save the token id used
@@ -73,7 +73,10 @@ export class DatabaseService {
           id: token_id,
           status: TokenStatus.Minting,
         });
-        this.tokenRepo.save(token);
+        const tokenSaved = await this.tokenRepo.save(token);
+        this.logger.log(
+          `db vaulting/token saved: ${vaultingSaved.beckett_id} ${tokenSaved.collection}, ${tokenSaved.id}, ${tokenSaved.status}`,
+        );
         progress = MintJobResult.TokenStatusSaved;
       },
     );
@@ -99,15 +102,19 @@ export class DatabaseService {
   }
 
   async getTokenStatus(collection: string, token_id: number) {
+    this.logger.log(`get token status: ${collection}, ${token_id}`);
     const token = await this.tokenRepo
       .createQueryBuilder('token')
-      .where('token.collection = :collection AND token.id = id ', {
+      .where('token.collection = :collection AND token.id = :id ', {
         collection: collection,
         id: token_id,
       })
       .getOne();
     // by default, return not minted
     if (token) {
+      if (token.id != token_id || token.collection != collection) {
+        throw new InternalServerErrorException('token db record mismatches');
+      }
       return token.status;
     } else {
       return TokenStatus.NotMinted;

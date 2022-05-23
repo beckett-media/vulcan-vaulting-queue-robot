@@ -24,8 +24,10 @@ export class WebhooksService {
   ) {}
 
   async handleMintEvent(collection: string, tokenId: number, reason: any) {
-    this.logger.log(`Event safeMint: ${collection}, ${tokenId}`);
     const minted = await this.blockchainService.nftMinted(collection, tokenId);
+    this.logger.log(
+      `Event safeMint: ${collection}, ${tokenId}, minted: ${minted}`,
+    );
     if (minted) {
       // update local database
       await this.databaseService.updateTokenStatus(
