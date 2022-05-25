@@ -7,7 +7,7 @@ import { BlockchainService } from 'src/blockchain/blockchain.service';
 import configuration from 'src/config/configuration';
 import { TokenStatus } from 'src/config/enum';
 import { DatabaseService } from 'src/database/database.service';
-import { createHash } from 'crypto';
+import { createHash, createHmac } from 'crypto';
 import { DeltaService } from 'src/delta/delta.service';
 import { DetailedLogger } from 'src/logger/detailed.logger';
 
@@ -92,12 +92,11 @@ export class WebhooksService {
     const env = process.env['runtime'];
     const config = configuration()[env];
     const webhookSharedSecret = config['webhook_shared_secret'];
-    const toHash = JSON.stringify({
-      secret: webhookSharedSecret,
-      request: request,
-    });
+    const toHash = JSON.stringify(request);
     this.logger.log(toHash);
-    const localHash = createHash('sha256').update(toHash).digest('hex');
+    const localHash = createHmac('sha256', webhookSharedSecret)
+      .update(toHash)
+      .digest('hex');
     this.logger.log(hash, localHash);
     if (hash === localHash) {
       return true;
