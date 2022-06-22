@@ -1,0 +1,148 @@
+import { Item, Submission, Token, Vaulting } from '../database/database.entity';
+import { Repository, getManager, In } from 'typeorm';
+
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { isNumber } from 'class-validator';
+import configuration from '../config/configuration';
+import { DetailedLogger } from 'src/logger/detailed.logger';
+import {
+  SubmissionDetails,
+  SubmissionRequest,
+} from 'src/marketplace/dtos/marketplace.dto';
+import { SubmissionStatus, SubmissionStatusReadable } from 'src/config/enum';
+
+@Injectable()
+export class DatabaseService {
+  private readonly logger = new DetailedLogger('DatabaseService', {
+    timestamp: true,
+  });
+
+  constructor(
+    @InjectRepository(Submission)
+    private submissionRepo: Repository<Submission>,
+    @InjectRepository(Item) private itemRepo: Repository<Item>,
+  ) {}
+
+  async createNewSubmission(submission: SubmissionRequest) {
+    var submission_id: number;
+    var item_id: number;
+    var status: number;
+    try {
+      await getManager().transaction(
+        'SERIALIZABLE',
+        async (transactionalEntityManager) => {
+          const newItem = this.itemRepo.create({
+            grading_company: submission.grading_company,
+            serial_number: submission.serial_number,
+            title: submission.title,
+            description: submission.description,
+            genre: submission.genre,
+            manufacturer: submission.manufacturer,
+            year: submission.year,
+            overall_grade: submission.overall_grade,
+            sub_grades: submission.sub_grades,
+            autograph: submission.autograph,
+            subject: submission.subject,
+            image: submission.image,
+          });
+          const itemSaved = await this.itemRepo.save(newItem);
+          item_id = itemSaved.id;
+          const newSubmission = this.submissionRepo.create({
+            user_id: submission.user_id,
+            item_id: itemSaved.id,
+            status: 1,
+            created_at: Math.round(Date.now() / 1000),
+            received_at: 0,
+            minted_at: 0,
+          });
+          const submissionSaved = await this.submissionRepo.save(newSubmission);
+          submission_id = submissionSaved.id;
+        },
+      );
+    } catch (error) {
+      status = SubmissionStatus.Failed;
+    }
+    status = SubmissionStatus.Submited;
+
+    return {
+      submission_id: submission_id,
+      item_id: item_id,
+      status: status,
+    };
+  }
+
+  async listSubmissions(
+    user_id: number,
+    start_at: number,
+    limit: number,
+  ): Promise<SubmissionDetails[]> {
+    const submissions = await this.submissionRepo.find({
+      where: { user_id: user_id },
+    });
+    console.log(user_id, submissions.length);
+    // get all item ids from submissions
+    const item_ids = submissions.map((submission) => submission.item_id);
+    // get all items from item_ids
+    const items = await this.itemRepo.find({
+      where: { id: In(item_ids) },
+    });
+    // build a map of item_id to item
+    const itemMap = new Map<number, Item>();
+    items.forEach((item) => {
+      itemMap.set(item.id, item);
+    });
+    var submissionDetails: SubmissionDetails[] = [];
+    submissions.forEach((submission) => {
+      const item = itemMap.get(submission.item_id);
+      submissionDetails.push(
+        new SubmissionDetails({
+          submission_id: submission.id,
+          user_id: submission.user_id,
+          grading_company: item.grading_company,
+          serial_number: item.serial_number,
+          title: item.title,
+          description: item.description,
+          genre: item.genre,
+          manufacturer: item.manufacturer,
+          year: item.year,
+          overall_grade: item.overall_grade,
+          sub_grades: item.sub_grades,
+          autograph: item.autograph,
+          subject: item.subject,
+          image: item.image,
+          status: submission.status,
+          status_desc: SubmissionStatusReadable[submission.status],
+          created_at: submission.created_at,
+          received_at: submission.received_at,
+          minted_at: submission.minted_at,
+        }),
+      );
+    });
+
+    return submissionDetails;
+  }
+
+  async getSubmission(submission_id: number): Promise<Submission> {
+    const submission = await this.submissionRepo.findOne(submission_id);
+    return submission;
+  }
+
+  async updateSubmission(submission_id: number, status: number) {
+    const submission = await this.submissionRepo.findOne(submission_id);
+    submission.status = status;
+    if (status === SubmissionStatus.Received) {
+      submission.received_at = Math.round(Date.now() / 1000);
+    }
+    if (status === SubmissionStatus.Minted) {
+      submission.minted_at = Math.round(Date.now() / 1000);
+    }
+    await this.submissionRepo.save(submission);
+    return submission;
+  }
+
+  async getItem(item_id: number): Promise<Item> {
+    const item = await this.itemRepo.findOne(item_id);
+    return item;
+  }
+}
