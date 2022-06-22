@@ -1,13 +1,15 @@
 export enum SubmissionStatus {
   Failed = 0,
-  Submited = 1,
+  Submitted = 1,
   Received = 2,
-  Minted = 3,
+  Rejected = 3,
+  Minted = 4,
 }
 
 export const SubmissionStatusReadable = {
   0: 'Failed',
-  1: 'Submited',
+  1: 'Submitted',
   2: 'Received',
-  3: 'Minted',
+  3: 'Rejected',
+  4: 'Minted',
 };

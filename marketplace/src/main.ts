@@ -23,8 +23,8 @@ function setupApp(app: INestApplication) {
 
   // swagger documents
   const docConfig = new DocumentBuilder()
-    .setTitle('Vaulting API')
-    .setDescription('The Vaulting API documents')
+    .setTitle('Marketplace API')
+    .setDescription('The Marketplace API documents')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, docConfig);
@@ -33,14 +33,14 @@ function setupApp(app: INestApplication) {
 
 async function bootstrap() {
   const config = configuration()[process.env['runtime']];
-  // create and setup vaulting server
-  const vaultingServer = express();
-  const vaultingApp = await NestFactory.create(
+  // create and setup marketplace server
+  const marketplaceServer = express();
+  const marketplaceApp = await NestFactory.create(
     MarketplaceModule,
-    new ExpressAdapter(vaultingServer),
+    new ExpressAdapter(marketplaceServer),
   );
-  setupApp(vaultingApp);
-  await vaultingApp.init();
-  http.createServer(vaultingServer).listen(config['api_port'], '0.0.0.0');
+  setupApp(marketplaceApp);
+  await marketplaceApp.init();
+  http.createServer(marketplaceServer).listen(config['api_port'], '0.0.0.0');
 }
 bootstrap();

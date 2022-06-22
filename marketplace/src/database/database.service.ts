@@ -63,7 +63,7 @@ export class DatabaseService {
     } catch (error) {
       status = SubmissionStatus.Failed;
     }
-    status = SubmissionStatus.Submited;
+    status = SubmissionStatus.Submitted;
 
     return {
       submission_id: submission_id,
@@ -74,12 +74,25 @@ export class DatabaseService {
 
   async listSubmissions(
     user_id: number,
-    start_at: number,
+    status: number,
+    offset: number,
     limit: number,
   ): Promise<SubmissionDetails[]> {
-    const submissions = await this.submissionRepo.find({
-      where: { user_id: user_id },
-    });
+    var where_filter = { user_id: user_id };
+    if (status !== undefined) {
+      where_filter['status'] = status;
+    }
+    if (offset == undefined) {
+      offset = 0;
+    }
+    var filter = {
+      where: where_filter,
+      skip: offset,
+    };
+    if (limit != undefined) {
+      filter['take'] = limit;
+    }
+    const submissions = await this.submissionRepo.find(filter);
     console.log(user_id, submissions.length);
     // get all item ids from submissions
     const item_ids = submissions.map((submission) => submission.item_id);

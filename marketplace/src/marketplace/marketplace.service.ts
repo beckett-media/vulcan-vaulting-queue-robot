@@ -10,7 +10,7 @@ import {
 
 @Injectable()
 export class MarketplaceService {
-  private readonly logger = new DetailedLogger('VaultingService', {
+  private readonly logger = new DetailedLogger('MarketplaceService', {
     timestamp: true,
   });
 
@@ -29,12 +29,14 @@ export class MarketplaceService {
 
   async listSubmissions(
     user_id: number,
-    start_at: number,
+    status: number,
+    offset: number,
     limit: number,
   ): Promise<SubmissionDetails[]> {
     const submissionDetails = await this.databaseService.listSubmissions(
       user_id,
-      start_at,
+      status,
+      offset,
       limit,
     );
     return submissionDetails;

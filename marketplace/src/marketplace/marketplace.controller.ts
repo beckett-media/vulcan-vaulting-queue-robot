@@ -13,7 +13,9 @@ import {
 import {
   ApiExcludeEndpoint,
   ApiOperation,
+  ApiParam,
   ApiProduces,
+  ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
 import configuration from 'src/config/configuration';
@@ -47,6 +49,9 @@ export class MarketplaceController {
   constructor(public MarketplaceService: MarketplaceService) {}
 
   @Get('/health')
+  @ApiOperation({
+    summary: 'LB health check',
+  })
   health() {
     return;
   }
@@ -57,11 +62,12 @@ export class MarketplaceController {
   })
   @ApiResponse({
     status: 200,
-    description: '',
+    description: 'Submission retrived',
+    type: SubmissionDetails,
   })
   @ApiResponse({
     status: 404,
-    description: '',
+    description: 'Submission not found',
   })
   @ApiProduces('application/json')
   async getSubmission(
@@ -75,15 +81,16 @@ export class MarketplaceController {
 
   @Put('/submission/:submission_id')
   @ApiOperation({
-    summary: 'Get submission by id',
+    summary: 'Update submission status by id (mainly used by admin)',
   })
   @ApiResponse({
     status: 200,
-    description: '',
+    description: 'Submission status updated',
+    type: SubmissionDetails,
   })
   @ApiResponse({
     status: 404,
-    description: '',
+    description: 'Submission not found',
   })
   @ApiProduces('application/json')
   async updateSubmission(
@@ -99,11 +106,30 @@ export class MarketplaceController {
 
   @Get('/submission')
   @ApiOperation({
-    summary: 'Get a list of submissions for user',
+    summary: 'Get a list of submissions from the user',
+  })
+  @ApiQuery({
+    name: 'status',
+    type: String,
+    description: 'Status of the submission',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'offset',
+    type: String,
+    description: 'offset for the query',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'limit',
+    type: String,
+    description: 'limit for the query',
+    required: false,
   })
   @ApiResponse({
-    status: 201,
+    status: 200,
     description: "Returns a list of user's submissions",
+    type: SubmissionDetails,
   })
   @ApiResponse({
     status: 500,
@@ -112,12 +138,15 @@ export class MarketplaceController {
   @ApiProduces('application/json')
   async listSubmissions(
     @Query('user_id') user_id: number,
-    @Query('start_at') start_at: number,
+    @Query('status') status: number,
+    @Query('offset') offset: number,
     @Query('limit') limit: number,
   ): Promise<SubmissionDetails[]> {
+    console.log(user_id, status, offset, limit);
     const result = await this.MarketplaceService.listSubmissions(
       user_id,
-      start_at,
+      status,
+      offset,
       limit,
     );
     return result;
@@ -130,10 +159,11 @@ export class MarketplaceController {
   @ApiResponse({
     status: 201,
     description: 'The item has been successfully submited.',
+    type: SubmissionResponse,
   })
   @ApiResponse({
     status: 500,
-    description: 'Submission of the item is failed',
+    description: 'Submission of the item failed',
   })
   @ApiProduces('application/json')
   async submitItem(
