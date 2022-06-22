@@ -28,6 +28,8 @@ export class DatabaseService {
     var submission_id: number;
     var item_id: number;
     var status: number;
+    var defaultImage =
+      'https://beckett-marketplace-dev.s3.us-west-1.amazonaws.com/baseball-cards-gettyimages-161023632.jpg';
     try {
       await getManager().transaction(
         'SERIALIZABLE',
@@ -44,7 +46,7 @@ export class DatabaseService {
             sub_grades: submission.sub_grades,
             autograph: submission.autograph,
             subject: submission.subject,
-            image: submission.image,
+            image: defaultImage,
           });
           const itemSaved = await this.itemRepo.save(newItem);
           item_id = itemSaved.id;

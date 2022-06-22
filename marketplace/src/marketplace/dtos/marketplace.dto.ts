@@ -69,7 +69,12 @@ export class SubmissionRequest {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  image: string;
+  image_base64: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  image_format: string;
 
   constructor(partial: Partial<SubmissionRequest>) {
     Object.assign(this, partial);
