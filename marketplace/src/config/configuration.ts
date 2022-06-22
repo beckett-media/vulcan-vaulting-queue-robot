@@ -92,8 +92,8 @@ export default () => ({
     check_palantir_request_auth: false,
   },
   dev: {
-    api_port: 3000,
-    webhook_port: 3001,
+    api_port: 3300,
+    webhook_port: 3301,
     redis: {
       host: 'localhost',
       port: 6379,
