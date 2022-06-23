@@ -2,6 +2,9 @@ export default () => ({
   prod: {
     api_port: 5000,
     webhook_port: 5001,
+    aws: {
+      AWS_PUBLIC_BUCKET_NAME: 'beckett-marketplace-dev',
+    },
     redis: {
       host: 'localhost',
       port: 6379,
@@ -34,6 +37,9 @@ export default () => ({
   stage: {
     api_port: 4000,
     webhook_port: 4001,
+    aws: {
+      AWS_PUBLIC_BUCKET_NAME: 'beckett-marketplace-dev',
+    },
     redis: {
       host: 'localhost',
       port: 6379,
@@ -64,6 +70,9 @@ export default () => ({
   awsdev: {
     api_port: 3000,
     webhook_port: 3001,
+    aws: {
+      AWS_PUBLIC_BUCKET_NAME: 'beckett-marketplace-dev',
+    },
     redis: {
       host: 'localhost',
       port: 6379,
@@ -94,6 +103,12 @@ export default () => ({
   dev: {
     api_port: 3300,
     webhook_port: 3301,
+    aws: {
+      AWS_PUBLIC_BUCKET_NAME: 'beckett-marketplace-dev',
+      AWS_ACCESS_KEY_ID: process.env.MARKETPLACE_AWS_ACCESS_KEY_ID,
+      AWS_SECRET_ACCESS_KEY: process.env.MARKETPLACE_AWS_SECRET_ACCESS_KEY,
+      AWS_DEFAULT_REGION: 'us-west-1',
+    },
     redis: {
       host: 'localhost',
       port: 6379,

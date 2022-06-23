@@ -24,7 +24,7 @@ export class DatabaseService {
     @InjectRepository(Item) private itemRepo: Repository<Item>,
   ) {}
 
-  async createNewSubmission(submission: SubmissionRequest) {
+  async createNewSubmission(submission: SubmissionRequest, s3URL: string) {
     var submission_id: number;
     var item_id: number;
     var status: number;
@@ -46,7 +46,7 @@ export class DatabaseService {
             sub_grades: submission.sub_grades,
             autograph: submission.autograph,
             subject: submission.subject,
-            image: defaultImage,
+            image: s3URL || defaultImage,
           });
           const itemSaved = await this.itemRepo.save(newItem);
           item_id = itemSaved.id;

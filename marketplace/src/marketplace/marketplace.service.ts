@@ -1,4 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { AwsService } from 'src/aws/aws.service';
 import { SubmissionStatusReadable } from 'src/config/enum';
 import { DatabaseService } from 'src/database/database.service';
 import { DetailedLogger } from 'src/logger/detailed.logger';
@@ -14,10 +15,26 @@ export class MarketplaceService {
     timestamp: true,
   });
 
-  constructor(private databaseService: DatabaseService) {}
+  constructor(
+    private databaseService: DatabaseService,
+    private awsService: AwsService,
+  ) {}
 
   async submitItem(request: SubmissionRequest): Promise<SubmissionResponse> {
-    const result = await this.databaseService.createNewSubmission(request);
+    // convert request.image_base64 to buffer
+    const image_buffer = Buffer.from(request.image_base64, 'base64');
+    const s3URL = await this.awsService.uploadItemImage(
+      image_buffer,
+      'submission',
+      request.image_format,
+    );
+    if (!s3URL) {
+      throw new InternalServerErrorException('Image upload failed');
+    }
+    const result = await this.databaseService.createNewSubmission(
+      request,
+      s3URL,
+    );
     return new SubmissionResponse({
       user_id: request.user_id,
       submission_id: result.submission_id,
