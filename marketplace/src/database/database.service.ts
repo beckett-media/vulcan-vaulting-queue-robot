@@ -1,7 +1,11 @@
-import { Item, Submission, Token, Vaulting } from '../database/database.entity';
+import { Item, Submission, Vaulting } from '../database/database.entity';
 import { Repository, getManager, In } from 'typeorm';
 
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNumber } from 'class-validator';
 import configuration from '../config/configuration';
@@ -22,6 +26,7 @@ export class DatabaseService {
     @InjectRepository(Submission)
     private submissionRepo: Repository<Submission>,
     @InjectRepository(Item) private itemRepo: Repository<Item>,
+    @InjectRepository(Vaulting) private vaultingRepo: Repository<Vaulting>,
   ) {}
 
   async createNewSubmission(submission: SubmissionRequest, s3URL: string) {
@@ -46,7 +51,8 @@ export class DatabaseService {
             sub_grades: submission.sub_grades,
             autograph: submission.autograph,
             subject: submission.subject,
-            image: s3URL || defaultImage,
+            submission_image: s3URL || defaultImage,
+            token_image: '',
           });
           const itemSaved = await this.itemRepo.save(newItem);
           item_id = itemSaved.id;
@@ -64,6 +70,7 @@ export class DatabaseService {
       );
     } catch (error) {
       status = SubmissionStatus.Failed;
+      this.logger.error(error);
     }
     status = SubmissionStatus.Submitted;
 
@@ -125,7 +132,7 @@ export class DatabaseService {
           sub_grades: item.sub_grades,
           autograph: item.autograph,
           subject: item.subject,
-          image: item.image,
+          image: item.submission_image,
           status: submission.status,
           status_desc: SubmissionStatusReadable[submission.status],
           created_at: submission.created_at,
@@ -140,6 +147,10 @@ export class DatabaseService {
 
   async getSubmission(submission_id: number): Promise<Submission> {
     const submission = await this.submissionRepo.findOne(submission_id);
+    // if we can not find submission, throw not found error
+    if (!submission) {
+      throw new NotFoundException('Submission not found');
+    }
     return submission;
   }
 
@@ -156,8 +167,78 @@ export class DatabaseService {
     return submission;
   }
 
+  // list items by item ids
+  async listItems(item_ids: number[]): Promise<Item[]> {
+    const items = await this.itemRepo.find({
+      where: { id: In(item_ids) },
+    });
+    return items;
+  }
+
   async getItem(item_id: number): Promise<Item> {
     const item = await this.itemRepo.findOne(item_id);
+    if (!item) {
+      throw new NotFoundException('Item not found');
+    }
     return item;
+  }
+
+  // create new vaulting item
+  async createNewVaulting(
+    user_id: number,
+    submission_id: number,
+    item_id: number,
+    collection: string,
+    token_id: number,
+  ): Promise<Vaulting> {
+    var vaulting: Vaulting;
+    try {
+      await getManager().transaction(
+        'SERIALIZABLE',
+        async (transactionalEntityManager) => {
+          const newVaulting = this.vaultingRepo.create({
+            user_id: user_id,
+            submission_id: submission_id,
+            item_id: item_id,
+            collection: collection,
+            token_id: token_id,
+          });
+          vaulting = await this.vaultingRepo.save(newVaulting);
+        },
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error);
+    }
+    return vaulting;
+  }
+
+  // list vaulting items by user id
+  async listVaultings(
+    user_id: number,
+    offset: number,
+    limit: number,
+  ): Promise<Vaulting[]> {
+    var where_filter = { user_id: user_id };
+    if (offset == undefined) {
+      offset = 0;
+    }
+    var filter = {
+      where: where_filter,
+      skip: offset,
+    };
+    if (limit != undefined) {
+      filter['take'] = limit;
+    }
+    const vaultings = await this.vaultingRepo.find(filter);
+    return vaultings;
+  }
+
+  async getVaulting(vaulting_id: number): Promise<Vaulting> {
+    const vaulting = await this.vaultingRepo.findOne(vaulting_id);
+    if (!vaulting) {
+      throw new NotFoundException('Vaulting not found');
+    }
+    return vaulting;
   }
 }

@@ -3,10 +3,14 @@ import { AwsService } from 'src/aws/aws.service';
 import { SubmissionStatusReadable } from 'src/config/enum';
 import { DatabaseService } from 'src/database/database.service';
 import { DetailedLogger } from 'src/logger/detailed.logger';
+import { newSubmissionDetails, newVaultingDetails } from 'src/util/format';
 import {
   SubmissionDetails,
   SubmissionRequest,
   SubmissionResponse,
+  VaultingDetails,
+  VaultingRequest,
+  VaultingResponse,
 } from './dtos/marketplace.dto';
 
 @Injectable()
@@ -28,6 +32,7 @@ export class MarketplaceService {
       'submission',
       request.image_format,
     );
+
     if (!s3URL) {
       throw new InternalServerErrorException('Image upload failed');
     }
@@ -71,26 +76,7 @@ export class MarketplaceService {
       throw new InternalServerErrorException('Submission not found');
     } else {
       const item = await this.databaseService.getItem(submission.item_id);
-      return new SubmissionDetails({
-        user_id: submission.user_id,
-        created_at: submission.created_at,
-        received_at: submission.received_at,
-        minted_at: submission.minted_at,
-        status: submission.status,
-        status_desc: SubmissionStatusReadable[submission.status],
-        grading_company: item.grading_company,
-        serial_number: item.serial_number,
-        title: item.title,
-        description: item.description,
-        genre: item.genre,
-        manufacturer: item.manufacturer,
-        year: item.year,
-        overall_grade: item.overall_grade,
-        sub_grades: item.sub_grades,
-        autograph: item.autograph,
-        subject: item.subject,
-        image: item.image,
-      });
+      return newSubmissionDetails(submission, item);
     }
   }
 
@@ -100,26 +86,47 @@ export class MarketplaceService {
       throw new InternalServerErrorException('Submission not found');
     } else {
       const item = await this.databaseService.getItem(submission.item_id);
-      return new SubmissionDetails({
-        user_id: submission.user_id,
-        created_at: submission.created_at,
-        received_at: submission.received_at,
-        minted_at: submission.minted_at,
-        status: submission.status,
-        status_desc: SubmissionStatusReadable[submission.status],
-        grading_company: item.grading_company,
-        serial_number: item.serial_number,
-        title: item.title,
-        description: item.description,
-        genre: item.genre,
-        manufacturer: item.manufacturer,
-        year: item.year,
-        overall_grade: item.overall_grade,
-        sub_grades: item.sub_grades,
-        autograph: item.autograph,
-        subject: item.subject,
-        image: item.image,
-      });
+      return newSubmissionDetails(submission, item);
     }
+  }
+
+  async listVaultings(
+    user_id: number,
+    offset: number,
+    limit: number,
+  ): Promise<VaultingDetails[]> {
+    const vaultings = await this.databaseService.listVaultings(
+      user_id,
+      offset,
+      limit,
+    );
+    // get item ids from vaultings
+    const item_ids = vaultings.map((vaulting) => vaulting.item_id);
+    // get item details from database
+    const item_details = await this.databaseService.listItems(item_ids);
+    // create new vaulting details from vaultings and item details
+    const vaultingDetails = vaultings.map((vaulting) => {
+      const item = item_details.find((item) => item.id === vaulting.item_id);
+      return newVaultingDetails(vaulting, item);
+    });
+    return vaultingDetails;
+  }
+
+  async vaultItem(request: VaultingRequest): Promise<VaultingResponse> {
+    const vaulting = await this.databaseService.createNewVaulting(
+      request.user_id,
+      request.submission_id,
+      request.item_id,
+      request.collection,
+      request.token_id,
+    );
+    return new VaultingResponse({
+      id: vaulting.id,
+      user_id: vaulting.user_id,
+      submission_id: vaulting.submission_id,
+      item_id: vaulting.item_id,
+      collection: vaulting.collection,
+      token_id: vaulting.token_id,
+    });
   }
 }

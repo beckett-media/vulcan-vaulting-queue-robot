@@ -86,15 +86,27 @@ export class Item {
   subject: string;
 
   @Column()
-  image: string;
+  submission_image: string;
+
+  @Column()
+  token_image: string;
 }
 
 // TODO: determine indexing strategy
 @Entity()
+@Index(['user_id'])
+@Index(['submission_id'], { unique: true })
+@Index(['item_id'], { unique: true })
 @Index(['collection', 'token_id'], { unique: true })
 export class Vaulting {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
   item_id: number;
+
+  @Column()
+  user_id: number;
 
   @Column()
   submission_id: number;
@@ -104,24 +116,6 @@ export class Vaulting {
 
   @Column()
   token_id: number;
-
-  @BeforeInsert()
-  toLowerCaseCollection() {
-    this.collection = this.collection.toLowerCase();
-  }
-}
-
-@Entity()
-export class Token {
-  @PrimaryColumn()
-  collection: string;
-
-  @PrimaryColumn()
-  id: number;
-
-  @Index()
-  @Column()
-  status: number;
 
   @BeforeInsert()
   toLowerCaseCollection() {

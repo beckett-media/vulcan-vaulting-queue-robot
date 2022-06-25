@@ -25,6 +25,9 @@ import {
   SubmissionRequest,
   SubmissionResponse,
   SubmissionStatusUpdate,
+  VaultingDetails,
+  VaultingRequest,
+  VaultingResponse,
 } from './dtos/marketplace.dto';
 import { MarketplaceService } from './marketplace.service';
 
@@ -46,7 +49,7 @@ function check_auth(request: any) {
 @Controller('marketplace')
 @UseInterceptors(ClassSerializerInterceptor)
 export class MarketplaceController {
-  constructor(public MarketplaceService: MarketplaceService) {}
+  constructor(public marketplaceService: MarketplaceService) {}
 
   @Get('/health')
   @ApiOperation({
@@ -73,7 +76,7 @@ export class MarketplaceController {
   async getSubmission(
     @Param('submission_id') submission_id: number,
   ): Promise<SubmissionDetails> {
-    const submissionDetails = await this.MarketplaceService.getSubmission(
+    const submissionDetails = await this.marketplaceService.getSubmission(
       submission_id,
     );
     return submissionDetails;
@@ -97,7 +100,7 @@ export class MarketplaceController {
     @Body() body: SubmissionStatusUpdate,
     @Param('submission_id') submission_id: number,
   ): Promise<SubmissionDetails> {
-    const submissionDetails = await this.MarketplaceService.updateSubmission(
+    const submissionDetails = await this.marketplaceService.updateSubmission(
       submission_id,
       body.status,
     );
@@ -143,7 +146,7 @@ export class MarketplaceController {
     @Query('limit') limit: number,
   ): Promise<SubmissionDetails[]> {
     console.log(user_id, status, offset, limit);
-    const result = await this.MarketplaceService.listSubmissions(
+    const result = await this.marketplaceService.listSubmissions(
       user_id,
       status,
       offset,
@@ -169,8 +172,54 @@ export class MarketplaceController {
   async submitItem(
     @Body() body: SubmissionRequest,
   ): Promise<SubmissionResponse> {
-    console.log(body);
-    const submissionResponse = await this.MarketplaceService.submitItem(body);
+    const submissionResponse = await this.marketplaceService.submitItem(body);
     return submissionResponse;
+  }
+
+  @Post('/vaulting')
+  @ApiOperation({
+    summary: 'Store new vaulting records',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'The item has been successfully submited.',
+    type: VaultingResponse,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Submission of the item failed',
+  })
+  @ApiProduces('application/json')
+  async vaultItem(@Body() body: VaultingRequest): Promise<VaultingResponse> {
+    const submissionResponse = await this.marketplaceService.vaultItem(body);
+    return submissionResponse;
+  }
+
+  // get vaulting by user id
+  @Get('/vaulting')
+  @ApiOperation({
+    summary: 'Get vaulting by user id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Vaulting retrived',
+    type: VaultingDetails,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Submission not found',
+  })
+  @ApiProduces('application/json')
+  async listVaultings(
+    @Query('user_id') user_id: number,
+    @Query('offset') offset: number,
+    @Query('limit') limit: number,
+  ): Promise<VaultingDetails[]> {
+    const vaultingDetails = await this.marketplaceService.listVaultings(
+      user_id,
+      offset,
+      limit,
+    );
+    return vaultingDetails;
   }
 }
