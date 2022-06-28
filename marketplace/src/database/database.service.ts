@@ -241,4 +241,14 @@ export class DatabaseService {
     }
     return vaulting;
   }
+
+  async updateVaulting(vaulting_id: number, status: number): Promise<Vaulting> {
+    const vaulting = await this.vaultingRepo.findOne(vaulting_id);
+    if (!vaulting) {
+      throw new NotFoundException('Vaulting not found');
+    }
+    Object.assign(vaulting, { status: status });
+    await this.vaultingRepo.save(vaulting);
+    return vaulting;
+  }
 }

@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { AwsService } from 'src/aws/aws.service';
-import { SubmissionStatusReadable } from 'src/config/enum';
+import { SubmissionStatusReadable, VaultingStatus } from 'src/config/enum';
 import { DatabaseService } from 'src/database/database.service';
 import { DetailedLogger } from 'src/logger/detailed.logger';
 import { newSubmissionDetails, newVaultingDetails } from 'src/util/format';
@@ -112,7 +112,7 @@ export class MarketplaceService {
     return vaultingDetails;
   }
 
-  async vaultItem(request: VaultingRequest): Promise<VaultingResponse> {
+  async newVaulting(request: VaultingRequest): Promise<VaultingResponse> {
     const vaulting = await this.databaseService.createNewVaulting(
       request.user_id,
       request.submission_id,
@@ -128,5 +128,32 @@ export class MarketplaceService {
       collection: vaulting.collection,
       token_id: vaulting.token_id,
     });
+  }
+
+  async withdrawVaulting(vaulting_id: number): Promise<VaultingDetails> {
+    const vaultingDetails = await this.updateVaulting(
+      vaulting_id,
+      VaultingStatus.Withdrawing,
+    );
+
+    return vaultingDetails;
+  }
+
+  async getVaulting(vaulting_id: number): Promise<VaultingDetails> {
+    const vaulting = await this.databaseService.getVaulting(vaulting_id);
+    const item = await this.databaseService.getItem(vaulting.item_id);
+    return newVaultingDetails(vaulting, item);
+  }
+
+  async updateVaulting(
+    vaulting_id: number,
+    status: number,
+  ): Promise<VaultingDetails> {
+    const vaulting = await this.databaseService.updateVaulting(
+      vaulting_id,
+      status,
+    );
+    const item = await this.databaseService.getItem(vaulting.item_id);
+    return newVaultingDetails(vaulting, item);
   }
 }

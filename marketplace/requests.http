@@ -48,5 +48,11 @@ Content-Type: application/json
     "item_id": 1,
     "submission_id": 1,
     "collection": "0x0000000000000000000000000000000000000000",
-    "token_id": 1
+    "token_id": 3
 }
+
+### Get vaulting for user id
+GET  http://127.0.0.1:3300/marketplace/vaulting?user_id=1
+
+### get single submission
+GET  http://127.0.0.1:3300/marketplace/health

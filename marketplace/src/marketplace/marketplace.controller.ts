@@ -3,6 +3,7 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -28,6 +29,7 @@ import {
   VaultingDetails,
   VaultingRequest,
   VaultingResponse,
+  VaultingStatusUpdate,
 } from './dtos/marketplace.dto';
 import { MarketplaceService } from './marketplace.service';
 
@@ -109,7 +111,7 @@ export class MarketplaceController {
 
   @Get('/submission')
   @ApiOperation({
-    summary: 'Get a list of submissions from the user',
+    summary: 'Get a list of submissions from a user',
   })
   @ApiQuery({
     name: 'status',
@@ -191,14 +193,14 @@ export class MarketplaceController {
   })
   @ApiProduces('application/json')
   async vaultItem(@Body() body: VaultingRequest): Promise<VaultingResponse> {
-    const submissionResponse = await this.marketplaceService.vaultItem(body);
+    const submissionResponse = await this.marketplaceService.newVaulting(body);
     return submissionResponse;
   }
 
-  // get vaulting by user id
-  @Get('/vaulting')
+  // get vaulting by id
+  @Get('/vaulting/:vaulting_id')
   @ApiOperation({
-    summary: 'Get vaulting by user id',
+    summary: 'Get vaulting by id',
   })
   @ApiResponse({
     status: 200,
@@ -207,7 +209,31 @@ export class MarketplaceController {
   })
   @ApiResponse({
     status: 404,
-    description: 'Submission not found',
+    description: 'Vaulting not found',
+  })
+  @ApiProduces('application/json')
+  async getVaulting(
+    @Param('vaulting_id') vaulting_id: number,
+  ): Promise<VaultingDetails> {
+    const vaultingDetails = await this.marketplaceService.getVaulting(
+      vaulting_id,
+    );
+    return vaultingDetails;
+  }
+
+  // get vaulting by user id
+  @Get('/vaulting')
+  @ApiOperation({
+    summary: 'Get a list of vaultings from a user',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Vaulting retrived',
+    type: VaultingDetails,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Vaulting not found',
   })
   @ApiProduces('application/json')
   async listVaultings(
@@ -219,6 +245,56 @@ export class MarketplaceController {
       user_id,
       offset,
       limit,
+    );
+    return vaultingDetails;
+  }
+
+  // withdraw vaulting by id
+  @Delete('/vaulting/:vaulting_id')
+  @ApiOperation({
+    summary: 'Withdraw vaulting by id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Vaulting withdrawn',
+    type: VaultingDetails,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Vaulting not found',
+  })
+  @ApiProduces('application/json')
+  async withdrawVaultings(
+    @Param('vaulting_id') vaulting_id: number,
+  ): Promise<VaultingDetails> {
+    const vaultingDetails = await this.marketplaceService.withdrawVaulting(
+      vaulting_id,
+    );
+    return vaultingDetails;
+  }
+
+  // update vaulting status id
+  @Put('/vaulting/:vaulting_id')
+  @ApiOperation({
+    summary: 'Update vaulting status by id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Vaulting withdrawn',
+    type: VaultingDetails,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Vaulting not found',
+  })
+  @ApiProduces('application/json')
+  async updateVaultings(
+    @Param('vaulting_id') vaulting_id: number,
+    @Body() body: VaultingStatusUpdate,
+  ): Promise<VaultingDetails> {
+    const vaultingDetails = await this.marketplaceService.updateVaulting(
+      vaulting_id,
+      body.status,
     );
     return vaultingDetails;
   }

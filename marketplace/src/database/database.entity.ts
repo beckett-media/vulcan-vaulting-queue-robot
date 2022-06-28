@@ -117,6 +117,12 @@ export class Vaulting {
   @Column()
   token_id: number;
 
+  @Column()
+  status: number;
+
+  @Column()
+  last_updated: number;
+
   @BeforeInsert()
   toLowerCaseCollection() {
     this.collection = this.collection.toLowerCase();

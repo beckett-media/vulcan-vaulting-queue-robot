@@ -10,70 +10,105 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SubmissionRequest {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The id of the user who submitted the item',
+    required: true,
+  })
   @IsNumber()
   user_id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The grading company of the submitted the item',
+    required: true,
+  })
   @IsString()
-  @MinLength(1)
   grading_company: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The serial number of the submitted the item',
+    required: true,
+  })
   @IsString()
-  @MinLength(1)
   serial_number: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The title of the submitted the item',
+    required: true,
+  })
   @IsString()
-  @MinLength(1)
   title: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The description of the submitted the item',
+    required: true,
+  })
   @IsString()
-  @MinLength(1)
   description: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The genre of the submitted the item',
+    required: true,
+  })
   @IsString()
-  @MinLength(1)
   genre: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The manufacturer of the submitted the item',
+    required: true,
+  })
   @IsString()
-  @MinLength(1)
+  @MinLength(0)
   manufacturer: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The year of the submitted the item',
+    required: true,
+  })
   @IsNumber()
   year: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The overall grade of the submitted the item',
+    required: true,
+  })
   @IsString()
   overall_grade: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The sub grades of the submitted the item',
+    required: true,
+  })
   @IsString()
   sub_grades: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The autograph of the submitted the item',
+    required: true,
+  })
   @IsString()
   @IsOptional()
+  @MinLength(0)
   autograph: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The subject of the submitted the item',
+    required: true,
+  })
   @IsString()
-  @IsOptional()
   subject: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: "The base64 encoding of the submitted the item's image ",
+    required: true,
+  })
   @IsString()
-  @IsOptional()
   image_base64: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The image format  of the submitted the item',
+    required: true,
+  })
   @IsString()
-  @IsOptional()
   image_format: string;
 
   constructor(partial: Partial<SubmissionRequest>) {
@@ -82,23 +117,38 @@ export class SubmissionRequest {
 }
 
 export class SubmissionResponse {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The id of the user who submitted the item',
+    required: true,
+  })
   @IsNumber()
   user_id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The  of the submitted the item',
+    required: true,
+  })
   @IsNumber()
   submission_id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The id of the submission',
+    required: true,
+  })
   @IsNumber()
   item_id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The status of the submitted the item',
+    required: true,
+  })
   @IsNumber()
   status: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The description of the status of the submitted the item',
+    required: true,
+  })
   @IsString()
   status_desc: string;
 
@@ -108,89 +158,146 @@ export class SubmissionResponse {
 }
 
 export class SubmissionDetails {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The id of the submission',
+    required: true,
+  })
   @IsNumber()
   submission_id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The id of the user who submitted the item',
+    required: true,
+  })
   @IsNumber()
   user_id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The timestamp of the creation of the submission',
+    required: true,
+  })
   @IsNumber()
   created_at: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The timestamp of the receipt of the item',
+    required: true,
+  })
   @IsNumber()
   received_at: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The timestamp of the minting of submitted the item',
+    required: true,
+  })
   @IsNumber()
   minted_at: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The current status of the submitted the item',
+    required: true,
+  })
   @IsNumber()
   status: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The description of current status of the submitted the item',
+    required: true,
+  })
   @IsString()
   @MinLength(1)
   status_desc: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The grading company of the submitted the item',
+    required: true,
+  })
   @IsString()
   @MinLength(1)
   grading_company: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The serial number of the submitted the item',
+    required: true,
+  })
   @IsString()
   @MinLength(1)
   serial_number: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The title of the submitted the item',
+    required: true,
+  })
   @IsString()
   @MinLength(1)
   title: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The description of the submitted the item',
+    required: true,
+  })
   @IsString()
   @MinLength(1)
   description: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The genre of the submitted the item',
+    required: true,
+  })
   @IsString()
   @MinLength(1)
   genre: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The manufacturer of the submitted the item',
+    required: true,
+  })
   @IsString()
   @MinLength(1)
   manufacturer: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The year of the submitted the item',
+    required: true,
+  })
   @IsString()
   @MinLength(1)
   year: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The overall grade of the submitted the item',
+    required: true,
+  })
   @IsString()
   overall_grade: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The sub grades of the submitted the item',
+    required: true,
+  })
   @IsString()
   sub_grades: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The autograph of the submitted the item',
+    required: true,
+  })
   @IsString()
   @IsOptional()
   autograph: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The subject of the submitted the item',
+    required: true,
+  })
   @IsString()
   @IsOptional()
   subject: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The image url of the submitted the item',
+    required: true,
+  })
   @IsString()
   @IsOptional()
   image: string;
@@ -419,6 +526,16 @@ export class VaultingDetails {
   image: string;
 
   constructor(partial: Partial<VaultingDetails>) {
+    Object.assign(this, partial);
+  }
+}
+
+export class VaultingStatusUpdate {
+  @ApiProperty()
+  @IsNumber()
+  status: number;
+
+  constructor(partial: Partial<SubmissionStatusUpdate>) {
     Object.assign(this, partial);
   }
 }

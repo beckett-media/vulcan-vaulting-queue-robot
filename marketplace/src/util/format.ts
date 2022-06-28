@@ -1,5 +1,8 @@
 import { Item, Submission, Vaulting } from 'src/database/database.entity';
-import { SubmissionStatusReadable } from 'src/config/enum';
+import {
+  SubmissionStatusReadable,
+  VaultingStatusReadable,
+} from 'src/config/enum';
 import {
   SubmissionDetails,
   VaultingDetails,
@@ -51,5 +54,7 @@ export function newVaultingDetails(
     autograph: item.autograph,
     subject: item.subject,
     image: item.submission_image,
+    status: vaulting.status,
+    status_desc: VaultingStatusReadable[vaulting.status],
   });
 }
