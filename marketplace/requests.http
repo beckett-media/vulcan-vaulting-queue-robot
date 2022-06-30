@@ -23,18 +23,18 @@ Content-Type: application/json
 }
 
 ### get single submission
-GET  http://127.0.0.1:3300/marketplace/submission/1
+GET  http://127.0.0.1:3300/marketplace/submission/3
 authorization: Bearer eyJraWQiOiJlMnlPUEc2TjBMcVl1Nk40WGVqeG11TlFQZDA0VTFBZEdcL1pnZlJPZjBcLzg9IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiIzMDcxMWI1ZS01NTVkLTQ5MzYtODQ2Ny04NGJmZWVkYzVlNTMiLCJjb2duaXRvOmdyb3VwcyI6WyJjb25zdW1lciJdLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLnVzLXdlc3QtMS5hbWF6b25hd3MuY29tXC91cy13ZXN0LTFfcWhnZ2Z6R29HIiwiY29nbml0bzp1c2VybmFtZSI6InlpZmFuMiIsIm9yaWdpbl9qdGkiOiIyN2M5YTY1Yi03MWQwLTQ5ZjctYWU1YS1iNjZmMDFiMmE5N2MiLCJhdWQiOiIxbmN2NDdxdDZkamEzYW1kNmtvbGhzc3J0cyIsImV2ZW50X2lkIjoiMzc1YmJjYzMtN2UxNy00NjEyLWE1MDAtYzllYzc4ZmRmM2U4IiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE2NTY0NjUyODIsIm5hbWUiOiJZaWZhbiBXYW5nIDIiLCJleHAiOjE2NTY0Njg4ODEsImlhdCI6MTY1NjQ2NTI4MiwianRpIjoiMGMxYTU5ZTQtYWRmOS00YzUwLWFjM2QtOGRhMGY0MDI0ZDQyIiwiZW1haWwiOiJ3YW5nQHlpZmFuLmlvIn0.RrZbGZR7gSGQEcHMv_xGMoCo-BRsnxcvYph6vITx2O2zsstGNKiheigcKDhND1f5X_GMYvSCkjLIz2iAm7NNxN7i6BuATA59C8Fgr95-STsxIgXWtSL1LmjEKvPacTxhajhuwXhtWctctf_Bx1MgHcxK1oOzMpZFoklvLHjqRH47_sx-IC-ummYDiw4_OC1dLLBFNCX_7Qmg-cSFrY8Z-9Uw4undvt_NS25quPHQtQjZnL4tEcl85xsLMreNDJYfDpXenNK7wPvo3R7aThH3aVbR0QUpRt4TxBnqcqeLwfRMto1QQEJWA3AxMkGk_J_ubNZ6AkuTEM9ThjMG3paBSQ
 
 
 ### get all submission
-GET  http://127.0.0.1:3300/marketplace/submission?user_name=yifan&status=1&offset=0&limit=2
+GET  http://127.0.0.1:3300/marketplace/submission?user_name=yifan&offset=0&limit=3
 
 ### get all submission
 GET  http://127.0.0.1:3300/marketplace/submission?user_name=yifan&status=3&offset=0&limit=2
 
 ### update submission
-PUT http://127.0.0.1:3300/marketplace/submission/9
+PUT http://127.0.0.1:3300/marketplace/submission/3
 Content-Type: application/json
 
 {

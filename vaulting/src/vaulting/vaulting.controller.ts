@@ -15,6 +15,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import configuration from 'src/config/configuration';
+import { serviceConfig as blockchainConfig } from 'src/blockchain/blockchain.service.config';
 import {
   BurnJobResult,
   BurnJobResultReadable,
@@ -103,6 +104,14 @@ export class VaultingController {
     if (!check_auth(body)) {
       throw new BadRequestException('Auth fields missing');
     }
+
+    // Check if the collection's ABI is known
+    if (!blockchainConfig.NftContractType[body.collection.toLowerCase()]) {
+      throw new BadRequestException(
+        `Collection ${body.collection} is not supported: ABI unknown`,
+      );
+    }
+
     const job = await this.VaultingService.mintNFT(body);
     return new JobSubmitResponse({
       job_id: Number(job.id),
@@ -151,6 +160,12 @@ export class VaultingController {
   async burnNFT(@Body() body: BurnRequest): Promise<JobSubmitResponse> {
     if (!check_auth(body)) {
       throw new BadRequestException('Auth fields missing');
+    }
+    // Check if the collection's ABI is known
+    if (!blockchainConfig.NftContractType[body.collection.toLowerCase()]) {
+      throw new BadRequestException(
+        `Collection ${body.collection} is not supported: ABI unknown`,
+      );
     }
     const job = await this.VaultingService.burnNFT(body);
     return new JobSubmitResponse({

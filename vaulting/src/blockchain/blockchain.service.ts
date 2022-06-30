@@ -87,6 +87,21 @@ export class BlockchainService {
 
   // TODO: make get contract a service
   getContract(address: string): Contract {
+    if (!serviceConfig.NftContractType[address]) {
+      throw new InternalServerErrorException(
+        `${address} is not a known contract address for ABI`,
+      );
+    }
+    const nftContractType = serviceConfig.NftContractType[address];
+    var abiType;
+    switch (nftContractType) {
+      case 'ERC721':
+        abiType = serviceConfig.ERC721ABI;
+        break;
+      case 'ERC721Registry':
+        abiType = serviceConfig.ERC721RegistryABI;
+        break;
+    }
     // cache the contract obj in class variable
     if (this.nftContracts == undefined) {
       this.nftContracts = {};
@@ -99,7 +114,7 @@ export class BlockchainService {
         const { signer } = this.getRelaySigner();
         this.nftContracts[address] = new ethers.Contract(
           address,
-          serviceConfig.ERC721ABI,
+          abiType,
           signer,
         );
       } catch (error) {
@@ -185,16 +200,18 @@ export class BlockchainService {
   ) {
     const nftContract = this.getContract(collection);
     this.logger.log(`Safe mint: ${owner}, ${id}, ${tokenURI}`);
-    owner = 'hello world';
-    const ownerBytes32 = ethers.utils.formatBytes32String(owner);
+    // update owner based on contract type
+    const nftContractType = serviceConfig.NftContractType[collection];
+    switch (nftContractType) {
+      case 'ERC721':
+        break;
+      case 'ERC721Registry':
+        owner = ethers.utils.keccak256(owner);
+        break;
+    }
     const tx_config =
       configuration()[process.env['runtime']]['blockchain']['tx_config'];
-    const mintTx = await nftContract.safeMint(
-      ownerBytes32,
-      id,
-      tokenURI,
-      tx_config,
-    );
+    const mintTx = await nftContract.safeMint(owner, id, tokenURI, tx_config);
     return mintTx.hash;
   }
 
@@ -268,10 +285,23 @@ export class BlockchainService {
   async burnToken(collection: string, token_id: number) {
     // TODO retrieval manager
     try {
-      const retrievalManager = await this.getRetrievalManager(collection);
       const tx_config =
         configuration()[process.env['runtime']]['blockchain']['tx_config'];
-      const burnTx = await retrievalManager.burn(token_id, tx_config);
+      var burnTx;
+      // contract type by collection
+      const nftContractType = serviceConfig.NftContractType[collection];
+      // burn token based on contract type
+      switch (nftContractType) {
+        case 'ERC721':
+          const retrievalManager = await this.getRetrievalManager(collection);
+          burnTx = await retrievalManager.burn(token_id, tx_config);
+          break;
+        case 'ERC721Registry':
+          const nftContract = this.getContract(collection);
+          burnTx = await nftContract.burn(token_id, tx_config);
+          break;
+      }
+
       this.logger.log(`burn tx: ${burnTx.hash}`);
       return {
         tx_hash: burnTx.hash,

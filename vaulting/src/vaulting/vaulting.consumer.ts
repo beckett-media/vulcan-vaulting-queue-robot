@@ -151,6 +151,7 @@ export class BurnNFTConsumer {
         return result;
       }
     } else {
+      this.logger.error(`db result mismatch for token id`);
       return {
         tx_hash: null,
         error: `Beckett sanity check error: ${beckett_id}, ${token_id}, ${collection}`,
