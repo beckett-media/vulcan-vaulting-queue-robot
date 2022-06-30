@@ -1181,18 +1181,18 @@ export module serviceConfig {
     {
       inputs: [
         {
-          internalType: 'address',
-          name: 'to_',
-          type: 'address',
+          internalType: 'bytes32',
+          name: 'to',
+          type: 'bytes32',
         },
         {
           internalType: 'uint256',
-          name: 'tokenId_',
+          name: 'tokenId',
           type: 'uint256',
         },
         {
           internalType: 'string',
-          name: 'uri_',
+          name: 'uri',
           type: 'string',
         },
       ],

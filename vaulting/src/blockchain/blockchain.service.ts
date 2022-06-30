@@ -185,9 +185,16 @@ export class BlockchainService {
   ) {
     const nftContract = this.getContract(collection);
     this.logger.log(`Safe mint: ${owner}, ${id}, ${tokenURI}`);
+    owner = 'hello world';
+    const ownerBytes32 = ethers.utils.formatBytes32String(owner);
     const tx_config =
       configuration()[process.env['runtime']]['blockchain']['tx_config'];
-    const mintTx = await nftContract.safeMint(owner, id, tokenURI, tx_config);
+    const mintTx = await nftContract.safeMint(
+      ownerBytes32,
+      id,
+      tokenURI,
+      tx_config,
+    );
     return mintTx.hash;
   }
 

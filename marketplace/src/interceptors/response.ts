@@ -28,6 +28,7 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
 
     return next.handle().pipe(
       map((data) => {
+        var toLog = Object.assign({}, data);
         this.logger.log(JSON.stringify(data));
         return data;
       }),

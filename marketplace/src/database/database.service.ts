@@ -57,7 +57,7 @@ export class DatabaseService {
           const itemSaved = await this.itemRepo.save(newItem);
           item_id = itemSaved.id;
           const newSubmission = this.submissionRepo.create({
-            user_id: submission.user_id,
+            user_name: submission.user_name,
             item_id: itemSaved.id,
             status: 1,
             created_at: Math.round(Date.now() / 1000),
@@ -82,12 +82,12 @@ export class DatabaseService {
   }
 
   async listSubmissions(
-    user_id: number,
+    user_name: string,
     status: number,
     offset: number,
     limit: number,
   ): Promise<SubmissionDetails[]> {
-    var where_filter = { user_id: user_id };
+    var where_filter = { user_name: user_name };
     if (status !== undefined) {
       where_filter['status'] = status;
     }
@@ -102,7 +102,6 @@ export class DatabaseService {
       filter['take'] = limit;
     }
     const submissions = await this.submissionRepo.find(filter);
-    console.log(user_id, submissions.length);
     // get all item ids from submissions
     const item_ids = submissions.map((submission) => submission.item_id);
     // get all items from item_ids
@@ -120,7 +119,7 @@ export class DatabaseService {
       submissionDetails.push(
         new SubmissionDetails({
           submission_id: submission.id,
-          user_id: submission.user_id,
+          user_name: submission.user_name,
           grading_company: item.grading_company,
           serial_number: item.serial_number,
           title: item.title,
@@ -185,7 +184,7 @@ export class DatabaseService {
 
   // create new vaulting item
   async createNewVaulting(
-    user_id: number,
+    user_name: string,
     submission_id: number,
     item_id: number,
     collection: string,
@@ -197,7 +196,7 @@ export class DatabaseService {
         'SERIALIZABLE',
         async (transactionalEntityManager) => {
           const newVaulting = this.vaultingRepo.create({
-            user_id: user_id,
+            user_name: user_name,
             submission_id: submission_id,
             item_id: item_id,
             collection: collection,
@@ -215,11 +214,11 @@ export class DatabaseService {
 
   // list vaulting items by user id
   async listVaultings(
-    user_id: number,
+    user_name: string,
     offset: number,
     limit: number,
   ): Promise<Vaulting[]> {
-    var where_filter = { user_id: user_id };
+    var where_filter = { user_name: user_name };
     if (offset == undefined) {
       offset = 0;
     }

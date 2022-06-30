@@ -41,7 +41,7 @@ export class MarketplaceService {
       s3URL,
     );
     return new SubmissionResponse({
-      user_id: request.user_id,
+      user_name: request.user_name,
       submission_id: result.submission_id,
       item_id: result.item_id,
       status: result.status,
@@ -50,13 +50,13 @@ export class MarketplaceService {
   }
 
   async listSubmissions(
-    user_id: number,
+    user_name: string,
     status: number,
     offset: number,
     limit: number,
   ): Promise<SubmissionDetails[]> {
     const submissionDetails = await this.databaseService.listSubmissions(
-      user_id,
+      user_name,
       status,
       offset,
       limit,
@@ -91,12 +91,12 @@ export class MarketplaceService {
   }
 
   async listVaultings(
-    user_id: number,
+    user_name: string,
     offset: number,
     limit: number,
   ): Promise<VaultingDetails[]> {
     const vaultings = await this.databaseService.listVaultings(
-      user_id,
+      user_name,
       offset,
       limit,
     );
@@ -114,7 +114,7 @@ export class MarketplaceService {
 
   async newVaulting(request: VaultingRequest): Promise<VaultingResponse> {
     const vaulting = await this.databaseService.createNewVaulting(
-      request.user_id,
+      request.user_name,
       request.submission_id,
       request.item_id,
       request.collection,
@@ -122,7 +122,7 @@ export class MarketplaceService {
     );
     return new VaultingResponse({
       id: vaulting.id,
-      user_id: vaulting.user_id,
+      user_name: vaulting.user_name,
       submission_id: vaulting.submission_id,
       item_id: vaulting.item_id,
       collection: vaulting.collection,

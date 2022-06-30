@@ -23,13 +23,13 @@ Image, need to define formats/file size
 */
 
 @Entity()
-@Index(['user_id', 'item_id'], { unique: true })
+@Index(['user_name', 'item_id'], { unique: true })
 export class Submission {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  user_id: number;
+  user_name: string;
 
   @Column()
   item_id: number;
@@ -94,7 +94,7 @@ export class Item {
 
 // TODO: determine indexing strategy
 @Entity()
-@Index(['user_id'])
+@Index(['user_name'])
 @Index(['submission_id'], { unique: true })
 @Index(['item_id'], { unique: true })
 @Index(['collection', 'token_id'], { unique: true })
@@ -106,7 +106,7 @@ export class Vaulting {
   item_id: number;
 
   @Column()
-  user_id: number;
+  user_name: string;
 
   @Column()
   submission_id: number;

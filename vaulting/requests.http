@@ -7,7 +7,7 @@ POST http://127.0.0.1:3000/vaulting/mint
 Content-Type: application/json
 
 {
-  "collection": "0x17E95B844F8BDb32f0bcf57542F1E5CD79A2B342",
+  "collection": "0x599b70873851c5ef6d52A613c574D6F688A53524",
   "owner": "0x18003c4f9eeae987b3899fe5136c85305e0e6749",
   "nft_record_uid": "00000001-7e3a-4623-a496-0117f324a521",
   "name": "fake BAYC",

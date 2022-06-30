@@ -11,11 +11,12 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class SubmissionRequest {
   @ApiProperty({
-    description: 'The id of the user who submitted the item',
+    description: 'The user name who submitted the item',
     required: true,
   })
-  @IsNumber()
-  user_id: number;
+  @IsString()
+  @MinLength(1)
+  user_name: string;
 
   @ApiProperty({
     description: 'The grading company of the submitted the item',
@@ -122,7 +123,7 @@ export class SubmissionResponse {
     required: true,
   })
   @IsNumber()
-  user_id: number;
+  user_name: string;
 
   @ApiProperty({
     description: 'The  of the submitted the item',
@@ -170,7 +171,7 @@ export class SubmissionDetails {
     required: true,
   })
   @IsNumber()
-  user_id: number;
+  user_name: string;
 
   @ApiProperty({
     description: 'The timestamp of the creation of the submission',
@@ -334,7 +335,7 @@ export class VaultingRequest {
   })
   @IsNotEmpty()
   @IsNumber()
-  user_id: number;
+  user_name: string;
 
   @ApiProperty({
     description: 'The id of the submission from which the item is vaulted',
@@ -394,7 +395,7 @@ export class VaultingResponse {
   })
   @IsNotEmpty()
   @IsNumber()
-  user_id: number;
+  user_name: string;
 
   @ApiProperty({
     description: 'The id of the submission from which the item is vaulted',
@@ -444,7 +445,7 @@ export class VaultingDetails {
 
   @ApiProperty()
   @IsNumber()
-  user_id: number;
+  user_name: string;
 
   @ApiProperty()
   @IsNumber()
@@ -535,7 +536,7 @@ export class VaultingStatusUpdate {
   @IsNumber()
   status: number;
 
-  constructor(partial: Partial<SubmissionStatusUpdate>) {
+  constructor(partial: Partial<VaultingStatusUpdate>) {
     Object.assign(this, partial);
   }
 }

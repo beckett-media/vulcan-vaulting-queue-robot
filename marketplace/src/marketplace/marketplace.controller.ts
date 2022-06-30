@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -19,6 +20,7 @@ import {
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt.authguard';
 import configuration from 'src/config/configuration';
 
 import {
@@ -62,6 +64,7 @@ export class MarketplaceController {
   }
 
   @Get('/submission/:submission_id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Get submission by id',
   })
@@ -142,14 +145,13 @@ export class MarketplaceController {
   })
   @ApiProduces('application/json')
   async listSubmissions(
-    @Query('user_id') user_id: number,
+    @Query('user_name') user_name: string,
     @Query('status') status: number,
     @Query('offset') offset: number,
     @Query('limit') limit: number,
   ): Promise<SubmissionDetails[]> {
-    console.log(user_id, status, offset, limit);
     const result = await this.marketplaceService.listSubmissions(
-      user_id,
+      user_name,
       status,
       offset,
       limit,
@@ -237,12 +239,12 @@ export class MarketplaceController {
   })
   @ApiProduces('application/json')
   async listVaultings(
-    @Query('user_id') user_id: number,
+    @Query('user_name') user_name: string,
     @Query('offset') offset: number,
     @Query('limit') limit: number,
   ): Promise<VaultingDetails[]> {
     const vaultingDetails = await this.marketplaceService.listVaultings(
-      user_id,
+      user_name,
       offset,
       limit,
     );

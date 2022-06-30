@@ -13,7 +13,7 @@ export function newSubmissionDetails(
   item: Item,
 ): SubmissionDetails {
   return new SubmissionDetails({
-    user_id: submission.user_id,
+    user_name: submission.user_name,
     created_at: submission.created_at,
     received_at: submission.received_at,
     minted_at: submission.minted_at,
@@ -39,7 +39,7 @@ export function newVaultingDetails(
   item: Item,
 ): VaultingDetails {
   return new VaultingDetails({
-    user_id: vaulting.user_id,
+    user_name: vaulting.user_name,
     collection: vaulting.collection,
     token_id: vaulting.token_id,
     grading_company: item.grading_company,

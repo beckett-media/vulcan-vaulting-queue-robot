@@ -29,7 +29,6 @@ export class AwsService {
         ContentType: 'mimetype',
       })
       .promise();
-    console.log('def');
     return uploadResult.Location;
   }
 }

@@ -70,8 +70,17 @@ export default () => ({
   awsdev: {
     api_port: 3000,
     webhook_port: 3001,
+    auth_enabled: false,
     aws: {
       AWS_PUBLIC_BUCKET_NAME: 'beckett-marketplace-dev',
+      AWS_ACCESS_KEY_ID: process.env.MARKETPLACE_AWS_ACCESS_KEY_ID,
+      AWS_SECRET_ACCESS_KEY: process.env.MARKETPLACE_AWS_SECRET_ACCESS_KEY,
+      AWS_DEFAULT_REGION: 'us-west-1',
+    },
+    cognito: {
+      COGNITO_USER_POOL_ID: 'us-west-1_qhggfzGoG',
+      COGNITO_CLIENT_ID: '1ncv47qt6dja3amd6kolhssrts',
+      COGNITO_REGION: 'us-west-1',
     },
     redis: {
       host: 'localhost',
@@ -103,6 +112,19 @@ export default () => ({
   dev: {
     api_port: 3300,
     webhook_port: 3301,
+    auth_enabled: false,
+    cognito: {
+      COGNITO_USER_POOL_ID: 'us-west-1_qhggfzGoG',
+      COGNITO_CLIENT_ID: '1ncv47qt6dja3amd6kolhssrts',
+      COGNITO_REGION: 'us-west-1',
+    },
+    bravo: {
+      mint: {
+        collection: '0x599b70873851c5ef6d52A613c574D6F688A53524',
+        url: 'https://dev.beckett.com:3000/vaulting/mint',
+        headers: { 'Content-Type': 'application/json' },
+      },
+    },
     aws: {
       AWS_PUBLIC_BUCKET_NAME: 'beckett-marketplace-dev',
       AWS_ACCESS_KEY_ID: process.env.MARKETPLACE_AWS_ACCESS_KEY_ID,
