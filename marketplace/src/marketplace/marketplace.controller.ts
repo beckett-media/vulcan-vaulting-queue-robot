@@ -60,7 +60,7 @@ export class MarketplaceController {
     summary: 'LB health check',
   })
   health() {
-    return;
+    return { status: 'ok' };
   }
 
   @Get('/submission/:submission_id')
@@ -145,13 +145,13 @@ export class MarketplaceController {
   })
   @ApiProduces('application/json')
   async listSubmissions(
-    @Query('user_name') user_name: string,
+    @Query('user') user: string,
     @Query('status') status: number,
     @Query('offset') offset: number,
     @Query('limit') limit: number,
   ): Promise<SubmissionDetails[]> {
     const result = await this.marketplaceService.listSubmissions(
-      user_name,
+      user,
       status,
       offset,
       limit,
@@ -239,12 +239,12 @@ export class MarketplaceController {
   })
   @ApiProduces('application/json')
   async listVaultings(
-    @Query('user_name') user_name: string,
+    @Query('user') user: string,
     @Query('offset') offset: number,
     @Query('limit') limit: number,
   ): Promise<VaultingDetails[]> {
     const vaultingDetails = await this.marketplaceService.listVaultings(
-      user_name,
+      user,
       offset,
       limit,
     );
@@ -276,7 +276,7 @@ export class MarketplaceController {
   }
 
   // update vaulting status id
-  @Put('/vaulting/:vaulting_id')
+  @Put('/vaulting')
   @ApiOperation({
     summary: 'Update vaulting status by id',
   })
@@ -291,13 +291,9 @@ export class MarketplaceController {
   })
   @ApiProduces('application/json')
   async updateVaultings(
-    @Param('vaulting_id') vaulting_id: number,
     @Body() body: VaultingStatusUpdate,
   ): Promise<VaultingDetails> {
-    const vaultingDetails = await this.marketplaceService.updateVaulting(
-      vaulting_id,
-      body.status,
-    );
+    const vaultingDetails = await this.marketplaceService.updateVaulting(body);
     return vaultingDetails;
   }
 }

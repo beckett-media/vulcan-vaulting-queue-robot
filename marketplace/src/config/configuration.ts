@@ -94,7 +94,7 @@ export default () => ({
     },
     db: {
       name: 'beckett_dev',
-      sync: false,
+      sync: true,
       host: 'vaulting-api-dev-stage.cluster-cgq6lc7ttzjk.us-west-1.rds.amazonaws.com',
       port: 3306,
       username: process.env.DB_USERNAME,

@@ -3,7 +3,8 @@ export enum SubmissionStatus {
   Submitted = 1,
   Received = 2,
   Rejected = 3,
-  Minted = 4,
+  Approved = 4,
+  Vaulted = 5,
 }
 
 export const SubmissionStatusReadable = {
@@ -11,7 +12,8 @@ export const SubmissionStatusReadable = {
   1: 'Submitted',
   2: 'Received',
   3: 'Rejected',
-  4: 'Minted',
+  4: 'Approved',
+  5: 'Vaulted',
 };
 
 export const VaultingStatusReadable = {

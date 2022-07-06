@@ -56,6 +56,10 @@ export class MintRequest {
   @IsString()
   @IsOptional()
   auth: string;
+
+  @IsNumber()
+  @IsOptional()
+  submisstion_id: number;
 }
 
 export class BurnRequest {

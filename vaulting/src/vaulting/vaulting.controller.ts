@@ -25,6 +25,7 @@ import {
   LockJobResultReadable,
   MintJobResult,
   MintJobResultReadable,
+  TokenStatusReadable,
 } from '../config/enum';
 
 import {
@@ -62,7 +63,7 @@ export class VaultingController {
 
   @Get('/health')
   health() {
-    return;
+    return { status: 'ok' };
   }
 
   @Get('/mint/:job_id')

@@ -11,12 +11,12 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class SubmissionRequest {
   @ApiProperty({
-    description: 'The user name who submitted the item',
+    description: 'The user who submitted the item',
     required: true,
   })
   @IsString()
   @MinLength(1)
-  user_name: string;
+  user: string;
 
   @ApiProperty({
     description: 'The grading company of the submitted the item',
@@ -119,11 +119,11 @@ export class SubmissionRequest {
 
 export class SubmissionResponse {
   @ApiProperty({
-    description: 'The id of the user who submitted the item',
+    description: 'The uuid of the user who submitted the item',
     required: true,
   })
   @IsNumber()
-  user_name: string;
+  user: string;
 
   @ApiProperty({
     description: 'The  of the submitted the item',
@@ -138,6 +138,13 @@ export class SubmissionResponse {
   })
   @IsNumber()
   item_id: number;
+
+  @ApiProperty({
+    description: 'The uuid of the submission',
+    required: true,
+  })
+  @IsString()
+  item_uuid: string;
 
   @ApiProperty({
     description: 'The status of the submitted the item',
@@ -167,11 +174,11 @@ export class SubmissionDetails {
   submission_id: number;
 
   @ApiProperty({
-    description: 'The id of the user who submitted the item',
+    description: 'The uuid of the user who submitted the item',
     required: true,
   })
   @IsNumber()
-  user_name: string;
+  user: string;
 
   @ApiProperty({
     description: 'The timestamp of the creation of the submission',
@@ -188,11 +195,18 @@ export class SubmissionDetails {
   received_at: number;
 
   @ApiProperty({
-    description: 'The timestamp of the minting of submitted the item',
+    description: 'The timestamp of the approval of submitted the item',
     required: true,
   })
   @IsNumber()
-  minted_at: number;
+  approved_at: number;
+
+  @ApiProperty({
+    description: 'The timestamp of the rejection of submitted the item',
+    required: true,
+  })
+  @IsNumber()
+  rejected_at: number;
 
   @ApiProperty({
     description: 'The current status of the submitted the item',
@@ -301,7 +315,7 @@ export class SubmissionDetails {
   })
   @IsString()
   @IsOptional()
-  image: string;
+  submission_image: string;
 
   constructor(partial: Partial<SubmissionDetails>) {
     Object.assign(this, partial);
@@ -329,13 +343,13 @@ export class VaultingRequest {
   item_id: number;
 
   @ApiProperty({
-    description: 'The id of the user who is vaulting the item',
+    description: 'The uuid of the user who is vaulting the item',
     example: 1,
     required: true,
   })
   @IsNotEmpty()
-  @IsNumber()
-  user_name: string;
+  @IsString()
+  user: string;
 
   @ApiProperty({
     description: 'The id of the submission from which the item is vaulted',
@@ -345,24 +359,6 @@ export class VaultingRequest {
   @IsNotEmpty()
   @IsNumber()
   submission_id: number;
-
-  @ApiProperty({
-    description: 'The collection of the minted NFT',
-    example: '0x1234567890123456789012345678901234567890',
-    required: true,
-  })
-  @IsNotEmpty()
-  @IsString()
-  collection: string;
-
-  @ApiProperty({
-    description: 'The id of the minted NFT',
-    example: 1,
-    required: true,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  token_id: number;
 
   constructor(partial: Partial<VaultingRequest>) {
     Object.assign(this, partial);
@@ -389,40 +385,40 @@ export class VaultingResponse {
   item_id: number;
 
   @ApiProperty({
-    description: 'The id of the user who is vaulting the item',
+    description: 'The uuid of the item to vault',
     example: 1,
-    required: true,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  user_name: string;
-
-  @ApiProperty({
-    description: 'The id of the submission from which the item is vaulted',
-    example: 1,
-    required: true,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  submission_id: number;
-
-  @ApiProperty({
-    description: 'The collection of the minted NFT',
-    example: '0x1234567890123456789012345678901234567890',
     required: true,
   })
   @IsNotEmpty()
   @IsString()
-  collection: string;
+  item_uuid: string;
 
   @ApiProperty({
-    description: 'The id of the minted NFT',
+    description: 'The uuid of the user who is vaulting the item',
     example: 1,
     required: true,
   })
   @IsNotEmpty()
   @IsNumber()
-  token_id: number;
+  user: string;
+
+  @ApiProperty({
+    description: 'The status of the vaulted item',
+    example: 1,
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  status: number;
+
+  @ApiProperty({
+    description: 'The description of the status of the vaulted item',
+    example: 1,
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  status_desc: number;
 
   constructor(partial: Partial<VaultingResponse>) {
     Object.assign(this, partial);
@@ -430,6 +426,10 @@ export class VaultingResponse {
 }
 
 export class VaultingDetails {
+  @ApiProperty()
+  @IsNumber()
+  id: number;
+
   @ApiProperty()
   @IsString()
   @MinLength(1)
@@ -445,7 +445,7 @@ export class VaultingDetails {
 
   @ApiProperty()
   @IsNumber()
-  user_name: string;
+  user: string;
 
   @ApiProperty()
   @IsNumber()
@@ -532,6 +532,18 @@ export class VaultingDetails {
 }
 
 export class VaultingStatusUpdate {
+  @ApiProperty()
+  @IsString()
+  item_uuid: string;
+
+  @ApiProperty()
+  @IsString()
+  collection: string;
+
+  @ApiProperty()
+  @IsNumber()
+  token_id: number;
+
   @ApiProperty()
   @IsNumber()
   status: number;

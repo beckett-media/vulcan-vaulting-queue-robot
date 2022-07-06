@@ -1,4 +1,4 @@
-import { Item, Submission, Vaulting } from 'src/database/database.entity';
+import { Item, Submission, Vaulting, User } from 'src/database/database.entity';
 import {
   SubmissionStatusReadable,
   VaultingStatusReadable,
@@ -11,12 +11,14 @@ import {
 export function newSubmissionDetails(
   submission: Submission,
   item: Item,
+  user: User,
 ): SubmissionDetails {
   return new SubmissionDetails({
-    user_name: submission.user_name,
+    user: user.uuid,
     created_at: submission.created_at,
     received_at: submission.received_at,
-    minted_at: submission.minted_at,
+    approved_at: submission.approved_at,
+    rejected_at: submission.rejected_at,
     status: submission.status,
     status_desc: SubmissionStatusReadable[submission.status],
     grading_company: item.grading_company,
@@ -30,16 +32,18 @@ export function newSubmissionDetails(
     sub_grades: item.sub_grades,
     autograph: item.autograph,
     subject: item.subject,
-    image: item.submission_image,
+    submission_image: item.submission_image,
   });
 }
 
 export function newVaultingDetails(
   vaulting: Vaulting,
   item: Item,
+  user: User,
 ): VaultingDetails {
   return new VaultingDetails({
-    user_name: vaulting.user_name,
+    id: vaulting.id,
+    user: user.uuid,
     collection: vaulting.collection,
     token_id: vaulting.token_id,
     grading_company: item.grading_company,
@@ -53,8 +57,28 @@ export function newVaultingDetails(
     sub_grades: item.sub_grades,
     autograph: item.autograph,
     subject: item.subject,
-    image: item.submission_image,
+    image: item.nft_image,
     status: vaulting.status,
     status_desc: VaultingStatusReadable[vaulting.status],
   });
+}
+
+const base64Threshold = 1000;
+
+export function removeBase64(body) {
+  var _body = Object.assign({}, body);
+  // loop through body and params and shorten base64 data
+  for (const key in _body) {
+    if (key.includes('base64')) {
+      // shorten base64 data
+      _body[key] = _body[key].substring(0, 100) + '......';
+    }
+
+    if (key.includes('image') && _body[key].length > base64Threshold) {
+      // shorten base64 data
+      _body[key] = _body[key].substring(0, 100) + '......';
+    }
+  }
+
+  return _body;
 }

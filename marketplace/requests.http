@@ -6,9 +6,9 @@ POST http://127.0.0.1:3300/marketplace/submission
 Content-Type: application/json
 
 {
-  "user_name": "yifan",
+  "user": "12345678-7e3a-4623-a496-0117f324a521",
   "grading_company": "Grading Company Foo",
-  "serial_number": "00000001-7e3a-4623-a496-0117f324a521",
+  "serial_number": "00000009-7e3a-4623-a496-0117f324a521",
   "title": "fake title",
   "description": "fake desc",
   "genre": "good day",
@@ -28,10 +28,10 @@ authorization: Bearer eyJraWQiOiJlMnlPUEc2TjBMcVl1Nk40WGVqeG11TlFQZDA0VTFBZEdcL1
 
 
 ### get all submission
-GET  http://127.0.0.1:3300/marketplace/submission?user_name=yifan&offset=0&limit=3
+GET  http://127.0.0.1:3300/marketplace/submission?user=12345678-7e3a-4623-a496-0117f324a521
 
 ### get all submission
-GET  http://127.0.0.1:3300/marketplace/submission?user_name=yifan&status=3&offset=0&limit=2
+GET  http://127.0.0.1:3300/marketplace/submission?user=yifan&status=3&offset=0&limit=2
 
 ### update submission
 PUT http://127.0.0.1:3300/marketplace/submission/3
@@ -46,12 +46,32 @@ POST http://127.0.0.1:3300/marketplace/vaulting
 Content-Type: application/json
 
 {
-    "user_id": 1,
-    "item_id": 1,
-    "submission_id": 1,
-    "collection": "0x0000000000000000000000000000000000000000",
-    "token_id": 3
+  "item_id": 1,
+  "user": "12345678-7e3a-4623-a496-0117f324a521",
+  "submission_id": 1
 }
+
+
+### callback for mint
+### 2 is status minted
+PUT http://127.0.0.1:3300/marketplace/vaulting
+Content-Type: application/json
+
+{
+  "item_uuid": "8b640c8f-3093-4c39-98e1-e5325458ed13",
+  "collection": "0x599b70873851c5ef6d52A613c574D6F688A53524",
+  "token_id": 1,
+  "status": 2
+}
+
+
+### Get vaulting by user
+GET http://127.0.0.1:3300/marketplace/vaulting?user=12345678-7e3a-4623-a496-0117f324a521
+
+
+### Get vaulting by id
+GET http://127.0.0.1:3300/marketplace/vaulting/1
+
 
 ### authenticate user to get jwt token
 POST http://127.0.0.1:3300/auth/login

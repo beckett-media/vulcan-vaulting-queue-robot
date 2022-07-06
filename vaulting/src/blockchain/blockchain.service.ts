@@ -206,7 +206,7 @@ export class BlockchainService {
       case 'ERC721':
         break;
       case 'ERC721Registry':
-        owner = ethers.utils.keccak256(owner);
+        owner = ethers.utils.id(owner);
         break;
     }
     const tx_config =

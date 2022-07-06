@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { removeBase64 } from 'src/util/format';
 
 export interface Response<T> {
   data: T;
@@ -28,8 +29,8 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
 
     return next.handle().pipe(
       map((data) => {
-        var toLog = Object.assign({}, data);
-        this.logger.log(JSON.stringify(data));
+        var toLog = removeBase64(data);
+        this.logger.log(JSON.stringify(toLog));
         return data;
       }),
     );

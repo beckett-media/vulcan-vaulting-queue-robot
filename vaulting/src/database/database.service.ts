@@ -1,7 +1,11 @@
 import { Token, Vaulting } from '../database/database.entity';
 import { Repository, getManager } from 'typeorm';
 
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNumber } from 'class-validator';
 import { MintJobResult, TokenStatus } from '../config/enum';

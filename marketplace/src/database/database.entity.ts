@@ -23,13 +23,13 @@ Image, need to define formats/file size
 */
 
 @Entity()
-@Index(['user_name', 'item_id'], { unique: true })
+@Index(['user', 'item_id'], { unique: true })
 export class Submission {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  user_name: string;
+  user: number;
 
   @Column()
   item_id: number;
@@ -44,13 +44,41 @@ export class Submission {
   received_at: number;
 
   @Column()
-  minted_at: number;
+  rejected_at: number;
+
+  @Column()
+  approved_at: number;
 }
 
 @Entity()
+@Index(['uuid'])
+export class User {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  uuid: string;
+
+  //TODO: hard code cognito first
+  @Column()
+  source: string;
+
+  @Column()
+  created_at: number;
+}
+
+@Entity()
+@Index(['uuid'], { unique: true })
+@Index(['user'])
 export class Item {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column()
+  uuid: string;
+
+  @Column()
+  user: number;
 
   @Column()
   grading_company: string;
@@ -89,13 +117,11 @@ export class Item {
   submission_image: string;
 
   @Column()
-  token_image: string;
+  nft_image: string;
 }
 
-// TODO: determine indexing strategy
 @Entity()
-@Index(['user_name'])
-@Index(['submission_id'], { unique: true })
+@Index(['user'])
 @Index(['item_id'], { unique: true })
 @Index(['collection', 'token_id'], { unique: true })
 export class Vaulting {
@@ -106,10 +132,13 @@ export class Vaulting {
   item_id: number;
 
   @Column()
-  user_name: string;
+  user: number;
 
   @Column()
-  submission_id: number;
+  mint_job_id: number;
+
+  @Column()
+  burn_job_id: number;
 
   @Column()
   collection: string;
@@ -122,6 +151,12 @@ export class Vaulting {
 
   @Column()
   last_updated: number;
+
+  @Column()
+  minted_at: number;
+
+  @Column()
+  burned_at: number;
 
   @BeforeInsert()
   toLowerCaseCollection() {

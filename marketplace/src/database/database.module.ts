@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import configuration from '../config/configuration';
-import { Submission, Item, Vaulting } from './database.entity';
+import { Submission, Item, Vaulting, User } from './database.entity';
 import { DatabaseService } from './database.service';
 
 function GetDBConnection(): TypeOrmModuleOptions {
@@ -11,7 +11,7 @@ function GetDBConnection(): TypeOrmModuleOptions {
     return {
       type: 'sqlite',
       database: config['db']['name'],
-      entities: [Submission, Item, Vaulting],
+      entities: [Submission, Item, Vaulting, User],
       synchronize: config['db']['sync'],
       keepConnectionAlive: true,
     };
@@ -19,7 +19,7 @@ function GetDBConnection(): TypeOrmModuleOptions {
     return {
       type: 'mysql',
       database: config['db']['name'],
-      entities: [Submission, Item, Vaulting],
+      entities: [Submission, Item, Vaulting, User],
       synchronize: config['db']['sync'],
       keepConnectionAlive: true,
       host: config['db']['host'],
@@ -36,7 +36,7 @@ function GetDBConnection(): TypeOrmModuleOptions {
   providers: [DatabaseService],
   imports: [
     TypeOrmModule.forRoot(GetDBConnection()),
-    TypeOrmModule.forFeature([Submission, Item, Vaulting]),
+    TypeOrmModule.forFeature([Submission, Item, Vaulting, User]),
   ],
   exports: [DatabaseService],
 })

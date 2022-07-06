@@ -8,7 +8,7 @@ export class WebhooksController {
 
   @Get('/health')
   health() {
-    return;
+    return { status: 'ok' };
   }
 
   @Post('/sentinel')

@@ -20,6 +20,12 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
     context: ExecutionContext,
     next: CallHandler,
   ): Observable<Response<T>> {
+    // ignore health check
+    const handler = context.getHandler().name;
+    if (handler && handler.includes('health')) {
+      return next.handle();
+    }
+
     return next.handle().pipe(
       map((data) => {
         this.logger.log(JSON.stringify(data));
