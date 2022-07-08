@@ -4,9 +4,14 @@ import { Injectable } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { passportJwtSecret } from 'jwks-rsa';
 import configuration from 'src/config/configuration';
+import { DetailedLogger } from 'src/logger/detailed.logger';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
+  private readonly logger = new DetailedLogger('JwtStrategy', {
+    timestamp: true,
+  });
+
   constructor(private readonly authService: AuthService) {
     const env = process.env['runtime'];
     const config = configuration()[env];
@@ -27,6 +32,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   public async validate(payload: any) {
-    return !!payload.sub;
+    return {
+      user: payload['sub'],
+      groups: payload['cognito:groups'],
+    };
   }
 }

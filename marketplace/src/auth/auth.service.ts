@@ -3,6 +3,7 @@ import {
   AuthenticationDetails,
   CognitoUser,
   CognitoUserPool,
+  CognitoUserSession,
 } from 'amazon-cognito-identity-js';
 import configuration from 'src/config/configuration';
 
@@ -18,7 +19,10 @@ export class AuthService {
     });
   }
 
-  authenticateUser(user: { name: string; password: string }) {
+  authenticateUser(user: {
+    name: string;
+    password: string;
+  }): Promise<CognitoUserSession> {
     const { name, password } = user;
     const authenticationDetails = new AuthenticationDetails({
       Username: name,

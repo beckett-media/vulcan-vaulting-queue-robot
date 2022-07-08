@@ -175,3 +175,26 @@ export class Vaulting {
     this.collection = this.collection.toLowerCase();
   }
 }
+
+@Entity()
+@Index(['user'])
+@Index(['item_id'], { unique: true })
+export class Listing {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  item_id: number;
+
+  @Column()
+  user: number;
+
+  @Column()
+  price: number;
+
+  @Column()
+  status: number;
+
+  @Column()
+  created_at: number;
+}

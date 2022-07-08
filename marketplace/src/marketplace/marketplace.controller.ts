@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  Request,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -20,8 +21,12 @@ import {
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
+import { OnlyAllowGroups } from 'src/auth/groups.decorator';
+import { GroupsGuard } from 'src/auth/groups.guard';
 import { JwtAuthGuard } from 'src/auth/jwt.authguard';
 import configuration from 'src/config/configuration';
+import { Group } from 'src/config/enum';
+import { DetailedLogger } from 'src/logger/detailed.logger';
 
 import {
   SubmissionDetails,
@@ -53,6 +58,10 @@ function check_auth(request: any) {
 @Controller('marketplace')
 @UseInterceptors(ClassSerializerInterceptor)
 export class MarketplaceController {
+  private readonly logger = new DetailedLogger('MarketplaceController', {
+    timestamp: true,
+  });
+
   constructor(public marketplaceService: MarketplaceService) {}
 
   @Get('/health')
@@ -64,7 +73,6 @@ export class MarketplaceController {
   }
 
   @Get('/submission/:submission_id')
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Get submission by id',
   })
@@ -80,7 +88,9 @@ export class MarketplaceController {
   @ApiProduces('application/json')
   async getSubmission(
     @Param('submission_id') submission_id: number,
+    @Request() request: any,
   ): Promise<SubmissionDetails> {
+    this.logger.log(JSON.stringify(request.user));
     const submissionDetails = await this.marketplaceService.getSubmission(
       submission_id,
     );

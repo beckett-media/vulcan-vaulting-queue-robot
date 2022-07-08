@@ -78,8 +78,8 @@ export default () => ({
       AWS_DEFAULT_REGION: 'us-west-1',
     },
     cognito: {
-      COGNITO_USER_POOL_ID: 'us-west-1_qhggfzGoG',
-      COGNITO_CLIENT_ID: '1ncv47qt6dja3amd6kolhssrts',
+      COGNITO_USER_POOL_ID: 'us-west-1_QgCMUGduZ',
+      COGNITO_CLIENT_ID: '30apj4knq7ps2qsaldr6clpr9p',
       COGNITO_REGION: 'us-west-1',
     },
     bravo: {
@@ -124,10 +124,10 @@ export default () => ({
   dev: {
     api_port: 3300,
     webhook_port: 3301,
-    auth_enabled: false,
+    auth_enabled: true,
     cognito: {
-      COGNITO_USER_POOL_ID: 'us-west-1_qhggfzGoG',
-      COGNITO_CLIENT_ID: '1ncv47qt6dja3amd6kolhssrts',
+      COGNITO_USER_POOL_ID: 'us-west-1_QgCMUGduZ',
+      COGNITO_CLIENT_ID: '30apj4knq7ps2qsaldr6clpr9p',
       COGNITO_REGION: 'us-west-1',
     },
     bravo: {

@@ -42,3 +42,14 @@ export enum VaultingUpdateType {
   ToBurn = 2,
   Burn = 3,
 }
+
+export enum ListingStatus {
+  NotListed = 0,
+  Listed = 1,
+}
+
+export enum Group {
+  User = 'vaulting',
+  Admin = 'admin',
+  Superman = 'superman',
+}

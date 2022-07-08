@@ -5,12 +5,17 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import configuration from 'src/config/configuration';
+import { DetailedLogger } from 'src/logger/detailed.logger';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
+  private readonly logger = new DetailedLogger('JwtAuthGuard', {
+    timestamp: true,
+  });
+
   canActivate(context: ExecutionContext) {
     // Add your custom authentication logic here
-    // for example, call super.logIn(request) to establish a session.
+    // for example, call super.logIn(request) to establish a session.\
     return super.canActivate(context);
   }
 
@@ -19,15 +24,17 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const env = process.env['runtime'];
     const authEnabled = configuration()[env]['auth_enabled'];
     if (authEnabled) {
-      console.log(err);
-      console.log(user);
-      console.log(info);
+      this.logger.log(
+        `handleRequest: err: ${err}, user: ${JSON.stringify(
+          user,
+        )}, info: ${info}`,
+      );
       if (err || !user) {
         throw err || new UnauthorizedException();
       }
       return user;
     } else {
-      return true;
+      return { user: '', groups: [] };
     }
   }
 }
