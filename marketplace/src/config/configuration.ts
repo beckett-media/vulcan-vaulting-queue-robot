@@ -105,7 +105,7 @@ export default () => ({
       limiter: { max: 1, duration: 10 },
     },
     db: {
-      name: 'beckett_dev',
+      name: 'beckett_marketplace_dev',
       sync: true,
       host: 'vaulting-api-dev-stage.cluster-cgq6lc7ttzjk.us-west-1.rds.amazonaws.com',
       port: 3306,
