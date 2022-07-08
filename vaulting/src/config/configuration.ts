@@ -85,6 +85,16 @@ export default () => ({
     blockchain: {
       tx_config: {},
     },
+    marketplace: {
+      mint: {
+        url: 'https://dev.beckett.com:3300/marketplace/vaulting',
+        headers: { 'Content-Type': 'application/json' },
+      },
+      burn: {
+        url: 'https://dev.beckett.com:3300/marketplace/vaulting',
+        headers: { 'Content-Type': 'application/json' },
+      },
+    },
     min_token_id: 1000000,
     network_mint_relayer: 'mumbai',
     pinata: 'dev',
