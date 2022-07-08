@@ -204,6 +204,12 @@ export class MarketplaceService {
 
   async withdrawVaulting(vaulting_id: number): Promise<VaultingDetails> {
     var vaultingDetails = await this.getVaulting(vaulting_id);
+    // check status
+    if (vaultingDetails.status != VaultingStatus.Minted) {
+      throw new InternalServerErrorException(
+        `Vaulting ${vaulting_id} not minted`,
+      );
+    }
     const item = await this.databaseService.getItem(vaultingDetails.item_id);
 
     const burn_job_id = await this.bravoService.burnNFT(

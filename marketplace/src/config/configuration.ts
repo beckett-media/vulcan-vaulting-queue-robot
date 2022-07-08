@@ -163,7 +163,7 @@ export default () => ({
       sync: true,
     },
     blockchain: {
-      tx_config: { gasLimit: 200000 },
+      tx_config: {},
     },
     min_token_id: 1,
     network_mint_relayer: 'mumbai',
