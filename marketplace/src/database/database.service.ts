@@ -8,22 +8,22 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { isNumber } from 'class-validator';
-import configuration from '../config/configuration';
 import { DetailedLogger } from 'src/logger/detailed.logger';
 import {
   SubmissionDetails,
   SubmissionRequest,
-  VaultingStatusUpdate,
+  VaultingUpdate,
 } from 'src/marketplace/dtos/marketplace.dto';
 import {
   SubmissionStatus,
-  SubmissionStatusReadable,
   VaultingStatus,
+  VaultingUpdateType,
 } from 'src/config/enum';
-import { ethers } from 'ethers';
+import { newSubmissionDetails } from 'src/util/format';
 
 const DEFAULT_USER_SOURCE = 'cognito';
+const INIT_COLLECTION = '';
+const INIT_TOKEN_ID = 0;
 
 @Injectable()
 export class DatabaseService {
@@ -84,8 +84,7 @@ export class DatabaseService {
             sub_grades: submission.sub_grades,
             autograph: submission.autograph,
             subject: submission.subject,
-            submission_image: s3URL || defaultImage,
-            nft_image: '',
+            est_value: submission.est_value,
           });
           const itemSaved = await this.itemRepo.save(newItem);
           item_id = itemSaved.id;
@@ -94,6 +93,7 @@ export class DatabaseService {
             user: user.id,
             item_id: itemSaved.id,
             status: 1,
+            image: s3URL || defaultImage,
             created_at: Math.round(Date.now() / 1000),
             received_at: 0,
             approved_at: 0,
@@ -161,29 +161,7 @@ export class DatabaseService {
     var submissionDetails: SubmissionDetails[] = [];
     submissions.forEach((submission) => {
       const item = itemMap.get(submission.item_id);
-      submissionDetails.push(
-        new SubmissionDetails({
-          submission_id: submission.id,
-          user: user.uuid,
-          grading_company: item.grading_company,
-          serial_number: item.serial_number,
-          title: item.title,
-          description: item.description,
-          genre: item.genre,
-          manufacturer: item.manufacturer,
-          year: item.year,
-          overall_grade: item.overall_grade,
-          sub_grades: item.sub_grades,
-          autograph: item.autograph,
-          subject: item.subject,
-          submission_image: item.submission_image,
-          status: submission.status,
-          status_desc: SubmissionStatusReadable[submission.status],
-          created_at: submission.created_at,
-          received_at: submission.received_at,
-          approved_at: submission.approved_at,
-        }),
-      );
+      submissionDetails.push(newSubmissionDetails(submission, item, user));
     });
 
     return submissionDetails;
@@ -263,6 +241,7 @@ export class DatabaseService {
     user: number,
     item_id: number,
     mint_job_id: number,
+    s3url: string,
   ): Promise<Vaulting> {
     var vaulting: Vaulting;
     try {
@@ -273,10 +252,14 @@ export class DatabaseService {
             user: user,
             item_id: item_id,
             mint_job_id: mint_job_id,
+            mint_tx_hash: '',
             burn_job_id: 0,
-            collection: '',
-            token_id: 0,
+            burn_tx_hash: '',
+            chain_id: 0,
+            collection: INIT_COLLECTION,
+            token_id: INIT_TOKEN_ID,
             status: VaultingStatus.Minting,
+            image: s3url,
             minted_at: 0,
             burned_at: 0,
             last_updated: Math.round(Date.now() / 1000),
@@ -338,22 +321,54 @@ export class DatabaseService {
     return vaulting;
   }
 
-  async updateVaulting(
-    vaultingStatusUpdate: VaultingStatusUpdate,
-  ): Promise<Vaulting> {
-    const vaulting = await this.getVaultingByItemUUID(
-      vaultingStatusUpdate.item_uuid,
-    );
+  async updateVaulting(vaultingUpdate: VaultingUpdate): Promise<Vaulting> {
+    const vaulting = await this.getVaultingByItemUUID(vaultingUpdate.item_uuid);
     if (!vaulting) {
       throw new NotFoundException(
-        `Vaulting not found for item ${vaultingStatusUpdate.item_uuid}`,
+        `Vaulting not found for item ${vaultingUpdate.item_uuid}`,
       );
     }
-    Object.assign(vaulting, {
-      collection: vaultingStatusUpdate.collection,
-      token_id: vaultingStatusUpdate.token_id,
-      status: vaultingStatusUpdate.status,
-    });
+
+    // if we don't have collection, update the whole vaulting object
+    // otherwise update only the status
+    if (vaultingUpdate.type == VaultingUpdateType.Mint) {
+      let newVaulting = {
+        chain_id: vaultingUpdate.chain_id,
+        collection: vaultingUpdate.collection,
+        token_id: vaultingUpdate.token_id,
+        mint_tx_hash: vaultingUpdate.mint_tx_hash,
+        minted_at: Math.round(Date.now() / 1000),
+        status: vaultingUpdate.status,
+        last_updated: Math.round(Date.now() / 1000),
+      };
+
+      if (vaultingUpdate.status == VaultingStatus.Withdrawn) {
+        newVaulting['burned_at'] = Math.round(Date.now() / 1000);
+      }
+
+      Object.assign(vaulting, newVaulting);
+    }
+
+    if (vaultingUpdate.type == VaultingUpdateType.Burn) {
+      let newVaulting = {
+        burn_tx_hash: vaultingUpdate.burn_tx_hash,
+        burned_at: Math.round(Date.now() / 1000),
+        status: vaultingUpdate.status,
+        last_updated: Math.round(Date.now() / 1000),
+      };
+
+      Object.assign(vaulting, newVaulting);
+    }
+
+    if (vaultingUpdate.type == VaultingUpdateType.ToBurn) {
+      let newVaulting = {
+        burn_job_id: vaultingUpdate.burn_job_id,
+        status: VaultingStatus.Withdrawing,
+        last_updated: Math.round(Date.now() / 1000),
+      };
+      Object.assign(vaulting, newVaulting);
+    }
+
     await this.vaultingRepo.save(vaulting);
     return vaulting;
   }

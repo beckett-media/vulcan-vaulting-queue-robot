@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import got from 'got/dist/source';
 import configuration from 'src/config/configuration';
 import { DetailedLogger } from 'src/logger/detailed.logger';
@@ -15,7 +15,7 @@ export class BravoService {
     description: string,
     imageFormat: string,
     imagebase64: string,
-  ) {
+  ): Promise<number> {
     const env = process.env['runtime'];
     const config = configuration()[env];
     const url = config['bravo']['mint']['url'];
@@ -38,7 +38,6 @@ export class BravoService {
       )} payload => ${JSON.stringify(removeBase64(payload))}`,
     );
 
-    /*
     try {
       const response = await got
         .post(url, { json: payload, headers: headers })
@@ -48,8 +47,46 @@ export class BravoService {
           response,
         )}`,
       );
+      return response['job_id'];
     } catch (error) {
       this.logger.error(`mint new nft token to Bravo API error: ${error}`);
-    }*/
+      throw new InternalServerErrorException(
+        `Mint new nft token failed: ${error}`,
+      );
+    }
+  }
+
+  async burnNFT(
+    itemUUID: string,
+    collection: string,
+    tokenId: number,
+  ): Promise<number> {
+    const env = process.env['runtime'];
+    const config = configuration()[env];
+    const url = config['bravo']['burn']['url'];
+    const headers = config['bravo']['burn']['headers'];
+    const payload = {
+      collection: collection,
+      nft_record_uid: itemUUID,
+      token_id: tokenId,
+    };
+    this.logger.log(
+      `Burn nft token by Bravo API: url => ${url}, header => ${JSON.stringify(
+        headers,
+      )} payload => ${JSON.stringify(removeBase64(payload))}`,
+    );
+
+    try {
+      const response = await got
+        .post(url, { json: payload, headers: headers })
+        .json();
+      this.logger.log(
+        `Burn nft token to Bravo API response => ${JSON.stringify(response)}`,
+      );
+      return response['job_id'];
+    } catch (error) {
+      this.logger.error(`Burn nft token to Bravo API error: ${error}`);
+      throw new InternalServerErrorException(`Burn nft token failed: ${error}`);
+    }
   }
 }

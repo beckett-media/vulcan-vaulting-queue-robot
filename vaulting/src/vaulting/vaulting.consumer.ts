@@ -6,9 +6,16 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { BlockchainService } from '../blockchain/blockchain.service';
 import { DatabaseService } from '../database/database.service';
 import { IPFSService } from '../ipfs/ipfs.service';
-import { BurnJobResult, MintJobResult } from '../config/enum';
+import {
+  BurnJobResult,
+  MintJobResult,
+  VaultingStatus,
+  VaultingUpdateType,
+} from '../config/enum';
 import { BigNumber } from 'ethers';
 import { DetailedLogger } from 'src/logger/detailed.logger';
+import { removeBase64 } from 'src/util/format';
+import { MarketplaceService } from 'src/marketplace/marketplace.service';
 
 @Processor(configuration()[process.env['runtime']]['queue']['mint'])
 export class MintNFTConsumer {
@@ -17,12 +24,14 @@ export class MintNFTConsumer {
     private blockchainService: BlockchainService,
     private databaseService: DatabaseService,
     private ipfsService: IPFSService,
+    private marketplaceService: MarketplaceService,
   ) {}
 
   @Process()
   async mintNFT(job: Job<unknown>) {
+    const _data = removeBase64(job.data);
     //TODO: check if token id already minted
-    this.logger.log(`Mint consumer: ${JSON.stringify(job.data)}`);
+    this.logger.log(`Mint consumer: ${JSON.stringify(_data)}`);
     const beckett_id = job.data['nft_record_uid'];
     const collection = job.data['collection'].toLowerCase();
     var progress = MintJobResult.JobReceived;
@@ -92,6 +101,26 @@ export class MintNFTConsumer {
       this.logger.log(
         `End of job: collection: ${collection}, token id: ${token_id}, owner: ${owner}, uri: ${tokenURI}`,
       );
+
+      const chain_id = await this.blockchainService.getChainid();
+
+      // report nft status back to marketplace API
+      try {
+        // call reportNftStatus
+        await this.marketplaceService.reportNftStatus(
+          VaultingUpdateType.Mint,
+          VaultingStatus.Minted,
+          chain_id,
+          beckett_id,
+          tx_hash,
+          '',
+          collection,
+          token_id,
+        );
+      } catch (error) {
+        this.logger.error(`Report mint NFT status: ${error}`);
+      }
+
       return {
         tx_hash: tx_hash,
         error: null,
@@ -115,6 +144,7 @@ export class BurnNFTConsumer {
   constructor(
     private blockchainService: BlockchainService,
     private databaseService: DatabaseService,
+    private marketplaceService: MarketplaceService,
   ) {}
 
   @Process()
@@ -144,6 +174,24 @@ export class BurnNFTConsumer {
     if (entity.token_id == token_id && entity.collection == collection) {
       progress = BurnJobResult.BeckettVerified;
       var result = await this.blockchainService.burnToken(collection, token_id);
+
+      // report nft status back to marketplace API
+      try {
+        // call reportNftStatus
+        await this.marketplaceService.reportNftStatus(
+          VaultingUpdateType.Burn,
+          VaultingStatus.Withdrawn,
+          0,
+          beckett_id,
+          '',
+          result.tx_hash,
+          '',
+          0,
+        );
+      } catch (error) {
+        this.logger.error(`Report burn NFT status: ${error}`);
+      }
+
       if (result.status == BurnJobResult.TxSent) {
         return result;
       } else {

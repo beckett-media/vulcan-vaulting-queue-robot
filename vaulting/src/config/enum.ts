@@ -74,3 +74,23 @@ export enum TokenStatus {
   Locked = 3,
   Minting = 4,
 }
+
+/////////////////////////////
+// enum from marketplace API
+
+export enum VaultingStatus {
+  NotMinted = 0,
+  Minting = 1,
+  Minted = 2,
+  Locking = 3,
+  Locked = 4,
+  Withdrawing = 5,
+  Withdrawn = 6,
+}
+
+export enum VaultingUpdateType {
+  ToMint = 0,
+  Mint = 1,
+  ToBurn = 2,
+  Burn = 3,
+}

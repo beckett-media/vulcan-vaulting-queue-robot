@@ -35,3 +35,10 @@ export enum VaultingStatus {
   Withdrawing = 5,
   Withdrawn = 6,
 }
+
+export enum VaultingUpdateType {
+  ToMint = 0,
+  Mint = 1,
+  ToBurn = 2,
+  Burn = 3,
+}

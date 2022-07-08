@@ -25,8 +25,8 @@ function setupApp(app: INestApplication) {
 
   // swagger documents
   const docConfig = new DocumentBuilder()
-    .setTitle('Vaulting API')
-    .setDescription('The Vaulting API documents')
+    .setTitle('Bravo API')
+    .setDescription('The Bravo API documents')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, docConfig);

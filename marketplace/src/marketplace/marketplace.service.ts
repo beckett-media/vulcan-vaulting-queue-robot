@@ -10,6 +10,7 @@ import {
   SubmissionStatusReadable,
   VaultingStatus,
   VaultingStatusReadable,
+  VaultingUpdateType,
 } from 'src/config/enum';
 import { DatabaseService } from 'src/database/database.service';
 import { DetailedLogger } from 'src/logger/detailed.logger';
@@ -21,7 +22,7 @@ import {
   VaultingDetails,
   VaultingRequest,
   VaultingResponse,
-  VaultingStatusUpdate,
+  VaultingUpdate,
 } from './dtos/marketplace.dto';
 
 @Injectable()
@@ -141,15 +142,49 @@ export class MarketplaceService {
   async newVaulting(request: VaultingRequest): Promise<VaultingResponse> {
     // TODO: don't allow multiple vaultings for the same item
 
+    // check submission status
+    const submission = await this.databaseService.getSubmission(
+      request.submission_id,
+    );
+    if (!submission) {
+      throw new NotFoundException('Submission not found');
+    }
+    if (submission.status !== SubmissionStatus.Approved) {
+      throw new InternalServerErrorException('Submission not approved');
+    }
+    if (submission.item_id === request.item_id) {
+      throw new InternalServerErrorException(
+        `Mismatched item_id for submission ${request.submission_id}, item: ${request.item_id}`,
+      );
+    }
+
+    // convert request.image_base64 to buffer
+    const image_buffer = Buffer.from(request.image_base64, 'base64');
+    const s3URL = await this.awsService.uploadItemImage(
+      image_buffer,
+      'vaulting',
+      request.image_format,
+    );
+
     // get user by uuid
     const user = await this.databaseService.getUserByUUID(request.user);
+    // get item by id
+    const item = await this.databaseService.getItem(request.item_id);
 
-    // get epoch time in seconds
-    const mint_job_id = Math.floor(Date.now() / 1000);
+    const mint_job_id = await this.bravoService.mintNFT(
+      request.user,
+      item.uuid,
+      item.title,
+      item.description,
+      request.image_format,
+      request.image_base64,
+    );
+
     const vaulting = await this.databaseService.createNewVaulting(
       user.id,
       request.item_id,
       mint_job_id,
+      s3URL,
     );
 
     // update submission status
@@ -157,17 +192,6 @@ export class MarketplaceService {
       request.submission_id,
       SubmissionStatus.Vaulted,
     );
-
-    /*
-    await this.bravoService.mintNFT(
-      request.user,
-      request.title,
-      result.uuid,
-      result.submission_id,
-      request.description,
-      request.image_format,
-      request.image_base64,
-    );*/
 
     return new VaultingResponse({
       id: vaulting.id,
@@ -179,10 +203,21 @@ export class MarketplaceService {
   }
 
   async withdrawVaulting(vaulting_id: number): Promise<VaultingDetails> {
-    const vaultingDetails = await this.getVaulting(vaulting_id);
+    var vaultingDetails = await this.getVaulting(vaulting_id);
+    const item = await this.databaseService.getItem(vaultingDetails.item_id);
 
-    // TODO: call bravo service to withdraw nft
-    // bravo will callback updateVaulting()
+    const burn_job_id = await this.bravoService.burnNFT(
+      item.uuid,
+      vaultingDetails.collection,
+      vaultingDetails.token_id,
+    );
+
+    const vaultingUpdate = new VaultingUpdate({
+      type: VaultingUpdateType.ToBurn,
+      item_uuid: item.uuid,
+      burn_job_id: burn_job_id,
+    });
+    vaultingDetails = await this.updateVaulting(vaultingUpdate);
 
     return vaultingDetails;
   }
@@ -195,11 +230,9 @@ export class MarketplaceService {
   }
 
   async updateVaulting(
-    vaultingStatusUpdate: VaultingStatusUpdate,
+    vaultingUpdate: VaultingUpdate,
   ): Promise<VaultingDetails> {
-    const vaulting = await this.databaseService.updateVaulting(
-      vaultingStatusUpdate,
-    );
+    const vaulting = await this.databaseService.updateVaulting(vaultingUpdate);
     const item = await this.databaseService.getItem(vaulting.item_id);
     const user = await this.databaseService.getUser(vaulting.user);
     return newVaultingDetails(vaulting, item, user);

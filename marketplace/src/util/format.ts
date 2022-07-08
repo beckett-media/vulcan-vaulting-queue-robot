@@ -14,11 +14,10 @@ export function newSubmissionDetails(
   user: User,
 ): SubmissionDetails {
   return new SubmissionDetails({
+    id: submission.id,
     user: user.uuid,
-    created_at: submission.created_at,
-    received_at: submission.received_at,
-    approved_at: submission.approved_at,
-    rejected_at: submission.rejected_at,
+    item_id: item.id,
+    item_uuid: item.uuid,
     status: submission.status,
     status_desc: SubmissionStatusReadable[submission.status],
     grading_company: item.grading_company,
@@ -32,7 +31,12 @@ export function newSubmissionDetails(
     sub_grades: item.sub_grades,
     autograph: item.autograph,
     subject: item.subject,
-    submission_image: item.submission_image,
+    est_value: item.est_value,
+    image_url: submission.image,
+    created_at: submission.created_at,
+    received_at: submission.received_at,
+    approved_at: submission.approved_at,
+    rejected_at: submission.rejected_at,
   });
 }
 
@@ -44,6 +48,8 @@ export function newVaultingDetails(
   return new VaultingDetails({
     id: vaulting.id,
     user: user.uuid,
+    item_id: item.id,
+    item_uuid: item.uuid,
     collection: vaulting.collection,
     token_id: vaulting.token_id,
     grading_company: item.grading_company,
@@ -57,9 +63,15 @@ export function newVaultingDetails(
     sub_grades: item.sub_grades,
     autograph: item.autograph,
     subject: item.subject,
-    image: item.nft_image,
+    est_value: item.est_value,
+    image_url: vaulting.image,
     status: vaulting.status,
     status_desc: VaultingStatusReadable[vaulting.status],
+    mint_tx_hash: vaulting.mint_tx_hash,
+    minted_at: vaulting.minted_at,
+    burn_tx_hash: vaulting.burn_tx_hash,
+    burned_at: vaulting.burned_at,
+    chain_id: vaulting.chain_id,
   });
 }
 

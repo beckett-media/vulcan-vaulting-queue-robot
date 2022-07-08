@@ -22,11 +22,14 @@ import {
 import { RequestLoggerMiddleware } from 'src/middleware/logger';
 import { ResponseInterceptor } from 'src/interceptors/response';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { MarketplaceModule } from 'src/marketplace/marketplace.module';
+import { MarketplaceService } from 'src/marketplace/marketplace.service';
 
 @Module({
   controllers: [VaultingController],
   providers: [
     VaultingService,
+    MarketplaceService,
     MintNFTConsumer,
     BurnNFTConsumer,
     LockNFTConsumer,
@@ -39,6 +42,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
   imports: [
     BlockchainModule,
     IPFSModule,
+    MarketplaceModule,
     DatabaseModule,
     BullModule.forRoot(configuration()[process.env['runtime']]),
     BullMintQueueModule,

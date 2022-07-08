@@ -38,6 +38,9 @@ export class Submission {
   status: number;
 
   @Column()
+  image: string;
+
+  @Column()
   created_at: number;
 
   @Column()
@@ -114,16 +117,13 @@ export class Item {
   subject: string;
 
   @Column()
-  submission_image: string;
-
-  @Column()
-  nft_image: string;
+  est_value: number;
 }
 
 @Entity()
 @Index(['user'])
 @Index(['item_id'], { unique: true })
-@Index(['collection', 'token_id'], { unique: true })
+@Index(['collection', 'token_id'])
 export class Vaulting {
   @PrimaryGeneratedColumn()
   id: number;
@@ -141,10 +141,22 @@ export class Vaulting {
   burn_job_id: number;
 
   @Column()
+  chain_id: number;
+
+  @Column()
+  mint_tx_hash: string;
+
+  @Column()
+  burn_tx_hash: string;
+
+  @Column()
   collection: string;
 
   @Column()
   token_id: number;
+
+  @Column()
+  image: string;
 
   @Column()
   status: number;

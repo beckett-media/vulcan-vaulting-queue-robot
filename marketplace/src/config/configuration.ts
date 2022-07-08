@@ -121,7 +121,12 @@ export default () => ({
     bravo: {
       mint: {
         collection: '0x599b70873851c5ef6d52A613c574D6F688A53524',
-        url: 'https://dev.beckett.com:3000/vaulting/mint',
+        url: 'http://localhost:3000/vaulting/mint',
+        headers: { 'Content-Type': 'application/json' },
+      },
+      burn: {
+        collection: '0x599b70873851c5ef6d52A613c574D6F688A53524',
+        url: 'http://localhost:3000/vaulting/burn',
         headers: { 'Content-Type': 'application/json' },
       },
     },

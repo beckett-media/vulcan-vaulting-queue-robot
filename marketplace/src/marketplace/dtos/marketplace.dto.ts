@@ -92,14 +92,21 @@ export class SubmissionRequest {
   autograph: string;
 
   @ApiProperty({
-    description: 'The subject of the submitted the item',
+    description: 'The subject of the submitted item',
     required: true,
   })
   @IsString()
   subject: string;
 
   @ApiProperty({
-    description: "The base64 encoding of the submitted the item's image ",
+    description: 'The estimated value of the submitted item in cents',
+    required: true,
+  })
+  @IsNumber()
+  est_value: number;
+
+  @ApiProperty({
+    description: "The base64 encoding of the submitted item's image ",
     required: true,
   })
   @IsString()
@@ -171,7 +178,7 @@ export class SubmissionDetails {
     required: true,
   })
   @IsNumber()
-  submission_id: number;
+  id: number;
 
   @ApiProperty({
     description: 'The uuid of the user who submitted the item',
@@ -195,14 +202,14 @@ export class SubmissionDetails {
   received_at: number;
 
   @ApiProperty({
-    description: 'The timestamp of the approval of submitted the item',
+    description: 'The timestamp of the approval of the submitted the item',
     required: true,
   })
   @IsNumber()
   approved_at: number;
 
   @ApiProperty({
-    description: 'The timestamp of the rejection of submitted the item',
+    description: 'The timestamp of the rejection of the submitted the item',
     required: true,
   })
   @IsNumber()
@@ -222,6 +229,20 @@ export class SubmissionDetails {
   @IsString()
   @MinLength(1)
   status_desc: string;
+
+  @ApiProperty({
+    description: 'The id of the submission',
+    required: true,
+  })
+  @IsNumber()
+  item_id: number;
+
+  @ApiProperty({
+    description: 'The uuid of the submission',
+    required: true,
+  })
+  @IsString()
+  item_uuid: string;
 
   @ApiProperty({
     description: 'The grading company of the submitted the item',
@@ -310,12 +331,19 @@ export class SubmissionDetails {
   subject: string;
 
   @ApiProperty({
+    description: 'The estimated value of the submitted item in cents',
+    required: true,
+  })
+  @IsNumber()
+  est_value: number;
+
+  @ApiProperty({
     description: 'The image url of the submitted the item',
     required: true,
   })
   @IsString()
   @IsOptional()
-  submission_image: string;
+  image_url: string;
 
   constructor(partial: Partial<SubmissionDetails>) {
     Object.assign(this, partial);
@@ -352,13 +380,31 @@ export class VaultingRequest {
   user: string;
 
   @ApiProperty({
-    description: 'The id of the submission from which the item is vaulted',
+    description: 'The id of the submission',
     example: 1,
     required: true,
   })
   @IsNotEmpty()
   @IsNumber()
   submission_id: number;
+
+  @ApiProperty({
+    description: 'The base64 encoding of the vaulting image',
+    example: '/9j/4AAQSkZJRgABAQAAAQABAAD/4Q......',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  image_base64: string;
+
+  @ApiProperty({
+    description: 'The format of the vaulting image',
+    example: 'jpg',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  image_format: string;
 
   constructor(partial: Partial<VaultingRequest>) {
     Object.assign(this, partial);
@@ -444,20 +490,28 @@ export class VaultingDetails {
   submission_id: number;
 
   @ApiProperty()
-  @IsNumber()
+  @IsString()
   user: string;
 
   @ApiProperty()
   @IsNumber()
-  created_at: number;
+  chain_id: number;
 
   @ApiProperty()
-  @IsNumber()
-  received_at: number;
+  @IsString()
+  mint_tx_hash: string;
+
+  @ApiProperty()
+  @IsString()
+  burn_tx_hash: string;
 
   @ApiProperty()
   @IsNumber()
   minted_at: number;
+
+  @ApiProperty()
+  @IsNumber()
+  burned_at: number;
 
   @ApiProperty()
   @IsNumber()
@@ -467,6 +521,20 @@ export class VaultingDetails {
   @IsString()
   @MinLength(1)
   status_desc: string;
+
+  @ApiProperty({
+    description: 'The id of the vaulted item',
+    required: true,
+  })
+  @IsNumber()
+  item_id: number;
+
+  @ApiProperty({
+    description: 'The uuid of the vaulted item',
+    required: true,
+  })
+  @IsString()
+  item_uuid: string;
 
   @ApiProperty()
   @IsString()
@@ -521,20 +589,51 @@ export class VaultingDetails {
   @IsOptional()
   subject: string;
 
+  @ApiProperty({
+    description: 'The estimated value of the submitted item in cents',
+    required: true,
+  })
+  @IsNumber()
+  est_value: number;
+
   @ApiProperty()
   @IsString()
   @IsOptional()
-  image: string;
+  image_url: string;
 
   constructor(partial: Partial<VaultingDetails>) {
     Object.assign(this, partial);
   }
 }
 
-export class VaultingStatusUpdate {
+export class VaultingUpdate {
+  @ApiProperty({
+    required: true,
+  })
+  @IsNumber()
+  type: number;
+
   @ApiProperty()
+  @IsNumber()
+  chain_id: number;
+
+  @ApiProperty({
+    required: true,
+  })
   @IsString()
   item_uuid: string;
+
+  @ApiProperty()
+  @IsNumber()
+  burn_job_id: number;
+
+  @ApiProperty()
+  @IsString()
+  mint_tx_hash: string;
+
+  @ApiProperty()
+  @IsString()
+  burn_tx_hash: string;
 
   @ApiProperty()
   @IsString()
@@ -548,7 +647,7 @@ export class VaultingStatusUpdate {
   @IsNumber()
   status: number;
 
-  constructor(partial: Partial<VaultingStatusUpdate>) {
+  constructor(partial: Partial<VaultingUpdate>) {
     Object.assign(this, partial);
   }
 }

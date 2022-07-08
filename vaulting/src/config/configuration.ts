@@ -109,7 +109,17 @@ export default () => ({
       sync: true,
     },
     blockchain: {
-      tx_config: { gasLimit: 200000 },
+      tx_config: {},
+    },
+    marketplace: {
+      mint: {
+        url: 'http://localhost:3300/marketplace/vaulting',
+        headers: { 'Content-Type': 'application/json' },
+      },
+      burn: {
+        url: 'http://localhost:3300/marketplace/vaulting',
+        headers: { 'Content-Type': 'application/json' },
+      },
     },
     min_token_id: 1,
     network_mint_relayer: 'mumbai',

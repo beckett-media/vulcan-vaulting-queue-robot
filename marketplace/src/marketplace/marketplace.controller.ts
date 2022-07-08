@@ -31,7 +31,7 @@ import {
   VaultingDetails,
   VaultingRequest,
   VaultingResponse,
-  VaultingStatusUpdate,
+  VaultingUpdate,
 } from './dtos/marketplace.dto';
 import { MarketplaceService } from './marketplace.service';
 
@@ -278,11 +278,11 @@ export class MarketplaceController {
   // update vaulting status id
   @Put('/vaulting')
   @ApiOperation({
-    summary: 'Update vaulting status by id',
+    summary: 'Update vaulting record by id (callback for Bravo API)',
   })
   @ApiResponse({
     status: 200,
-    description: 'Vaulting withdrawn',
+    description: 'Vaulting record updated',
     type: VaultingDetails,
   })
   @ApiResponse({
@@ -291,7 +291,7 @@ export class MarketplaceController {
   })
   @ApiProduces('application/json')
   async updateVaultings(
-    @Body() body: VaultingStatusUpdate,
+    @Body() body: VaultingUpdate,
   ): Promise<VaultingDetails> {
     const vaultingDetails = await this.marketplaceService.updateVaulting(body);
     return vaultingDetails;

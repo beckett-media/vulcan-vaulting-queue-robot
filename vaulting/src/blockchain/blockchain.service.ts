@@ -192,6 +192,11 @@ export class BlockchainService {
     return TokenStatus.NotMinted;
   }
 
+  async getChainid(): Promise<number> {
+    const network = await this.relayProvider.getNetwork();
+    return network.chainId;
+  }
+
   async mintToken(
     collection: string,
     id: number,
