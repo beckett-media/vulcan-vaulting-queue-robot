@@ -68,8 +68,8 @@ export default () => ({
     check_palantir_request_auth: false,
   },
   awsdev: {
-    api_port: 3000,
-    webhook_port: 3001,
+    api_port: 3300,
+    webhook_port: 3301,
     auth_enabled: false,
     aws: {
       AWS_PUBLIC_BUCKET_NAME: 'beckett-marketplace-dev',
