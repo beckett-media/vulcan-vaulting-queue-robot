@@ -152,7 +152,7 @@ export class MarketplaceService {
     if (submission.status !== SubmissionStatus.Approved) {
       throw new InternalServerErrorException('Submission not approved');
     }
-    if (submission.item_id === request.item_id) {
+    if (submission.item_id != request.item_id) {
       throw new InternalServerErrorException(
         `Mismatched item_id for submission ${request.submission_id}, item: ${request.item_id}`,
       );
