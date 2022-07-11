@@ -1,9 +1,17 @@
-import { Item, Submission, Vaulting, User } from 'src/database/database.entity';
 import {
+  Item,
+  Submission,
+  Vaulting,
+  User,
+  Listing,
+} from 'src/database/database.entity';
+import {
+  ListingStatusReadable,
   SubmissionStatusReadable,
   VaultingStatusReadable,
 } from 'src/config/enum';
 import {
+  ListingDetails,
   SubmissionDetails,
   VaultingDetails,
 } from 'src/marketplace/dtos/marketplace.dto';
@@ -72,6 +80,37 @@ export function newVaultingDetails(
     burn_tx_hash: vaulting.burn_tx_hash,
     burned_at: vaulting.burned_at,
     chain_id: vaulting.chain_id,
+  });
+}
+
+export function newListingDetails(
+  listing: Listing,
+  item: Item,
+  user: User,
+  vaulting: Vaulting,
+): ListingDetails {
+  return new ListingDetails({
+    id: listing.id,
+    user: user.uuid,
+    status: listing.status,
+    status_desc: ListingStatusReadable[listing.status],
+    price: listing.price,
+    created_at: listing.created_at,
+    updated_at: listing.updated_at,
+    item_id: item.id,
+    item_uuid: item.uuid,
+    grading_company: item.grading_company,
+    serial_number: item.serial_number,
+    title: item.title,
+    description: item.description,
+    genre: item.genre,
+    manufacturer: item.manufacturer,
+    year: item.year,
+    overall_grade: item.overall_grade,
+    sub_grades: item.sub_grades,
+    autograph: item.autograph,
+    subject: item.subject,
+    image_url: vaulting.image,
   });
 }
 

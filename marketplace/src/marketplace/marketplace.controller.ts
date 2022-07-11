@@ -29,6 +29,10 @@ import { Group } from 'src/config/enum';
 import { DetailedLogger } from 'src/logger/detailed.logger';
 
 import {
+  ListingDetails,
+  ListingRequest,
+  ListingResponse,
+  ListingUpdate,
   SubmissionDetails,
   SubmissionRequest,
   SubmissionResponse,
@@ -125,6 +129,12 @@ export class MarketplaceController {
   @Get('/submission')
   @ApiOperation({
     summary: 'Get a list of submissions from a user',
+  })
+  @ApiQuery({
+    name: 'user',
+    type: String,
+    description: 'User of the submission',
+    required: false,
   })
   @ApiQuery({
     name: 'status',
@@ -238,6 +248,24 @@ export class MarketplaceController {
   @ApiOperation({
     summary: 'Get a list of vaultings from a user',
   })
+  @ApiQuery({
+    name: 'user',
+    type: String,
+    description: 'User of the vaulting',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'offset',
+    type: String,
+    description: 'offset for the query',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'limit',
+    type: String,
+    description: 'limit for the query',
+    required: false,
+  })
   @ApiResponse({
     status: 200,
     description: 'Vaulting retrived',
@@ -305,5 +333,85 @@ export class MarketplaceController {
   ): Promise<VaultingDetails> {
     const vaultingDetails = await this.marketplaceService.updateVaulting(body);
     return vaultingDetails;
+  }
+
+  @Get('/listing/:listing_id')
+  @ApiOperation({
+    summary: 'Get listing by id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Listing retrived',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Listing not found',
+  })
+  @ApiProduces('application/json')
+  async getListing(
+    @Param('listing_id') listing_id: number,
+  ): Promise<ListingDetails> {
+    const listingDetails = await this.marketplaceService.getListing(listing_id);
+    return listingDetails;
+  }
+
+  @Get('/listing')
+  @ApiOperation({
+    summary: 'Get all listings for a given user',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Listing retrived',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Listing not found',
+  })
+  @ApiProduces('application/json')
+  async listListings(
+    @Query('user') user: string,
+    @Query('offset') offset: number,
+    @Query('limit') limit: number,
+  ): Promise<ListingDetails[]> {
+    const listingDetails = await this.marketplaceService.listListings(
+      user,
+      offset,
+      limit,
+    );
+    return listingDetails;
+  }
+
+  @Post('/listing')
+  @ApiOperation({
+    summary: 'Create new listing for vaulted item',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Listing created',
+  })
+  @ApiProduces('application/json')
+  async createListing(@Body() body: ListingRequest): Promise<ListingResponse> {
+    const listingDetails = await this.marketplaceService.newListing(body);
+    return listingDetails;
+  }
+
+  @Put('/listing/listing_id')
+  @ApiOperation({
+    summary: 'Update listing for vaulted item',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Listing updated',
+  })
+  @ApiProduces('application/json')
+  async updateListing(
+    @Param('listing_id') listing_id: number,
+    @Body() body: ListingUpdate,
+  ): Promise<ListingDetails> {
+    const listingDetails = await this.marketplaceService.updateListing(
+      listing_id,
+      body,
+    );
+    return listingDetails;
   }
 }

@@ -177,14 +177,14 @@ export class Vaulting {
 }
 
 @Entity()
-@Index(['user'])
-@Index(['item_id'], { unique: true })
+@Index(['user', 'status'])
+@Index(['vaulting_id'], { unique: true })
 export class Listing {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  item_id: number;
+  vaulting_id: number;
 
   @Column()
   user: number;
@@ -197,4 +197,7 @@ export class Listing {
 
   @Column()
   created_at: number;
+
+  @Column()
+  updated_at: number;
 }

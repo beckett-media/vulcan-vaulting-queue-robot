@@ -22,7 +22,7 @@ import { RequestLoggerMiddleware } from 'src/middleware/logger';
       useClass: ResponseInterceptor,
     },
   ],
-  imports: [DatabaseModule, AwsModule, AuthModule, BravoModule],
+  imports: [DatabaseModule, AwsModule, BravoModule, AuthModule],
 })
 export class MarketplaceModule {
   configure(consumer: MiddlewareConsumer) {

@@ -651,3 +651,168 @@ export class VaultingUpdate {
     Object.assign(this, partial);
   }
 }
+
+export class ListingRequest {
+  @ApiProperty()
+  @IsNumber()
+  vaulting_id: number;
+
+  @ApiProperty()
+  @IsString()
+  user: string;
+
+  @ApiProperty()
+  @IsNumber()
+  price: number;
+
+  constructor(partial: Partial<ListingRequest>) {
+    Object.assign(this, partial);
+  }
+}
+
+export class ListingResponse {
+  @ApiProperty()
+  @IsNumber()
+  id: number;
+
+  @ApiProperty()
+  @IsNumber()
+  vaulting_id: number;
+
+  @ApiProperty()
+  @IsString()
+  user: string;
+
+  @ApiProperty()
+  @IsNumber()
+  price: number;
+
+  @ApiProperty()
+  @IsNumber()
+  status: number;
+
+  @ApiProperty()
+  @IsString()
+  status_desc: string;
+
+  constructor(partial: Partial<ListingResponse>) {
+    Object.assign(this, partial);
+  }
+}
+
+export class ListingDetails {
+  @ApiProperty()
+  @IsNumber()
+  id: number;
+
+  @ApiProperty()
+  @IsNumber()
+  price: number;
+
+  @ApiProperty()
+  @IsString()
+  user: string;
+
+  @ApiProperty()
+  @IsNumber()
+  status: number;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(1)
+  status_desc: string;
+
+  @ApiProperty()
+  @IsNumber()
+  created_at: number;
+
+  @ApiProperty()
+  @IsNumber()
+  updated_at: number;
+
+  @ApiProperty({
+    description: 'The id of the vaulted item',
+    required: true,
+  })
+  @IsNumber()
+  item_id: number;
+
+  @ApiProperty({
+    description: 'The uuid of the vaulted item',
+    required: true,
+  })
+  @IsString()
+  item_uuid: string;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(1)
+  grading_company: string;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(1)
+  serial_number: string;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(1)
+  title: string;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(1)
+  description: string;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(1)
+  genre: string;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(1)
+  manufacturer: string;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(1)
+  year: number;
+
+  @ApiProperty()
+  @IsString()
+  overall_grade: string;
+
+  @ApiProperty()
+  @IsString()
+  sub_grades: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  autograph: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  subject: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  image_url: string;
+
+  constructor(partial: Partial<ListingDetails>) {
+    Object.assign(this, partial);
+  }
+}
+
+export class ListingUpdate {
+  @ApiProperty()
+  @IsNumber()
+  price: number;
+
+  constructor(partial: Partial<ListingUpdate>) {
+    Object.assign(this, partial);
+  }
+}

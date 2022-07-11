@@ -1,4 +1,10 @@
-import { Item, Submission, Vaulting, User } from '../database/database.entity';
+import {
+  Item,
+  Submission,
+  Vaulting,
+  User,
+  Listing,
+} from '../database/database.entity';
 import { Repository, getManager, In } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -10,16 +16,18 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DetailedLogger } from 'src/logger/detailed.logger';
 import {
+  ListingDetails,
   SubmissionDetails,
   SubmissionRequest,
   VaultingUpdate,
 } from 'src/marketplace/dtos/marketplace.dto';
 import {
+  ListingStatus,
   SubmissionStatus,
   VaultingStatus,
   VaultingUpdateType,
 } from 'src/config/enum';
-import { newSubmissionDetails } from 'src/util/format';
+import { newListingDetails, newSubmissionDetails } from 'src/util/format';
 
 const DEFAULT_USER_SOURCE = 'cognito';
 const INIT_COLLECTION = '';
@@ -37,6 +45,7 @@ export class DatabaseService {
     @InjectRepository(Item) private itemRepo: Repository<Item>,
     @InjectRepository(Vaulting) private vaultingRepo: Repository<Vaulting>,
     @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(Listing) private listingRepo: Repository<Listing>,
   ) {}
 
   async maybeCreateNewUser(user_uuid: string, source: string): Promise<User> {
@@ -321,6 +330,17 @@ export class DatabaseService {
     return vaulting;
   }
 
+  // get vaulting by item id
+  async getVaultingByItemID(item_id: number): Promise<Vaulting> {
+    const vaulting = await this.vaultingRepo.findOne({
+      where: { item_id: item_id },
+    });
+    if (!vaulting) {
+      throw new NotFoundException(`Vaulting not found for item ${item_id}`);
+    }
+    return vaulting;
+  }
+
   async updateVaulting(vaultingUpdate: VaultingUpdate): Promise<Vaulting> {
     const vaulting = await this.getVaultingByItemUUID(vaultingUpdate.item_uuid);
     if (!vaulting) {
@@ -371,5 +391,137 @@ export class DatabaseService {
 
     await this.vaultingRepo.save(vaulting);
     return vaulting;
+  }
+
+  // get listing by id
+  async getListing(listing_id: number): Promise<Listing> {
+    const listing = await this.listingRepo.findOne(listing_id);
+    if (!listing) {
+      throw new NotFoundException(`Listing ${listing_id} not found`);
+    }
+    return listing;
+  }
+
+  // get listing by vaulting id
+  async getListingByVaultingID(vaulting_id: number): Promise<Listing> {
+    const vaulting = await this.getVaulting(vaulting_id);
+    if (!vaulting) {
+      throw new NotFoundException(`Vaulting ${vaulting_id} not found`);
+    }
+    const listing = await this.listingRepo.findOne({
+      where: { vaulting_id: vaulting.id },
+    });
+    if (!listing) {
+      throw new NotFoundException(
+        `Listing not found for vaulting ${vaulting_id}`,
+      );
+    }
+    return listing;
+  }
+
+  // create new listing
+  async createNewListing(
+    user: number,
+    vaulting_id: number,
+    price: number,
+  ): Promise<Listing> {
+    var listing: Listing;
+    try {
+      await getManager().transaction(
+        'SERIALIZABLE',
+        async (transactionalEntityManager) => {
+          const newListing = this.listingRepo.create({
+            user: user,
+            vaulting_id: vaulting_id,
+            price: price,
+            status: ListingStatus.Listed,
+            created_at: Math.round(Date.now() / 1000),
+            updated_at: Math.round(Date.now() / 1000),
+          });
+          listing = await this.listingRepo.save(newListing);
+        },
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error);
+    }
+    return listing;
+  }
+
+  // update listing
+  async updateListing(listing_id: number, price: number): Promise<Listing> {
+    const listing = await this.getListing(listing_id);
+    if (!listing) {
+      throw new NotFoundException(`Listing ${listing_id} not found`);
+    }
+
+    let newListing = {
+      price: price,
+      updated_at: Math.round(Date.now() / 1000),
+    };
+
+    Object.assign(listing, newListing);
+
+    await this.listingRepo.save(listing);
+    return listing;
+  }
+
+  async listListings(
+    user_id: number,
+    offset: number,
+    limit: number,
+  ): Promise<ListingDetails[]> {
+    // get user by id
+    const user = await this.userRepo.findOne(user_id);
+    if (!user) {
+      throw new NotFoundException(`User ${user_id} not found`);
+    }
+
+    var where_filter = { user: user_id };
+    if (offset == undefined) {
+      offset = 0;
+    }
+    var filter = {
+      where: where_filter,
+      skip: offset,
+    };
+    if (limit != undefined) {
+      filter['take'] = limit;
+    }
+
+    const listings = await this.listingRepo.find(filter);
+
+    // get all vaulting ids from listings
+    const vaulting_ids = listings.map((listing) => listing.vaulting_id);
+    // get all vaulting from vaulting_ids
+    const vaultings = await this.vaultingRepo.find({
+      where: { id: In(vaulting_ids) },
+    });
+    // build a map of item_id to item
+    const vaultingMap = new Map<number, Vaulting>();
+    vaultings.forEach((vaulting) => {
+      vaultingMap.set(vaulting.id, vaulting);
+    });
+
+    // get all item ids from submissions
+    const item_ids = vaultings.map((vaulting) => vaulting.item_id);
+    // get all items from item_ids
+    const items = await this.itemRepo.find({
+      where: { id: In(item_ids) },
+    });
+    // build a map of item_id to item
+    const itemMap = new Map<number, Item>();
+    items.forEach((item) => {
+      itemMap.set(item.id, item);
+    });
+
+    var listingDetails: ListingDetails[] = [];
+    listings.forEach((listing) => {
+      const vaulting = vaultingMap.get(listing.vaulting_id);
+      const item = itemMap.get(listing.vaulting_id);
+      listingDetails.push(newListingDetails(listing, item, user, vaulting));
+    });
+
+    return listingDetails;
   }
 }

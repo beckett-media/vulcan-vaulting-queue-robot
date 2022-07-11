@@ -27,7 +27,7 @@ export class AuthController {
   @OnlyAllowGroups(Group.Admin)
   @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
-    summary: 'Test for oauth token',
+    summary: 'Test if admin oauth token works',
   })
   @ApiResponse({
     status: 200,

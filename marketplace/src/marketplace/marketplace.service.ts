@@ -6,6 +6,8 @@ import {
 import { AwsService } from 'src/aws/aws.service';
 import { BravoService } from 'src/bravo/bravo.service';
 import {
+  ListingStatus,
+  ListingStatusReadable,
   SubmissionStatus,
   SubmissionStatusReadable,
   VaultingStatus,
@@ -14,8 +16,16 @@ import {
 } from 'src/config/enum';
 import { DatabaseService } from 'src/database/database.service';
 import { DetailedLogger } from 'src/logger/detailed.logger';
-import { newSubmissionDetails, newVaultingDetails } from 'src/util/format';
 import {
+  newListingDetails,
+  newSubmissionDetails,
+  newVaultingDetails,
+} from 'src/util/format';
+import {
+  ListingDetails,
+  ListingRequest,
+  ListingResponse,
+  ListingUpdate,
   SubmissionDetails,
   SubmissionRequest,
   SubmissionResponse,
@@ -204,12 +214,24 @@ export class MarketplaceService {
 
   async withdrawVaulting(vaulting_id: number): Promise<VaultingDetails> {
     var vaultingDetails = await this.getVaulting(vaulting_id);
-    // check status
+
+    // No withdrawal if not minted or already withdrawn
     if (vaultingDetails.status != VaultingStatus.Minted) {
       throw new InternalServerErrorException(
-        `Vaulting ${vaulting_id} not minted`,
+        `Vaulting ${vaulting_id} not minted or already withdrawn`,
       );
     }
+
+    // No withdrawal if item is listed
+    const listing = await this.databaseService.getListingByVaultingID(
+      vaulting_id,
+    );
+    if (listing.status != ListingStatus.NotListed) {
+      throw new InternalServerErrorException(
+        `Vaulting ${vaulting_id} has a listing`,
+      );
+    }
+
     const item = await this.databaseService.getItem(vaultingDetails.item_id);
 
     const burn_job_id = await this.bravoService.burnNFT(
@@ -242,5 +264,85 @@ export class MarketplaceService {
     const item = await this.databaseService.getItem(vaulting.item_id);
     const user = await this.databaseService.getUser(vaulting.user);
     return newVaultingDetails(vaulting, item, user);
+  }
+
+  // create new listing
+  async newListing(request: ListingRequest): Promise<ListingResponse> {
+    // get user by uuid
+    const user = await this.databaseService.getUserByUUID(request.user);
+    // get vaulting by id
+    const vaulting = await this.databaseService.getVaulting(
+      request.vaulting_id,
+    );
+    // make sure user and item exist
+    if (!user) {
+      throw new NotFoundException(`User not found for ${request.user}`);
+    }
+    if (!vaulting) {
+      throw new NotFoundException(
+        `Vaulting not found for ${request.vaulting_id}`,
+      );
+    }
+
+    // create new listing
+    const listing = await this.databaseService.createNewListing(
+      user.id,
+      request.vaulting_id,
+      request.price,
+    );
+    // return new listing details
+    return new ListingResponse({
+      id: listing.id,
+      user: request.user,
+      vaulting_id: listing.vaulting_id,
+      price: listing.price,
+      status: listing.status,
+      status_desc: ListingStatusReadable[listing.status],
+    });
+  }
+
+  // update price for listing
+  async updateListing(
+    listing_id: number,
+    listingUpdate: ListingUpdate,
+  ): Promise<ListingDetails> {
+    const listing = await this.databaseService.updateListing(
+      listing_id,
+      listingUpdate.price,
+    );
+    const vaulting = await this.databaseService.getVaulting(
+      listing.vaulting_id,
+    );
+    const item = await this.databaseService.getItem(vaulting.item_id);
+    const user = await this.databaseService.getUser(listing.user);
+    return newListingDetails(listing, item, user, vaulting);
+  }
+
+  // get listing by id
+  async getListing(listing_id: number): Promise<ListingDetails> {
+    const listing = await this.databaseService.getListing(listing_id);
+    const vaulting = await this.databaseService.getVaulting(
+      listing.vaulting_id,
+    );
+    const item = await this.databaseService.getItem(vaulting.item_id);
+    const user = await this.databaseService.getUser(listing.user);
+    return newListingDetails(listing, item, user, vaulting);
+  }
+
+  // list all listings by user
+  async listListings(
+    user_uuid: string,
+    offset: number,
+    limit: number,
+  ): Promise<ListingDetails[]> {
+    // get user by uuid
+    const user = await this.databaseService.getUserByUUID(user_uuid);
+    // get all listings for user
+    const listingDetails = await this.databaseService.listListings(
+      user.id,
+      offset,
+      limit,
+    );
+    return listingDetails;
   }
 }

@@ -46,7 +46,14 @@ export enum VaultingUpdateType {
 export enum ListingStatus {
   NotListed = 0,
   Listed = 1,
+  Sold = 2,
+  Ended = 3,
 }
+
+export const ListingStatusReadable = {
+  0: 'NotListed',
+  1: 'Listed',
+};
 
 export enum Group {
   User = 'vaulting',
