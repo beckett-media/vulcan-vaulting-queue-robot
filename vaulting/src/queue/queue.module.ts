@@ -21,9 +21,15 @@ const BullExecQueueModule = BullModule.registerQueue({
   limiter: configuration()[process.env['runtime']]['queue']['limiter'],
 });
 
+const BullMemorydbQueueModule = BullModule.registerQueue({
+  name: configuration()[process.env['runtime']]['queue']['memorydb'],
+  limiter: configuration()[process.env['runtime']]['queue']['limiter'],
+});
+
 export {
   BullMintQueueModule,
   BullBurnQueueModule,
   BullLockQueueModule,
   BullExecQueueModule,
+  BullMemorydbQueueModule,
 };

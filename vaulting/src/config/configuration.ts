@@ -7,9 +7,10 @@ export default () => ({
       port: 6379,
     },
     queue: {
-      mint: 'beckett_mint_prod',
-      burn: 'beckett_burn_prod',
-      lock: 'beckett_lock_prod',
+      mint: '{beckett_mint_prod}',
+      burn: '{beckett_burn_prod}',
+      lock: '{beckett_lock_prod}',
+      exec: '{beckett_exec_prod}',
       limiter: { max: 1, duration: 10 },
     },
     db: {
@@ -39,9 +40,10 @@ export default () => ({
       port: 6379,
     },
     queue: {
-      mint: 'beckett_mint_stage',
-      burn: 'beckett_burn_stage',
-      lock: 'beckett_lock_stage',
+      mint: '{beckett_mint_stage}',
+      burn: '{beckett_burn_stage}',
+      lock: '{beckett_lock_stage}',
+      exec: '{beckett_exec_stage}',
       limiter: { max: 1, duration: 10 },
     },
     db: {
@@ -70,9 +72,11 @@ export default () => ({
       enableTLS: true,
     },
     queue: {
-      mint: 'beckett_mint_dev',
-      burn: 'beckett_burn_dev',
-      lock: 'beckett_lock_dev',
+      mint: '{beckett_mint_dev}',
+      burn: '{beckett_burn_dev}',
+      lock: '{beckett_lock_dev}',
+      exec: '{beckett_exec_dev}',
+      memorydb: '{beckett_memorydb_dev}',
       limiter: { max: 1, duration: 10 },
     },
     db: {
@@ -111,9 +115,11 @@ export default () => ({
       enableTLS: false,
     },
     queue: {
-      mint: 'beckett_mint_dev',
-      burn: 'beckett_burn_dev',
-      lock: 'beckett_lock_dev',
+      mint: '{beckett_mint_dev}',
+      burn: '{beckett_burn_dev}',
+      lock: '{beckett_lock_dev}',
+      exec: '{beckett_exec_dev}',
+      memorydb: '{beckett_memorydb_dev}',
       limiter: { max: 1, duration: 10 },
     },
     db: {

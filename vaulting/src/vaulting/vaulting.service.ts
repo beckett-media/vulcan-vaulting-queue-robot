@@ -43,6 +43,8 @@ export class VaultingService {
     private lockQueue: Queue,
     @InjectQueue(configuration()[process.env['runtime']]['queue']['exec'])
     private execQueue: Queue,
+    @InjectQueue(configuration()[process.env['runtime']]['queue']['memorydb'])
+    private memorydbQueue: Queue,
     private databaseService: DatabaseService,
     private blockchainService: BlockchainService,
   ) {}
@@ -432,5 +434,15 @@ export class VaultingService {
         }
       }
     }
+  }
+
+  async memorydbNewJob(data: any) {
+    const job = await this.memorydbQueue.add(data);
+    return job;
+  }
+
+  async memorydbJob(id: number) {
+    const job = await this.memorydbQueue.getJob(id);
+    return job;
   }
 }

@@ -306,3 +306,27 @@ export class JobStatusResponse {
     Object.assign(this, partial);
   }
 }
+
+export class MemorydbTestRequest {
+  @IsNumber()
+  payload: number;
+
+  constructor(partial: Partial<MemorydbTestRequest>) {
+    Object.assign(this, partial);
+  }
+}
+
+export class MemorydbTestResponse {
+  @IsNumber()
+  payload: number;
+
+  @IsNumber()
+  job_id: number;
+
+  @IsString()
+  job_queue: string;
+
+  constructor(partial: Partial<MemorydbTestResponse>) {
+    Object.assign(this, partial);
+  }
+}

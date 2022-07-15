@@ -35,6 +35,8 @@ import {
   JobStatusResponse,
   JobSubmitResponse,
   LockRequest,
+  MemorydbTestRequest,
+  MemorydbTestResponse,
   MintJobStatus,
   MintRequest,
   MintStatus,
@@ -271,5 +273,45 @@ export class VaultingController {
   ): Promise<JobStatusResponse> {
     const jobStatus = await this.VaultingService.execJobStatus(job_id);
     return new JobStatusResponse(jobStatus);
+  }
+
+  @Post('/memorydb/job')
+  @ApiOperation({
+    summary: 'Put a sample job to AWS memoryDB',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return details of job',
+  })
+  @ApiProduces('application/json')
+  async memorydbNewJob(
+    @Body() body: MemorydbTestRequest,
+  ): Promise<MemorydbTestResponse> {
+    const job = await this.VaultingService.memorydbNewJob(body);
+    return new MemorydbTestResponse({
+      payload: job.data['payload'],
+      job_id: Number(job.id),
+      job_queue: job.queue.name,
+    });
+  }
+
+  @Get('/memorydb/job/:job_id')
+  @ApiOperation({
+    summary: 'Get a sample job from AWS memoryDB',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return details of job',
+  })
+  @ApiProduces('application/json')
+  async memorydbJob(
+    @Param('job_id') job_id: number,
+  ): Promise<MemorydbTestResponse> {
+    const job = await this.VaultingService.memorydbJob(job_id);
+    return new MemorydbTestResponse({
+      payload: job.data['payload'],
+      job_id: Number(job.id),
+      job_queue: job.queue.name,
+    });
   }
 }

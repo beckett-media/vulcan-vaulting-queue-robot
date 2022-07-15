@@ -18,6 +18,7 @@ import {
   BullBurnQueueModule,
   BullLockQueueModule,
   BullExecQueueModule,
+  BullMemorydbQueueModule,
 } from '../queue/queue.module';
 import { RequestLoggerMiddleware } from 'src/middleware/logger';
 import { ResponseInterceptor } from 'src/interceptors/response';
@@ -49,6 +50,7 @@ import { MarketplaceService } from 'src/marketplace/marketplace.service';
     BullBurnQueueModule,
     BullLockQueueModule,
     BullExecQueueModule,
+    BullMemorydbQueueModule,
   ],
 })
 export class VaultingModule implements NestModule {
