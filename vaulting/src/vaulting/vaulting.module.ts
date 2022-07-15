@@ -1,7 +1,7 @@
 import { BullModule } from '@nestjs/bull';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 
-import configuration from '../config/configuration';
+import configuration, { redisConfig } from '../config/configuration';
 import {
   BurnNFTConsumer,
   ExecConsumer,
@@ -44,7 +44,7 @@ import { MarketplaceService } from 'src/marketplace/marketplace.service';
     IPFSModule,
     MarketplaceModule,
     DatabaseModule,
-    BullModule.forRoot(configuration()[process.env['runtime']]),
+    BullModule.forRoot(redisConfig(configuration()[process.env['runtime']])),
     BullMintQueueModule,
     BullBurnQueueModule,
     BullLockQueueModule,

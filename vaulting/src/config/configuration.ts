@@ -65,8 +65,9 @@ export default () => ({
     api_port: 3000,
     webhook_port: 3001,
     redis: {
-      host: 'localhost',
+      host: 'clustercfg.vaulting-redis-cluster.qux2cn.memorydb.us-west-1.amazonaws.com',
       port: 6379,
+      enableTLS: true,
     },
     queue: {
       mint: 'beckett_mint_dev',
@@ -107,6 +108,7 @@ export default () => ({
     redis: {
       host: 'localhost',
       port: 6379,
+      enableTLS: false,
     },
     queue: {
       mint: 'beckett_mint_dev',
@@ -138,3 +140,22 @@ export default () => ({
     check_palantir_request_auth: false,
   },
 });
+
+export function redisConfig(config) {
+  if (config['redis']['enableTLS']) {
+    return {
+      redis: {
+        host: config['redis']['host'],
+        port: config['redis']['port'],
+        tls: {},
+      },
+    };
+  } else {
+    return {
+      redis: {
+        host: config['redis']['host'],
+        port: config['redis']['port'],
+      },
+    };
+  }
+}
