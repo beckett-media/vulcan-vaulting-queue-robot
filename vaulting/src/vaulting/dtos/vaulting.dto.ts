@@ -53,13 +53,13 @@ export class MintRequest {
   @IsString()
   animation: string;
 
+  @ApiProperty()
+  @IsOptional()
+  attributes: { [key: string]: any };
+
   @IsString()
   @IsOptional()
   auth: string;
-
-  @IsNumber()
-  @IsOptional()
-  submisstion_id: number;
 }
 
 export class BurnRequest {

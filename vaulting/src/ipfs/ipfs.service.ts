@@ -34,11 +34,13 @@ export class IPFSService {
     imageHash: string,
     animationHash: string,
     beckett_id: string,
+    attributes: {},
   ) {
     var metadata = {
       name: name,
       description: description,
       beckett_id: beckett_id,
+      attributes: attributes,
       image: `ipfs://${imageHash}`,
     };
 

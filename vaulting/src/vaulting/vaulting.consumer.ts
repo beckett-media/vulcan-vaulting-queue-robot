@@ -74,12 +74,16 @@ export class MintNFTConsumer {
       progress = MintJobResult.ImagePined;
 
       // step 5: pin metadata
+      if (!job.data['attributes']) {
+        job.data['attributes'] = {};
+      }
       const metaData = this.ipfsService.getMetaData(
         job.data['name'],
         job.data['description'],
         imageHash,
         animationHash,
         beckett_id,
+        job.data['attributes'],
       );
       const metaDataPin = await this.ipfsService.pinMetadata(
         metaData,
