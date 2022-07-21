@@ -9,7 +9,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNumber } from 'class-validator';
 import { MintJobResult, TokenStatus } from '../config/enum';
-import configuration from '../config/configuration';
+import configuration, { RUNTIME_ENV } from '../config/configuration';
 import { DetailedLogger } from 'src/logger/detailed.logger';
 
 @Injectable()
@@ -44,7 +44,7 @@ export class DatabaseService {
           // otherwise, this is the first time we see this beckett id
           // then issue a new token id
           const min_token_id =
-            configuration()[process.env['runtime']]['min_token_id'];
+            configuration()[process.env[RUNTIME_ENV]]['min_token_id'];
           const result = await this.tokenRepo
             .createQueryBuilder('token')
             .select('MAX(id)', 'max')

@@ -3,7 +3,7 @@ import {
   DefenderRelaySigner,
 } from 'defender-relay-client/lib/ethers';
 import { BigNumber, Contract, ethers, utils } from 'ethers';
-import configuration from '../config/configuration';
+import configuration, { RUNTIME_ENV } from '../config/configuration';
 
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 
@@ -41,7 +41,7 @@ export class BlockchainService {
         //TODO: move to burn relayer
         const relayConfig =
           serviceConfig.RelayConfig[
-            configuration()[process.env['runtime']]['network_mint_relayer']
+            configuration()[process.env[RUNTIME_ENV]]['network_mint_relayer']
           ];
         const credentials = {
           apiKey: relayConfig['apiKey'],
@@ -66,7 +66,7 @@ export class BlockchainService {
     if (this.relaySigner == undefined || this.relayProvider == undefined) {
       const relayConfig =
         serviceConfig.RelayConfig[
-          configuration()[process.env['runtime']]['network_mint_relayer']
+          configuration()[process.env[RUNTIME_ENV]]['network_mint_relayer']
         ];
       const credentials = {
         apiKey: relayConfig['apiKey'],
@@ -215,7 +215,7 @@ export class BlockchainService {
         break;
     }
     const tx_config =
-      configuration()[process.env['runtime']]['blockchain']['tx_config'];
+      configuration()[process.env[RUNTIME_ENV]]['blockchain']['tx_config'];
     const mintTx = await nftContract.safeMint(owner, id, tokenURI, tx_config);
     return mintTx.hash;
   }
@@ -225,7 +225,7 @@ export class BlockchainService {
       const nftContract = this.getContract(collection);
       const retrievalManager = await this.getRetrievalManager(collection);
       const tx_config =
-        configuration()[process.env['runtime']]['blockchain']['tx_config'];
+        configuration()[process.env[RUNTIME_ENV]]['blockchain']['tx_config'];
       var progress: number;
 
       // # 1: call retrieval manager's lock function
@@ -255,7 +255,7 @@ export class BlockchainService {
       // gas estimate is wrong for execute transaction
       // add extra gas to gas limit
       var tx_config =
-        configuration()[process.env['runtime']]['blockchain']['tx_config'];
+        configuration()[process.env[RUNTIME_ENV]]['blockchain']['tx_config'];
       if (tx_config == undefined) {
         tx_config = {};
       }
@@ -291,7 +291,7 @@ export class BlockchainService {
     // TODO retrieval manager
     try {
       const tx_config =
-        configuration()[process.env['runtime']]['blockchain']['tx_config'];
+        configuration()[process.env[RUNTIME_ENV]]['blockchain']['tx_config'];
       var burnTx;
       // contract type by collection
       const nftContractType = serviceConfig.NftContractType[collection];

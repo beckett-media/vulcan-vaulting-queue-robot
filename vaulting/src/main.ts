@@ -6,7 +6,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-import configuration from './config/configuration';
+import configuration, { RUNTIME_ENV } from './config/configuration';
 import { VaultingModule } from './vaulting/vaulting.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { WebhooksModule } from './webhooks/webhooks.module';
@@ -34,7 +34,7 @@ function setupApp(app: INestApplication) {
 }
 
 async function bootstrap() {
-  const config = configuration()[process.env['runtime']];
+  const config = configuration()[process.env[RUNTIME_ENV]];
   if (!check_env()) {
     throw new Error(
       'Missing env variables in prod. See check_env() for details',

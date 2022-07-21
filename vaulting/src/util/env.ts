@@ -1,5 +1,7 @@
+import { RUNTIME_ENV } from 'src/config/configuration';
+
 export function check_env() {
-  if (process.env.runtime == 'prod') {
+  if (process.env[RUNTIME_ENV] == 'prod') {
     if (
       process.env.DB_PROD_USERNAME &&
       process.env.DB_PROD_PASSWORD &&

@@ -1,5 +1,5 @@
 import { Job } from 'bull';
-import configuration from '../config/configuration';
+import configuration, { RUNTIME_ENV } from '../config/configuration';
 
 import { Process, Processor } from '@nestjs/bull';
 import { InternalServerErrorException } from '@nestjs/common';
@@ -17,7 +17,7 @@ import { DetailedLogger } from 'src/logger/detailed.logger';
 import { removeBase64 } from 'src/util/format';
 import { MarketplaceService } from 'src/marketplace/marketplace.service';
 
-@Processor(configuration()[process.env['runtime']]['queue']['mint'])
+@Processor(configuration()[process.env[RUNTIME_ENV]]['queue']['mint'])
 export class MintNFTConsumer {
   private readonly logger = new DetailedLogger('MintNFTConsumer');
   constructor(
@@ -112,7 +112,7 @@ export class MintNFTConsumer {
       try {
         // call reportNftStatus
         await this.marketplaceService.reportNftStatus(
-          VaultingUpdateType.Mint,
+          VaultingUpdateType.Minted,
           VaultingStatus.Minted,
           chain_id,
           beckett_id,
@@ -141,7 +141,7 @@ export class MintNFTConsumer {
   }
 }
 
-@Processor(configuration()[process.env['runtime']]['queue']['burn'])
+@Processor(configuration()[process.env[RUNTIME_ENV]]['queue']['burn'])
 export class BurnNFTConsumer {
   private readonly logger = new DetailedLogger('BurnNFTConsumer');
 
@@ -183,7 +183,7 @@ export class BurnNFTConsumer {
       try {
         // call reportNftStatus
         await this.marketplaceService.reportNftStatus(
-          VaultingUpdateType.Burn,
+          VaultingUpdateType.Burned,
           VaultingStatus.Withdrawn,
           0,
           beckett_id,
@@ -213,7 +213,7 @@ export class BurnNFTConsumer {
   }
 }
 
-@Processor(configuration()[process.env['runtime']]['queue']['lock'])
+@Processor(configuration()[process.env[RUNTIME_ENV]]['queue']['lock'])
 export class LockNFTConsumer {
   private readonly logger = new DetailedLogger('LockNFTConsumer');
   constructor(private blockchainService: BlockchainService) {}
@@ -230,7 +230,7 @@ export class LockNFTConsumer {
   }
 }
 
-@Processor(configuration()[process.env['runtime']]['queue']['exec'])
+@Processor(configuration()[process.env[RUNTIME_ENV]]['queue']['exec'])
 export class ExecConsumer {
   private readonly logger = new DetailedLogger('ExecConsumer');
 

@@ -3,7 +3,7 @@ import { Contract } from 'ethers';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
-import configuration from '../config/configuration';
+import configuration, { RUNTIME_ENV } from '../config/configuration';
 import {
   BurnRequest,
   ForwardRequest,
@@ -35,13 +35,13 @@ export class VaultingService {
   });
 
   constructor(
-    @InjectQueue(configuration()[process.env['runtime']]['queue']['mint'])
+    @InjectQueue(configuration()[process.env[RUNTIME_ENV]]['queue']['mint'])
     private mintQueue: Queue,
-    @InjectQueue(configuration()[process.env['runtime']]['queue']['burn'])
+    @InjectQueue(configuration()[process.env[RUNTIME_ENV]]['queue']['burn'])
     private burnQueue: Queue,
-    @InjectQueue(configuration()[process.env['runtime']]['queue']['lock'])
+    @InjectQueue(configuration()[process.env[RUNTIME_ENV]]['queue']['lock'])
     private lockQueue: Queue,
-    @InjectQueue(configuration()[process.env['runtime']]['queue']['exec'])
+    @InjectQueue(configuration()[process.env[RUNTIME_ENV]]['queue']['exec'])
     private execQueue: Queue,
     private databaseService: DatabaseService,
     private blockchainService: BlockchainService,

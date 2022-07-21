@@ -1,4 +1,5 @@
 import { Logger } from '@nestjs/common';
+import { RUNTIME_ENV } from 'src/config/configuration';
 
 /**
  * Error examples:
@@ -31,7 +32,10 @@ export class DetailedLogger extends Logger {
       lines = callerLineSplits[1].split('/');
     }
 
-    if (process.env['runtime'] == 'dev' || process.env['runtime'] == 'awsdev') {
+    if (
+      process.env[RUNTIME_ENV] == 'dev' ||
+      process.env[RUNTIME_ENV] == 'awsdev'
+    ) {
       const line = lines[lines.length - 1].split(')')[0];
       super.log(`<${caller}(), ${line}> ${message}`);
     } else {

@@ -1,6 +1,7 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { Injectable, Logger } from '@nestjs/common';
 import got from 'got/dist/source';
+import { RUNTIME_ENV } from 'src/config/configuration';
 import { TokenStatusReadable } from 'src/config/enum';
 import { DatabaseService } from 'src/database/database.service';
 import { DetailedLogger } from 'src/logger/detailed.logger';
@@ -17,7 +18,7 @@ export class DeltaService {
     token_id: number,
     status: number,
   ) {
-    const url = deltaConfig.updateTokenStatusURL[process.env.runtime];
+    const url = deltaConfig.updateTokenStatusURL[process.env[RUNTIME_ENV]];
     const headers = deltaConfig.updateTokenStatusHeaders;
     const nft_record_uid = await this.databaseService.getVaultingUUID(
       collection,

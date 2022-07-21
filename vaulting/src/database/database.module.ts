@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import configuration from '../config/configuration';
+import configuration, { RUNTIME_ENV } from '../config/configuration';
 import { Token, Vaulting } from './database.entity';
 import { DatabaseService } from './database.service';
 
 function GetDBConnection(): TypeOrmModuleOptions {
-  let env = process.env['runtime'];
+  let env = process.env[RUNTIME_ENV];
   let config = configuration()[env];
   if (env === 'dev') {
     return {

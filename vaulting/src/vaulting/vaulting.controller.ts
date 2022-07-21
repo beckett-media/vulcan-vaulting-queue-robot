@@ -14,7 +14,7 @@ import {
   ApiProduces,
   ApiResponse,
 } from '@nestjs/swagger';
-import configuration from 'src/config/configuration';
+import configuration, { RUNTIME_ENV } from 'src/config/configuration';
 import { serviceConfig as blockchainConfig } from 'src/blockchain/blockchain.service.config';
 import {
   BurnJobResult,
@@ -42,13 +42,14 @@ import {
 import { VaultingService } from './vaulting.service';
 
 function InProd() {
-  return 'prod' == process.env.runtime;
+  return 'prod' == process.env[RUNTIME_ENV];
 }
 
 function check_auth(request: any) {
   const should_check_auth =
-    configuration()[process.env['runtime']]['check_palantir_request_auth'];
-  const auth = configuration()[process.env['runtime']]['palantir_request_auth'];
+    configuration()[process.env[RUNTIME_ENV]]['check_palantir_request_auth'];
+  const auth =
+    configuration()[process.env[RUNTIME_ENV]]['palantir_request_auth'];
   if (should_check_auth) {
     return request.auth == auth;
   } else {

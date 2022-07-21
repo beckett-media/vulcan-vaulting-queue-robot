@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import got from 'got/dist/source';
-import configuration from 'src/config/configuration';
+import configuration, { RUNTIME_ENV } from 'src/config/configuration';
 import { VaultingStatus } from 'src/config/enum';
 import { DetailedLogger } from 'src/logger/detailed.logger';
 import { removeBase64 } from 'src/util/format';
@@ -19,7 +19,7 @@ export class MarketplaceService {
     collection: string,
     token_id: number,
   ) {
-    const env = process.env['runtime'];
+    const env = process.env[RUNTIME_ENV];
     const config = configuration()[env];
     const url = config['marketplace']['mint']['url'];
     const headers = config['marketplace']['mint']['headers'];

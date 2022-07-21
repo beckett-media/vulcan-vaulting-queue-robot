@@ -1,7 +1,7 @@
 import { sha256 } from 'ethers/lib/utils';
 import { createReadStream, unlinkSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
-import configuration from 'src/config/configuration';
+import configuration, { RUNTIME_ENV } from 'src/config/configuration';
 
 import { Injectable, Logger } from '@nestjs/common';
 import pinataClient, * as Pinata from '@pinata/sdk';
@@ -19,7 +19,9 @@ export class IPFSService {
   getPinataClient() {
     if (this.pinataClient == undefined) {
       const pinataConfig =
-        serviceConfig.Pinata[configuration()[process.env['runtime']]['pinata']];
+        serviceConfig.Pinata[
+          configuration()[process.env[RUNTIME_ENV]]['pinata']
+        ];
       this.pinataClient = pinataClient(
         pinataConfig['apiKey'],
         pinataConfig['apiSecret'],
@@ -68,7 +70,7 @@ export class IPFSService {
   }
 
   async pinMetadata(metaData: {}, beckett_id: number) {
-    const env = process.env['runtime'];
+    const env = process.env[RUNTIME_ENV];
     const options = {
       pinataMetadata: {
         name: `metadata_${beckett_id}_${env}`,

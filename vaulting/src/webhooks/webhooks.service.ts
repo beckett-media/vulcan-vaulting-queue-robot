@@ -4,7 +4,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
-import configuration from 'src/config/configuration';
+import configuration, { RUNTIME_ENV } from 'src/config/configuration';
 import { TokenStatus } from 'src/config/enum';
 import { DatabaseService } from 'src/database/database.service';
 import { createHash, createHmac } from 'crypto';
@@ -89,7 +89,7 @@ export class WebhooksService {
   }
 
   verifyHash(hash: string, request: any) {
-    const env = process.env['runtime'];
+    const env = process.env[RUNTIME_ENV];
     const config = configuration()[env];
     const webhookSharedSecret = config['webhook_shared_secret'];
     const toHash = JSON.stringify(request);

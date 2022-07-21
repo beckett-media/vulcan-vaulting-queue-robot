@@ -90,7 +90,7 @@ export enum VaultingStatus {
 
 export enum VaultingUpdateType {
   ToMint = 0,
-  Mint = 1,
+  Minted = 1,
   ToBurn = 2,
-  Burn = 3,
+  Burned = 3,
 }
