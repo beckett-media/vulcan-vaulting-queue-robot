@@ -39,3 +39,6 @@ lerna-debug.log*
 *dotgit
 yarn.lock
 package.lock
+
+# emacs
+*~
