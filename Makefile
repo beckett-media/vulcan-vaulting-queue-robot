@@ -8,7 +8,7 @@ clean:
 	rm -rf vaulting/dist
 
 install:
-	cd vaulting && yarn install;
+	cd vaulting && npm install;
 
 run:
 	cd vaulting && npm run start;
