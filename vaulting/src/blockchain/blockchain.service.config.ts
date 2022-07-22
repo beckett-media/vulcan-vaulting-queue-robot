@@ -10,29 +10,28 @@ export module serviceConfig {
   export const RelayConfig = {
     mumbai: {
       address: '0x18003c4f9eeae987b3899fe5136c85305e0e6749',
-      apiSecret:
-        '4wyC3hy256qXjUPQGo8oAZeY8vxXMhGCxxJ6eAjXksHAkKgKE5GousfTNoAeiWm9',
-      apiKey: '9zPmBQBZ2dcps39csAaQvjtg2SswvJVa',
+      apiSecret: process.env.VAULTING_DEV_MINT_RELAYER_API_SECRET,
+      apiKey: process.env.VAULTING_DEV_MINT_RELAYER_API_KEY,
     },
     polygon_stage: {
       address: '0xb9e2ce59feb1848db71fc31304db613a9fe1bbf9',
-      apiKey: process.env.BECKETT_RELAYER_STAGE_API_KEY,
-      apiSecret: process.env.ECKETT_RELAYER_STAGE_API_SECRET,
+      apiKey: process.env.VAULTING_STAGE_MINT_RELAYER_API_KEY,
+      apiSecret: process.env.VAULTING_STAGE_MINT_RELAYER_API_SECRET,
     },
     polygon_prod_mint: {
       address: '0xe000e4235975851085c0cd48fe1b207bd06b1c27',
-      apiKey: process.env.BECKETT_RELAYER_PROD_MINT_API_KEY,
-      apiSecret: process.env.BECKETT_RELAYER_PROD_MINT_API_SECRET,
+      apiKey: process.env.VAULTING_PROD_MINT_RELAYER_API_KEY,
+      apiSecret: process.env.VAULTING_PROD_MINT_RELAYER_API_SECRET,
     },
     polygon_prod_lock: {
       address: '0x1ef86a41cc4b18241bea02403eef5bd37f7be34e',
-      apiKey: process.env.BECKETT_RELAYER_PROD_LOCK_API_KEY,
-      apiSecret: process.env.BECKETT_RELAYER_PROD_LOCK_API_SECRET,
+      apiKey: process.env.VAULTING_PROD_LOCK_RELAYER_API_KEY,
+      apiSecret: process.env.VAULTING_PROD_LOCK_RELAYER_API_SECRET,
     },
     polygon_prod_burn: {
       address: '0xc125a594974308f952b56948d2871318c49ab796',
-      apiKey: process.env.BECKETT_RELAYER_PROD_BURN_API_KEY,
-      apiSecret: process.env.BECKETT_RELAYER_PROD_BURN_API_SECRET,
+      apiKey: process.env.VAULTING_PROD_BURN_RELAYER_API_KEY,
+      apiSecret: process.env.VAULTING_PROD_BURN_RELAYER_API_SECRET,
     },
   };
 

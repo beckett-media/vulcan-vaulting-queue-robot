@@ -37,6 +37,7 @@ export default () => ({
     redis: {
       host: process.env.VAULTING_PROD_REDIS_HOST,
       port: process.env.VAULTING_PROD_REDIS_PORT,
+      enableTLS: true,
     },
     min_token_id: process.env.VAULTING_PROD_MIN_TOKEN_ID || 1,
     network_mint_relayer: 'polygon_prod_mint',
@@ -85,9 +86,10 @@ export default () => ({
     redis: {
       host: process.env.VAULTING_STAGE_REDIS_HOST,
       port: process.env.VAULTING_STAGE_REDIS_PORT,
+      enableTLS: true,
     },
     min_token_id: process.env.VAULTING_STAGE_MIN_TOKEN_ID || 1,
-    network_mint_relayer: 'polygon_stage',
+    network_mint_relayer: 'mumbai',
     pinata: 'stage',
     webhook_shared_secret: process.env.VAULTING_STAGE_AUTOTASK_SHARED_SECRET,
     check_palantir_request_auth: false,
@@ -143,26 +145,22 @@ export default () => ({
     check_palantir_request_auth: false,
   },
   dev: {
-    api_port: process.env.VAULTING_DEV_API_PORT || 3000,
-    webhook_port: process.env.VAULTING_DEV_WEBHOOK_PORT || 3001,
+    api_port: process.env.VAULTING_DEV_API_PORT,
+    webhook_port: process.env.VAULTING_DEV_WEBHOOK_PORT,
     blockchain: {
       tx_config: {},
     },
     db: {
-      name: process.env.VAULTING_DEV_DB_NAME || 'beckett_db_dev.sqlite',
+      name: process.env.VAULTING_DEV_DB_NAME,
       sync: true,
     },
     marketplace: {
       mint: {
-        url:
-          process.env.VAULTING_DEV_MARKETPLACE_MINT_URL ||
-          'http://localhost:3300/marketplace/vaulting',
+        url: process.env.VAULTING_DEV_MARKETPLACE_MINT_URL,
         headers: { 'Content-Type': 'application/json' },
       },
       burn: {
-        url:
-          process.env.VAULTING_DEV_MARKETPLACE_BURN_URL ||
-          'http://localhost:3300/marketplace/vaulting',
+        url: process.env.VAULTING_DEV_MARKETPLACE_BURN_URL,
         headers: { 'Content-Type': 'application/json' },
       },
     },
@@ -174,8 +172,8 @@ export default () => ({
       limiter: { max: 1, duration: 10 },
     },
     redis: {
-      host: process.env.VAULTING_DEV_REDIS_HOST || 'localhost',
-      port: process.env.VAULTING_DEV_REDIS_PORT || 6379,
+      host: process.env.VAULTING_DEV_REDIS_HOST,
+      port: process.env.VAULTING_DEV_REDIS_PORT,
       enableTLS: false,
     },
     min_token_id: process.env.VAULTING_DEV_MIN_TOKEN_ID || 1,

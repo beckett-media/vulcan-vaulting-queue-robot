@@ -6,9 +6,14 @@ COPY vaulting /opt/vaulting
 WORKDIR /opt/vaulting
 RUN yarn install
 
-# marketplace API port
-EXPOSE 3300
+# vaulting API & webhook port
+EXPOSE 3000
+EXPOSE 3001
+EXPOSE 4000
+EXPOSE 4001
+EXPOSE 5000
+EXPOSE 5001
 
-# start the marketplace API server in development mode
+# start the vaulting API server
 WORKDIR /opt/vaulting
-ENTRYPOINT ["npm", "run", "start:dev"]
+ENTRYPOINT ["npm", "run", "start"]
