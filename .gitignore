@@ -40,7 +40,7 @@ lerna-debug.log*
 *dotgit
 yarn.lock
 package.lock
-package-lock.json
+# package-lock.json
 
 # emacs
 *~
