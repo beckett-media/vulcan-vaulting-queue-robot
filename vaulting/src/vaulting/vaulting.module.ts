@@ -22,11 +22,11 @@ import {
   BullLockQueueModule,
   BullExecQueueModule,
 } from '../queue/queue.module';
-import { RequestLoggerMiddleware } from 'src/middleware/logger';
-import { ResponseInterceptor } from 'src/interceptors/response';
+import { RequestLoggerMiddleware } from '../middleware/logger';
+import { ResponseInterceptor } from '../interceptors/response';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { MarketplaceModule } from 'src/marketplace/marketplace.module';
-import { MarketplaceService } from 'src/marketplace/marketplace.service';
+import { MarketplaceModule } from '../marketplace/marketplace.module';
+import { MarketplaceService } from '../marketplace/marketplace.service';
 
 @Module({
   controllers: [VaultingController],

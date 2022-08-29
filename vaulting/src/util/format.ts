@@ -17,3 +17,7 @@ export function removeBase64(body) {
 
   return _body;
 }
+
+export function onlyLetters(str: string) {
+  return /^[a-zA-Z]+$/.test(str);
+}

@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { isNumber } from 'class-validator';
 import { MintJobResult, TokenStatus } from '../config/enum';
 import configuration, { RUNTIME_ENV } from '../config/configuration';
-import { DetailedLogger } from 'src/logger/detailed.logger';
+import { DetailedLogger } from '../logger/detailed.logger';
 
 @Injectable()
 export class DatabaseService {

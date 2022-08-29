@@ -1,7 +1,7 @@
 import { sha256 } from 'ethers/lib/utils';
 import { createReadStream, unlinkSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
-import configuration, { RUNTIME_ENV } from 'src/config/configuration';
+import configuration, { RUNTIME_ENV } from '../config/configuration';
 
 import { Injectable, Logger } from '@nestjs/common';
 import pinataClient, * as Pinata from '@pinata/sdk';

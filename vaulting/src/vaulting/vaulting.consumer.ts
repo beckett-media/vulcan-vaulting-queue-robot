@@ -13,9 +13,9 @@ import {
   VaultingUpdateType,
 } from '../config/enum';
 import { BigNumber } from 'ethers';
-import { DetailedLogger } from 'src/logger/detailed.logger';
-import { removeBase64 } from 'src/util/format';
-import { MarketplaceService } from 'src/marketplace/marketplace.service';
+import { DetailedLogger } from '../logger/detailed.logger';
+import { removeBase64 } from '../util/format';
+import { MarketplaceService } from '../marketplace/marketplace.service';
 
 @Processor(configuration()[process.env[RUNTIME_ENV]]['queue']['mint'])
 export class MintNFTConsumer {

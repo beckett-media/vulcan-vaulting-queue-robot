@@ -25,8 +25,7 @@ import {
   TokenStatus,
   TokenStatusReadable,
 } from '../config/enum';
-import { Token } from 'src/database/database.entity';
-import { DetailedLogger } from 'src/logger/detailed.logger';
+import { DetailedLogger } from '../logger/detailed.logger';
 
 @Injectable()
 export class VaultingService {

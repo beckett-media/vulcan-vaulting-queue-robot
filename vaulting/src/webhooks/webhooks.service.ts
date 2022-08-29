@@ -3,13 +3,13 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { BlockchainService } from 'src/blockchain/blockchain.service';
-import configuration, { RUNTIME_ENV } from 'src/config/configuration';
-import { TokenStatus } from 'src/config/enum';
-import { DatabaseService } from 'src/database/database.service';
+import { BlockchainService } from '../blockchain/blockchain.service';
+import configuration, { RUNTIME_ENV } from '../config/configuration';
+import { TokenStatus } from '../config/enum';
+import { DatabaseService } from '../database/database.service';
 import { createHash, createHmac } from 'crypto';
-import { DeltaService } from 'src/delta/delta.service';
-import { DetailedLogger } from 'src/logger/detailed.logger';
+import { DeltaService } from '../delta/delta.service';
+import { DetailedLogger } from '../logger/detailed.logger';
 
 @Injectable()
 export class WebhooksService {

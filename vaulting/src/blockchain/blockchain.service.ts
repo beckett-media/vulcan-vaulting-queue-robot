@@ -15,7 +15,7 @@ import {
   LockJobResult,
   TokenStatus,
 } from '../config/enum';
-import { DetailedLogger } from 'src/logger/detailed.logger';
+import { DetailedLogger } from '../logger/detailed.logger';
 
 const executeGas = 50000;
 

@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import got from 'got/dist/source';
-import configuration, { RUNTIME_ENV } from 'src/config/configuration';
-import { VaultingStatus } from 'src/config/enum';
-import { DetailedLogger } from 'src/logger/detailed.logger';
-import { removeBase64 } from 'src/util/format';
+import configuration, { RUNTIME_ENV } from '../config/configuration';
+import { DetailedLogger } from '../logger/detailed.logger';
+import { removeBase64 } from '../util/format';
 
 @Injectable()
 export class MarketplaceService {

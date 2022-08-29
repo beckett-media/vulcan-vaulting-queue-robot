@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { RUNTIME_ENV } from 'src/config/configuration';
+import { RUNTIME_ENV } from '../config/configuration';
 
 /**
  * Error examples:

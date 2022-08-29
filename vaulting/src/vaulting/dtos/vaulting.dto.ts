@@ -32,7 +32,6 @@ export class MintRequest {
 
   @ApiProperty()
   @IsString()
-  @MinLength(1)
   description: string;
 
   @ApiProperty()

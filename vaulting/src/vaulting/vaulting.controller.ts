@@ -14,8 +14,8 @@ import {
   ApiProduces,
   ApiResponse,
 } from '@nestjs/swagger';
-import configuration, { RUNTIME_ENV } from 'src/config/configuration';
-import { serviceConfig as blockchainConfig } from 'src/blockchain/blockchain.service.config';
+import configuration, { RUNTIME_ENV } from '../config/configuration';
+import { serviceConfig as blockchainConfig } from '../blockchain/blockchain.service.config';
 import {
   BurnJobResult,
   BurnJobResultReadable,
@@ -40,6 +40,7 @@ import {
   MintStatus,
 } from './dtos/vaulting.dto';
 import { VaultingService } from './vaulting.service';
+import { onlyLetters } from 'src/util/format';
 
 function InProd() {
   return 'prod' == process.env[RUNTIME_ENV];
@@ -111,6 +112,13 @@ export class VaultingController {
     if (!blockchainConfig.NftContractType[body.collection.toLowerCase()]) {
       throw new BadRequestException(
         `Collection ${body.collection} is not supported: ABI unknown`,
+      );
+    }
+
+    // check if image_format is letter only
+    if (!!body.image_format && !onlyLetters(body.image_format)) {
+      throw new BadRequestException(
+        `Image format ${body.image_format} is not supported: only letters are allowed`,
       );
     }
 

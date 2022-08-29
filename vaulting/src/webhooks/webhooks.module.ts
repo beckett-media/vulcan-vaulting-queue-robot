@@ -1,12 +1,12 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { BlockchainModule } from 'src/blockchain/blockchain.module';
-import configuration from 'src/config/configuration';
-import { DatabaseModule } from 'src/database/database.module';
-import { DeltaModule } from 'src/delta/delta.module';
-import { ResponseInterceptor } from 'src/interceptors/response';
-import { RequestLoggerMiddleware } from 'src/middleware/logger';
+import { BlockchainModule } from '../blockchain/blockchain.module';
+import configuration from '../config/configuration';
+import { DatabaseModule } from '../database/database.module';
+import { DeltaModule } from '../delta/delta.module';
+import { ResponseInterceptor } from '../interceptors/response';
+import { RequestLoggerMiddleware } from '../middleware/logger';
 import { WebhooksController } from './webhooks.controller';
 import { WebhooksService } from './webhooks.service';
 

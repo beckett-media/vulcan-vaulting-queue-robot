@@ -1,10 +1,10 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { Injectable, Logger } from '@nestjs/common';
 import got from 'got/dist/source';
-import { RUNTIME_ENV } from 'src/config/configuration';
-import { TokenStatusReadable } from 'src/config/enum';
-import { DatabaseService } from 'src/database/database.service';
-import { DetailedLogger } from 'src/logger/detailed.logger';
+import { RUNTIME_ENV } from '../config/configuration';
+import { TokenStatusReadable } from '../config/enum';
+import { DatabaseService } from '../database/database.service';
+import { DetailedLogger } from '../logger/detailed.logger';
 import { deltaConfig } from './delta.service.config';
 
 @Injectable()

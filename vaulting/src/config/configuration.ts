@@ -182,6 +182,44 @@ export default () => ({
     webhook_shared_secret: process.env.VAULTING_DEV_AUTOTASK_SHARED_SECRET,
     check_palantir_request_auth: false,
   },
+  test: {
+    api_port: 3000,
+    webhook_port: 3001,
+    blockchain: {
+      tx_config: {},
+    },
+    db: {
+      name: 'beckett_db_test.sqlite',
+      sync: true,
+    },
+    marketplace: {
+      mint: {
+        url: 'NOTUSED',
+        headers: { 'Content-Type': 'application/json' },
+      },
+      burn: {
+        url: 'NOTUSED',
+        headers: { 'Content-Type': 'application/json' },
+      },
+    },
+    queue: {
+      mint: '{beckett_mint_prod}',
+      burn: '{beckett_burn_prod}',
+      lock: '{beckett_lock_prod}',
+      exec: '{beckett_exec_prod}',
+      limiter: { max: 1, duration: 10 },
+    },
+    redis: {
+      host: 'NOTUSED',
+      port: 'NOTUSED',
+      enableTLS: false,
+    },
+    min_token_id: 1,
+    network_mint_relayer: 'NOTUSED',
+    pinata: 'NOTUSED',
+    webhook_shared_secret: 'NOTUSED',
+    check_palantir_request_auth: false,
+  },
 });
 
 export function redisConfig(config) {
