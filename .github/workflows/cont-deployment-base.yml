@@ -1,0 +1,96 @@
+on:
+  workflow_call:
+    inputs:
+      ECR_REPOSITORY:
+        required: true
+        type: string
+      ECS_SERVICE:
+        required: true
+        type: string
+      ECS_TASK:
+        required: true
+        type: string
+      ECS_CLUSTER:
+        required: true
+        type: string
+      CONTAINER_NAME:
+        required: true
+        type: string
+      IMAGE_TAG:
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      ENVIRONMENT_VARIABLES:
+        required: true
+
+jobs:
+
+  build:    
+    runs-on: ubuntu-latest
+    name: Build, Upload & Deploy
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-west-1
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      run: |
+        docker build -t $ECR_REGISTRY/${{ inputs.ECR_REPOSITORY }}:${{ inputs.IMAGE_TAG }} -f docker/marketplace.api.dockerfile .
+        docker push $ECR_REGISTRY/${{ inputs.ECR_REPOSITORY }}:${{ inputs.IMAGE_TAG }}
+        echo "::set-output name=image::$ECR_REGISTRY/${{ inputs.ECR_REPOSITORY }}:${{ inputs.IMAGE_TAG }}"
+
+    
+    # - name: Scan ECR image with Trivy vulnerability scanner
+    #   uses: aquasecurity/trivy-action@c666240787bede835456c7ceb9f75c9225c3c1b4
+    #   with:
+    #     image-ref: ${{ steps.build-image.outputs.image }}
+    #     format: 'table'
+    #     exit-code: '1'
+    #     ignore-unfixed: true
+    #     vuln-type: 'os,library'
+    #     severity: 'CRITICAL,HIGH'
+  
+    - name: Download task definition
+      run: |
+        aws ecs describe-task-definition --task-definition ${{ inputs.ECS_TASK }} --query taskDefinition > task-definition.json
+    
+    - name: Delete previous env vars
+      uses: sergeysova/jq-action@v2
+      id: version
+      with:
+        cmd: 'jq ".containerDefinitions[0].environment = []" task-definition.json > tf.json'
+    
+    - name: Update Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: tf.json
+        container-name: ${{ inputs.CONTAINER_NAME }}
+        image: ${{ steps.build-image.outputs.image }}
+        environment-variables: ${{ secrets.ENVIRONMENT_VARIABLES }}
+    
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: ${{ inputs.ECS_SERVICE }}
+        cluster: ${{ inputs.ECS_CLUSTER }}
+        wait-for-service-stability: true
+        

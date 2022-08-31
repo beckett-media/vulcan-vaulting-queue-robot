@@ -1,0 +1,20 @@
+name: Build & Upload [DEV]
+
+on:
+  push:
+    branches:
+      - development
+    
+jobs:
+  deploy:
+    name: DEV
+    
+    uses: beckett-media/vulcan-vaulting-queue-robot/.github/workflows/cont-deployment-base.yml@development
+    with:
+      ECS_CLUSTER: dev-vulcan-vaulting-api-cluster
+      ECS_SERVICE: dev-vulcan-vaulting-api-service
+      ECS_TASK:  dev-vulcan-vaulting-api-task
+      ECR_REPOSITORY: dev-vulcan-vaulting-api
+      CONTAINER_NAME: dev-vaulting-api
+      IMAGE_TAG: ${{ github.sha }}
+    secrets: inherit
