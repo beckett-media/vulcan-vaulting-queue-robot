@@ -153,6 +153,7 @@ export default () => ({
     db: {
       name: process.env.VAULTING_DEV_DB_NAME,
       sync: true,
+      host: 'N/A',
     },
     marketplace: {
       mint: {
@@ -191,6 +192,7 @@ export default () => ({
     db: {
       name: 'beckett_db_test.sqlite',
       sync: true,
+      host: 'N/A',
     },
     marketplace: {
       mint: {

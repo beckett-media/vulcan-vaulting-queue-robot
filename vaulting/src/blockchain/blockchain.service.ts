@@ -87,14 +87,14 @@ export class BlockchainService {
 
   // TODO: make get contract a service
   getContract(address: string): Contract {
-    if (!serviceConfig.NftContractType[address]) {
+    if (!serviceConfig.NftContractABISelector[address]) {
       throw new InternalServerErrorException(
         `${address} is not a known contract address for ABI`,
       );
     }
-    const nftContractType = serviceConfig.NftContractType[address];
+    const nftContractABI = serviceConfig.NftContractABISelector[address];
     var abiType;
-    switch (nftContractType) {
+    switch (nftContractABI) {
       case 'ERC721':
         abiType = serviceConfig.ERC721ABI;
         break;
@@ -193,8 +193,32 @@ export class BlockchainService {
   }
 
   async getChainid(): Promise<number> {
-    const network = await this.relayProvider.getNetwork();
+    const { provider } = this.getRelaySigner();
+    const network = await provider.getNetwork();
     return network.chainId;
+  }
+
+  async sanityCheck(): Promise<[boolean, any]> {
+    try {
+      const chainid = await this.getChainid();
+      return [
+        true,
+        {
+          chainid: chainid,
+          contracts: serviceConfig.NftContractABISelector,
+          relayConfig: {
+            address:
+              serviceConfig.RelayConfig[
+                configuration()[process.env[RUNTIME_ENV]][
+                  'network_mint_relayer'
+                ]
+              ]['address'],
+          },
+        },
+      ];
+    } catch (error) {
+      return [false, { error: JSON.stringify(error) }];
+    }
   }
 
   async mintToken(
@@ -206,7 +230,7 @@ export class BlockchainService {
     const nftContract = this.getContract(collection);
     this.logger.log(`Safe mint: ${owner}, ${id}, ${tokenURI}`);
     // update owner based on contract type
-    const nftContractType = serviceConfig.NftContractType[collection];
+    const nftContractType = serviceConfig.NftContractABISelector[collection];
     switch (nftContractType) {
       case 'ERC721':
         break;
@@ -294,9 +318,9 @@ export class BlockchainService {
         configuration()[process.env[RUNTIME_ENV]]['blockchain']['tx_config'];
       var burnTx;
       // contract type by collection
-      const nftContractType = serviceConfig.NftContractType[collection];
+      const nftContractABI = serviceConfig.NftContractABISelector[collection];
       // burn token based on contract type
-      switch (nftContractType) {
+      switch (nftContractABI) {
         case 'ERC721':
           const retrievalManager = await this.getRetrievalManager(collection);
           burnTx = await retrievalManager.burn(token_id, tx_config);

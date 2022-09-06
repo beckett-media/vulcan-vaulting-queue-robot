@@ -11,6 +11,7 @@ import { isNumber } from 'class-validator';
 import { MintJobResult, TokenStatus } from '../config/enum';
 import configuration, { RUNTIME_ENV } from '../config/configuration';
 import { DetailedLogger } from '../logger/detailed.logger';
+import { GetDBConnection } from './database.module';
 
 @Injectable()
 export class DatabaseService {
@@ -22,6 +23,25 @@ export class DatabaseService {
     @InjectRepository(Token) private tokenRepo: Repository<Token>,
     @InjectRepository(Vaulting) private vaultingRepo: Repository<Vaulting>,
   ) {}
+
+  async sanityCheck(): Promise<[boolean, any]> {
+    try {
+      const env = process.env[RUNTIME_ENV];
+      const config = configuration()[env];
+      await this.tokenRepo.find({ take: 1 });
+      return [
+        true,
+        {
+          type: config['db']['type'],
+          host: config['db']['host'],
+          database: config['db']['name'],
+          sync: config['db']['sync'],
+        },
+      ];
+    } catch (e) {
+      return [false, { error: JSON.stringify(e) }];
+    }
+  }
 
   async createNewVaulting(beckett_id: string, collection: string) {
     var progress: MintJobResult;

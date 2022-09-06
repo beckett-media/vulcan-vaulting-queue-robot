@@ -131,10 +131,10 @@ export class MintNFTConsumer {
         status: progress,
       };
     } catch (error) {
-      this.logger.error(`MintNFT Error: ${error}`);
+      this.logger.error(`MintNFT Error: ${JSON.stringify(error)}`);
       return {
         tx_hash: tx_hash,
-        error: error.toString(),
+        error: JSON.stringify(error),
         status: progress,
       };
     }

@@ -7,7 +7,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import pinataClient, * as Pinata from '@pinata/sdk';
 
 import { serviceConfig } from './ipfs.service.config';
-import { DetailedLogger } from 'src/logger/detailed.logger';
+import { DetailedLogger } from '../logger/detailed.logger';
 
 @Injectable()
 export class IPFSService {
@@ -51,6 +51,39 @@ export class IPFSService {
     }
 
     return metadata;
+  }
+
+  async sanityCheck(): Promise<[boolean, any]> {
+    try {
+      // pin a file with random content
+      const result = await this.getPinataClient().testAuthentication();
+      if (result.authenticated) {
+        const randomString = Math.random().toString(36);
+        const mediaBuffer = Buffer.from(randomString);
+        const tmpFileName = `${tmpdir()}/${Buffer.from(
+          sha256(mediaBuffer),
+        ).toString('hex')}.sanitycheck}`;
+        writeFileSync(tmpFileName, mediaBuffer);
+        const mediaStream = createReadStream(tmpFileName);
+        const mediaPin = await this.getPinataClient().pinFileToIPFS(
+          mediaStream,
+        );
+        unlinkSync(tmpFileName);
+
+        const pinataConfig =
+          serviceConfig.Pinata[
+            configuration()[process.env[RUNTIME_ENV]]['pinata']
+          ];
+
+        return [
+          true,
+          { apiKey: pinataConfig['apiKey'].substr(0, 6) + '**************' },
+        ];
+      }
+      return [false, { error: 'Not authenticated' }];
+    } catch (e) {
+      return [false, { error: JSON.stringify(e) }];
+    }
   }
 
   async pinMedia(media_format: string, media: string) {

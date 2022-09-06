@@ -3,7 +3,10 @@ import { Contract } from 'ethers';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
-import configuration, { RUNTIME_ENV } from '../config/configuration';
+import configuration, {
+  redisConfig,
+  RUNTIME_ENV,
+} from '../config/configuration';
 import {
   BurnRequest,
   ForwardRequest,
@@ -26,6 +29,7 @@ import {
   TokenStatusReadable,
 } from '../config/enum';
 import { DetailedLogger } from '../logger/detailed.logger';
+import { IPFSService } from '../ipfs/ipfs.service';
 
 @Injectable()
 export class VaultingService {
@@ -44,6 +48,7 @@ export class VaultingService {
     private execQueue: Queue,
     private databaseService: DatabaseService,
     private blockchainService: BlockchainService,
+    private ipfsService: IPFSService,
   ) {}
 
   nftContracts: {
@@ -431,5 +436,41 @@ export class VaultingService {
         }
       }
     }
+  }
+
+  async sanitycheck() {
+    // check db connection
+    const [dbCheck, dbReason] = await this.databaseService.sanityCheck();
+
+    // check redis queue connection
+    var redisCheck = false;
+    var redisReason = {};
+    try {
+      const anyJob = await this.mintQueue.getJob(1);
+      redisCheck = true;
+      redisReason = redisConfig(configuration()[process.env[RUNTIME_ENV]]);
+    } catch (err) {
+      redisReason = { error: JSON.stringify(err) };
+    }
+
+    // check pinata connection
+    const [pinataCheck, pinataReason] = await this.ipfsService.sanityCheck();
+
+    // check blockchain connection
+    const [blockchainCheck, blockchainReason] =
+      await this.blockchainService.sanityCheck();
+
+    return {
+      db: dbCheck ? 'ok' : `failed`,
+      redis: redisCheck ? 'ok' : `failed`,
+      pinata: pinataCheck ? 'ok' : `failed`,
+      blockchain: blockchainCheck ? 'ok' : `failed`,
+      details: {
+        db: dbReason,
+        redis: redisReason,
+        pinata: pinataReason,
+        blockchain: blockchainReason,
+      },
+    };
   }
 }

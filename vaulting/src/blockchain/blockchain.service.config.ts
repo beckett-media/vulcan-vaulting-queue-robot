@@ -1,5 +1,5 @@
 export module serviceConfig {
-  export const NftContractType = {
+  export const NftContractABISelector = {
     '0x17e95b844f8bdb32f0bcf57542f1e5cd79a2b342': 'ERC721',
     '0x599b70873851c5ef6d52a613c574d6f688a53524': 'ERC721Registry',
   };

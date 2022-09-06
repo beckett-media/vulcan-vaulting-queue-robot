@@ -40,7 +40,7 @@ import {
   MintStatus,
 } from './dtos/vaulting.dto';
 import { VaultingService } from './vaulting.service';
-import { onlyLetters } from 'src/util/format';
+import { onlyLetters } from '../util/format';
 
 function InProd() {
   return 'prod' == process.env[RUNTIME_ENV];
@@ -61,11 +61,17 @@ function check_auth(request: any) {
 @Controller('vaulting')
 @UseInterceptors(ClassSerializerInterceptor)
 export class VaultingController {
-  constructor(public VaultingService: VaultingService) {}
+  constructor(public vaultingService: VaultingService) {}
 
   @Get('/health')
   health() {
     return { status: 'ok' };
+  }
+
+  @Get('/sanitycheck')
+  async sanitycheck() {
+    const result = await this.vaultingService.sanitycheck();
+    return result;
   }
 
   @Get('/mint/:job_id')
@@ -85,7 +91,7 @@ export class VaultingController {
   async mintStatus(
     @Param('job_id') job_id: number,
   ): Promise<JobStatusResponse> {
-    const jobStatus = await this.VaultingService.mintJobStatus(job_id);
+    const jobStatus = await this.vaultingService.mintJobStatus(job_id);
     return new JobStatusResponse(jobStatus);
   }
 
@@ -109,7 +115,9 @@ export class VaultingController {
     }
 
     // Check if the collection's ABI is known
-    if (!blockchainConfig.NftContractType[body.collection.toLowerCase()]) {
+    if (
+      !blockchainConfig.NftContractABISelector[body.collection.toLowerCase()]
+    ) {
       throw new BadRequestException(
         `Collection ${body.collection} is not supported: ABI unknown`,
       );
@@ -122,7 +130,7 @@ export class VaultingController {
       );
     }
 
-    const job = await this.VaultingService.mintNFT(body);
+    const job = await this.vaultingService.mintNFT(body);
     return new JobSubmitResponse({
       job_id: Number(job.id),
       collection: body.collection.toLowerCase(),
@@ -150,7 +158,7 @@ export class VaultingController {
   async burnStatus(
     @Param('job_id') job_id: number,
   ): Promise<JobStatusResponse> {
-    const jobStatus = await this.VaultingService.burnJobStatus(job_id);
+    const jobStatus = await this.vaultingService.burnJobStatus(job_id);
     return new JobStatusResponse(jobStatus);
   }
 
@@ -172,12 +180,14 @@ export class VaultingController {
       throw new BadRequestException('Auth fields missing');
     }
     // Check if the collection's ABI is known
-    if (!blockchainConfig.NftContractType[body.collection.toLowerCase()]) {
+    if (
+      !blockchainConfig.NftContractABISelector[body.collection.toLowerCase()]
+    ) {
       throw new BadRequestException(
         `Collection ${body.collection} is not supported: ABI unknown`,
       );
     }
-    const job = await this.VaultingService.burnNFT(body);
+    const job = await this.vaultingService.burnNFT(body);
     return new JobSubmitResponse({
       job_id: Number(job.id),
       nft_record_uid: body.nft_record_uid,
@@ -207,7 +217,7 @@ export class VaultingController {
   async lockStatus(
     @Param('job_id') job_id: number,
   ): Promise<JobStatusResponse> {
-    const jobStatus = await this.VaultingService.lockJobStatus(job_id);
+    const jobStatus = await this.vaultingService.lockJobStatus(job_id);
     return new JobStatusResponse(jobStatus);
   }
 
@@ -226,7 +236,7 @@ export class VaultingController {
   })
   @ApiProduces('application/json')
   async lockNFT(@Body() body: LockRequest): Promise<JobSubmitResponse> {
-    const job = await this.VaultingService.lockNFT(body);
+    const job = await this.vaultingService.lockNFT(body);
     return new JobSubmitResponse({
       job_id: Number(job.id),
       collection: body.collection,
@@ -252,7 +262,7 @@ export class VaultingController {
   })
   @ApiProduces('application/json')
   async execute(@Body() body: ForwardRequest): Promise<JobSubmitResponse> {
-    const job = await this.VaultingService.execute(body);
+    const job = await this.vaultingService.execute(body);
     return new JobSubmitResponse({
       job_id: Number(job.id),
       processed: false,
@@ -278,7 +288,7 @@ export class VaultingController {
   async execStatus(
     @Param('job_id') job_id: number,
   ): Promise<JobStatusResponse> {
-    const jobStatus = await this.VaultingService.execJobStatus(job_id);
+    const jobStatus = await this.vaultingService.execJobStatus(job_id);
     return new JobStatusResponse(jobStatus);
   }
 }
