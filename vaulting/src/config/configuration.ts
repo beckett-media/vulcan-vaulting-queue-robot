@@ -4,6 +4,10 @@ export default () => ({
     webhook_port: process.env.VAULTING_PROD_WEBHOOK_PORT || 5001,
     blockchain: {
       tx_config: {},
+      mint_relayer: 'polygon_prod_mint',
+      lock_relayer: 'polygon_prod_lock',
+      burn_relayer: 'polygon_prod_burn',
+      readonly_relayer: 'polygon_prod_readonly',
     },
     db: {
       name: process.env.VAULTING_PROD_DB_NAME,
@@ -40,9 +44,6 @@ export default () => ({
       enableTLS: true,
     },
     min_token_id: process.env.VAULTING_PROD_MIN_TOKEN_ID || 1,
-    network_mint_relayer: 'polygon_prod_mint',
-    network_lock_relayer: 'polygon_prod_lock',
-    network_burn_relayer: 'polygon_prod_burn',
     pinata: 'prod',
     webhook_shared_secret:
       process.env.VAULTING_PROD_AUTOTASK_SHARED_SECRET_PROD,
@@ -53,6 +54,10 @@ export default () => ({
     webhook_port: process.env.VAULTING_STAGE_WEBHOOK_PORT || 4001,
     blockchain: {
       tx_config: {},
+      mint_relayer: 'mumbai',
+      lock_relayer: 'mumbai',
+      burn_relayer: 'mumbai',
+      readonly_relayer: 'mumbai',
     },
     db: {
       name: process.env.VAULTING_STAGE_DB_NAME,
@@ -77,10 +82,10 @@ export default () => ({
       },
     },
     queue: {
-      mint: '{beckett_mint_prod}',
-      burn: '{beckett_burn_prod}',
-      lock: '{beckett_lock_prod}',
-      exec: '{beckett_exec_prod}',
+      mint: '{beckett_mint_stage}',
+      burn: '{beckett_burn_stage}',
+      lock: '{beckett_lock_stage}',
+      exec: '{beckett_exec_stage}',
       limiter: { max: 1, duration: 10 },
     },
     redis: {
@@ -89,7 +94,6 @@ export default () => ({
       enableTLS: true,
     },
     min_token_id: process.env.VAULTING_STAGE_MIN_TOKEN_ID || 1,
-    network_mint_relayer: 'mumbai',
     pinata: 'stage',
     webhook_shared_secret: process.env.VAULTING_STAGE_AUTOTASK_SHARED_SECRET,
     check_palantir_request_auth: false,
@@ -99,6 +103,10 @@ export default () => ({
     webhook_port: process.env.VAULTING_AWSDEV_WEBHOOK_PORT || 3001,
     blockchain: {
       tx_config: {},
+      mint_relayer: 'mumbai',
+      lock_relayer: 'mumbai',
+      burn_relayer: 'mumbai',
+      readonly_relayer: 'mumbai',
     },
     db: {
       name: process.env.VAULTING_AWSDEV_DB_NAME || 'beckett_dev',
@@ -125,10 +133,10 @@ export default () => ({
       },
     },
     queue: {
-      mint: '{beckett_mint_prod}',
-      burn: '{beckett_burn_prod}',
-      lock: '{beckett_lock_prod}',
-      exec: '{beckett_exec_prod}',
+      mint: '{beckett_mint_awsdev}',
+      burn: '{beckett_burn_awsdev}',
+      lock: '{beckett_lock_awsdev}',
+      exec: '{beckett_exec_awsdev}',
       limiter: { max: 1, duration: 10 },
     },
     redis: {
@@ -139,7 +147,6 @@ export default () => ({
       enableTLS: true,
     },
     min_token_id: process.env.VAULTING_AWSDEV_MIN_TOKEN_ID || 1000000,
-    network_mint_relayer: 'mumbai',
     pinata: 'dev',
     webhook_shared_secret: process.env.VAULTING_AWSDEV_AUTOTASK_SHARED_SECRET,
     check_palantir_request_auth: false,
@@ -149,6 +156,10 @@ export default () => ({
     webhook_port: process.env.VAULTING_DEV_WEBHOOK_PORT,
     blockchain: {
       tx_config: {},
+      mint_relayer: 'mumbai',
+      lock_relayer: 'mumbai',
+      burn_relayer: 'mumbai',
+      readonly_relayer: 'mumbai',
     },
     db: {
       name: process.env.VAULTING_DEV_DB_NAME,
@@ -166,10 +177,10 @@ export default () => ({
       },
     },
     queue: {
-      mint: '{beckett_mint_prod}',
-      burn: '{beckett_burn_prod}',
-      lock: '{beckett_lock_prod}',
-      exec: '{beckett_exec_prod}',
+      mint: '{beckett_mint_dev}',
+      burn: '{beckett_burn_dev}',
+      lock: '{beckett_lock_dev}',
+      exec: '{beckett_exec_dev}',
       limiter: { max: 1, duration: 10 },
     },
     redis: {
@@ -178,7 +189,6 @@ export default () => ({
       enableTLS: false,
     },
     min_token_id: process.env.VAULTING_DEV_MIN_TOKEN_ID || 1,
-    network_mint_relayer: 'mumbai',
     pinata: 'dev',
     webhook_shared_secret: process.env.VAULTING_DEV_AUTOTASK_SHARED_SECRET,
     check_palantir_request_auth: false,
@@ -188,6 +198,10 @@ export default () => ({
     webhook_port: 3001,
     blockchain: {
       tx_config: {},
+      mint_relayer: 'NOTUSED',
+      lock_relayer: 'NOTUSED',
+      burn_relayer: 'NOTUSED',
+      readonly_relayer: 'NOTUSED',
     },
     db: {
       name: 'beckett_db_test.sqlite',
@@ -205,10 +219,10 @@ export default () => ({
       },
     },
     queue: {
-      mint: '{beckett_mint_prod}',
-      burn: '{beckett_burn_prod}',
-      lock: '{beckett_lock_prod}',
-      exec: '{beckett_exec_prod}',
+      mint: '{beckett_mint_test}',
+      burn: '{beckett_burn_test}',
+      lock: '{beckett_lock_test}',
+      exec: '{beckett_exec_test}',
       limiter: { max: 1, duration: 10 },
     },
     redis: {
@@ -217,7 +231,6 @@ export default () => ({
       enableTLS: false,
     },
     min_token_id: 1,
-    network_mint_relayer: 'NOTUSED',
     pinata: 'NOTUSED',
     webhook_shared_secret: 'NOTUSED',
     check_palantir_request_auth: false,

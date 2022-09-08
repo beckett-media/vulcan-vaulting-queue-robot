@@ -11,8 +11,10 @@ import { serviceConfig } from './blockchain.service.config';
 import { isString } from 'class-validator';
 import {
   BurnJobResult,
+  ContractType,
   ExecJobResult,
   LockJobResult,
+  RelayerType,
   TokenStatus,
 } from '../config/enum';
 import { DetailedLogger } from '../logger/detailed.logger';
@@ -31,17 +33,22 @@ export class BlockchainService {
     [key: string]: Contract;
   };
   private minimalForwarder: Contract;
-  private relaySigner: DefenderRelaySigner;
-  private relayProvider: DefenderRelayProvider;
+  private relaySigners: any;
+  private relayProviders: any;
 
   constructor() {
+    this.relayProviders = {};
+    this.relaySigners = {};
     // TODO: move this to its own function
+    // if minimal forwarder is not set, set it
     if (this.minimalForwarder == undefined) {
       try {
         //TODO: move to burn relayer
         const relayConfig =
           serviceConfig.RelayConfig[
-            configuration()[process.env[RUNTIME_ENV]]['network_mint_relayer']
+            configuration()[process.env[RUNTIME_ENV]]['blockchain'][
+              'mint_relayer'
+            ]
           ];
         const credentials = {
           apiKey: relayConfig['apiKey'],
@@ -62,31 +69,71 @@ export class BlockchainService {
     }
   }
 
-  getRelaySigner() {
-    if (this.relaySigner == undefined || this.relayProvider == undefined) {
-      const relayConfig =
-        serviceConfig.RelayConfig[
-          configuration()[process.env[RUNTIME_ENV]]['network_mint_relayer']
-        ];
+  getRelaySigner(relayerType: number) {
+    if (
+      this.relaySigners[relayerType] == undefined ||
+      this.relayProviders[relayerType] == undefined
+    ) {
+      var relayConfig: any;
+      switch (relayerType) {
+        case RelayerType.Readonly:
+          relayConfig =
+            serviceConfig.RelayConfig[
+              configuration()[process.env[RUNTIME_ENV]]['blockchain'][
+                'readonly_relayer'
+              ]
+            ];
+          break;
+        case RelayerType.Mint:
+          relayConfig =
+            serviceConfig.RelayConfig[
+              configuration()[process.env[RUNTIME_ENV]]['blockchain'][
+                'mint_relayer'
+              ]
+            ];
+          break;
+        case RelayerType.Burn:
+          relayConfig =
+            serviceConfig.RelayConfig[
+              configuration()[process.env[RUNTIME_ENV]]['blockchain'][
+                'burn_relayer'
+              ]
+            ];
+          break;
+        case RelayerType.Lock:
+          relayConfig =
+            serviceConfig.RelayConfig[
+              configuration()[process.env[RUNTIME_ENV]]['blockchain'][
+                'lock_relayer'
+              ]
+            ];
+          break;
+        default:
+          throw new InternalServerErrorException('invalid relayer type');
+      }
+
       const credentials = {
         apiKey: relayConfig['apiKey'],
         apiSecret: relayConfig['apiSecret'],
       };
-      this.relayProvider = new DefenderRelayProvider(credentials);
-      this.relaySigner = new DefenderRelaySigner(
+      this.relayProviders[relayerType] = new DefenderRelayProvider(credentials);
+      this.relaySigners[relayerType] = new DefenderRelaySigner(
         credentials,
-        this.relayProvider,
+        this.relayProviders[relayerType],
         {
           speed: 'fast',
         },
       );
     }
 
-    return { provider: this.relayProvider, signer: this.relaySigner };
+    return {
+      provider: this.relayProviders[relayerType],
+      signer: this.relaySigners[relayerType],
+    };
   }
 
   // TODO: make get contract a service
-  getContract(address: string): Contract {
+  getContract(address: string, relayerType: number): Contract {
     if (!serviceConfig.NftContractABISelector[address]) {
       throw new InternalServerErrorException(
         `${address} is not a known contract address for ABI`,
@@ -95,10 +142,10 @@ export class BlockchainService {
     const nftContractABI = serviceConfig.NftContractABISelector[address];
     var abiType;
     switch (nftContractABI) {
-      case 'ERC721':
+      case ContractType.ERC721:
         abiType = serviceConfig.ERC721ABI;
         break;
-      case 'ERC721Registry':
+      case ContractType.ERC721Registry:
         abiType = serviceConfig.ERC721RegistryABI;
         break;
     }
@@ -111,7 +158,7 @@ export class BlockchainService {
       return this.nftContracts[address];
     } else {
       try {
-        const { signer } = this.getRelaySigner();
+        const { signer } = this.getRelaySigner(relayerType);
         this.nftContracts[address] = new ethers.Contract(
           address,
           abiType,
@@ -124,7 +171,10 @@ export class BlockchainService {
     }
   }
 
-  async getRetrievalManager(collectionAddress: string): Promise<Contract> {
+  async getRetrievalManager(
+    collectionAddress: string,
+    relayerType: number,
+  ): Promise<Contract> {
     // cache the contract obj in class variable
     if (this.retrievalManagers == undefined) {
       this.retrievalManagers = {};
@@ -134,9 +184,9 @@ export class BlockchainService {
       return this.retrievalManagers[collectionAddress];
     } else {
       try {
-        const nftContract = this.getContract(collectionAddress);
+        const nftContract = this.getContract(collectionAddress, relayerType);
         const retrievalManagerAddress = await nftContract.retrievalManager();
-        const { signer } = this.getRelaySigner();
+        const { signer } = this.getRelaySigner(relayerType);
         this.retrievalManagers[collectionAddress] = new ethers.Contract(
           retrievalManagerAddress,
           serviceConfig.RetrievalManagerABI,
@@ -150,8 +200,11 @@ export class BlockchainService {
   }
 
   async nftLocked(collection: string, id: number) {
-    const nftContract = this.getContract(collection);
-    const retrievalManager = await this.getRetrievalManager(collection);
+    const nftContract = this.getContract(collection, RelayerType.Readonly);
+    const retrievalManager = await this.getRetrievalManager(
+      collection,
+      RelayerType.Readonly,
+    );
     try {
       const owner = await nftContract.ownerOf(id);
       if (isString(owner) && owner == retrievalManager.address) {
@@ -165,7 +218,7 @@ export class BlockchainService {
   }
 
   async nftMinted(collection: string, id: number) {
-    const nftContract = this.getContract(collection);
+    const nftContract = this.getContract(collection, RelayerType.Readonly);
     try {
       const owner = await nftContract.ownerOf(id);
       return isString(owner);
@@ -193,7 +246,7 @@ export class BlockchainService {
   }
 
   async getChainid(): Promise<number> {
-    const { provider } = this.getRelaySigner();
+    const { provider } = this.getRelaySigner(RelayerType.Readonly);
     const network = await provider.getNetwork();
     return network.chainId;
   }
@@ -201,22 +254,43 @@ export class BlockchainService {
   async sanityCheck(): Promise<[boolean, any]> {
     try {
       const chainid = await this.getChainid();
+      const readonlyRelayer =
+        configuration()[process.env[RUNTIME_ENV]]['blockchain'][
+          'readonly_relayer'
+        ];
+      const readonlyRelayerConfig = serviceConfig.RelayConfig[readonlyRelayer];
+      const mintRelayer =
+        configuration()[process.env[RUNTIME_ENV]]['blockchain']['mint_relayer'];
+      const mintRelayerConfig = serviceConfig.RelayConfig[mintRelayer];
+      const burnRelayer =
+        configuration()[process.env[RUNTIME_ENV]]['blockchain']['burn_relayer'];
+      const burnRelayerConfig = serviceConfig.RelayConfig[burnRelayer];
+      const lockRelayer =
+        configuration()[process.env[RUNTIME_ENV]]['blockchain']['lock_relayer'];
+      const lockRelayerConfig = serviceConfig.RelayConfig[lockRelayer];
       return [
         true,
         {
           chainid: chainid,
           contracts: serviceConfig.NftContractABISelector,
           relayConfig: {
-            address:
-              serviceConfig.RelayConfig[
-                configuration()[process.env[RUNTIME_ENV]][
-                  'network_mint_relayer'
-                ]
-              ]['address'],
+            readonly_relayer: `${readonlyRelayer}:${
+              readonlyRelayerConfig['address']
+            }:${readonlyRelayerConfig['apiKey'].substr(0, 8)}******`,
+            mint_relayer: `${mintRelayer}:${
+              mintRelayerConfig['address']
+            }:${mintRelayerConfig['apiKey'].substr(0, 8)}******`,
+            burn_relayer: `${burnRelayer}:${
+              burnRelayerConfig['address']
+            }:${burnRelayerConfig['apiKey'].substr(0, 8)}******`,
+            lock_relayer: `${lockRelayer}:${
+              lockRelayerConfig['address']
+            }:${lockRelayerConfig['apiKey'].substr(0, 8)}******`,
           },
         },
       ];
     } catch (error) {
+      console.log(error);
       return [false, { error: JSON.stringify(error) }];
     }
   }
@@ -227,14 +301,14 @@ export class BlockchainService {
     owner: string,
     tokenURI: string,
   ) {
-    const nftContract = this.getContract(collection);
+    const nftContract = this.getContract(collection, RelayerType.Mint);
     this.logger.log(`Safe mint: ${owner}, ${id}, ${tokenURI}`);
     // update owner based on contract type
     const nftContractType = serviceConfig.NftContractABISelector[collection];
     switch (nftContractType) {
-      case 'ERC721':
+      case ContractType.ERC721:
         break;
-      case 'ERC721Registry':
+      case ContractType.ERC721Registry:
         owner = ethers.utils.id(owner);
         break;
     }
@@ -246,8 +320,11 @@ export class BlockchainService {
 
   async lockToken(collection: string, token_id: number, hash: string) {
     try {
-      const nftContract = this.getContract(collection);
-      const retrievalManager = await this.getRetrievalManager(collection);
+      const nftContract = this.getContract(collection, RelayerType.Lock);
+      const retrievalManager = await this.getRetrievalManager(
+        collection,
+        RelayerType.Lock,
+      );
       const tx_config =
         configuration()[process.env[RUNTIME_ENV]]['blockchain']['tx_config'];
       var progress: number;
@@ -321,12 +398,15 @@ export class BlockchainService {
       const nftContractABI = serviceConfig.NftContractABISelector[collection];
       // burn token based on contract type
       switch (nftContractABI) {
-        case 'ERC721':
-          const retrievalManager = await this.getRetrievalManager(collection);
+        case ContractType.ERC721:
+          const retrievalManager = await this.getRetrievalManager(
+            collection,
+            RelayerType.Burn,
+          );
           burnTx = await retrievalManager.burn(token_id, tx_config);
           break;
-        case 'ERC721Registry':
-          const nftContract = this.getContract(collection);
+        case ContractType.ERC721Registry:
+          const nftContract = this.getContract(collection, RelayerType.Burn);
           burnTx = await nftContract.burn(token_id, tx_config);
           break;
       }
@@ -348,7 +428,7 @@ export class BlockchainService {
   }
 
   async getTransactionReceipt(tx_hash: string) {
-    const { provider } = this.getRelaySigner();
+    const { provider } = this.getRelaySigner(RelayerType.Readonly);
     const receipt = await provider.getTransactionReceipt(tx_hash);
     return receipt;
   }

@@ -1,7 +1,11 @@
+import { ContractType } from '../config/enum';
+
 export module serviceConfig {
   export const NftContractABISelector = {
-    '0x17e95b844f8bdb32f0bcf57542f1e5cd79a2b342': 'ERC721',
-    '0x599b70873851c5ef6d52a613c574d6f688a53524': 'ERC721Registry',
+    '0x17e95b844f8bdb32f0bcf57542f1e5cd79a2b342': ContractType.ERC721,
+    '0x599b70873851c5ef6d52a613c574d6f688a53524': ContractType.ERC721Registry, // on polygon mumbai
+    '0x014869fBA7dB04d80090c5E3B4a37848583c1385': ContractType.ERC721Registry, // on polygon mainnet
+    '0x708F43793BfcCD527efF09DE91434e3e213dd606': ContractType.ERC721Registry,
   };
 
   export const MinimalForwarderAddress =
@@ -17,6 +21,11 @@ export module serviceConfig {
       address: '0xb9e2ce59feb1848db71fc31304db613a9fe1bbf9',
       apiKey: process.env.VAULTING_STAGE_MINT_RELAYER_API_KEY,
       apiSecret: process.env.VAULTING_STAGE_MINT_RELAYER_API_SECRET,
+    },
+    polygon_prod_readonly: {
+      address: '0xe000e4235975851085c0cd48fe1b207bd06b1c27',
+      apiKey: process.env.VAULTING_PROD_MINT_RELAYER_API_KEY,
+      apiSecret: process.env.VAULTING_PROD_MINT_RELAYER_API_SECRET,
     },
     polygon_prod_mint: {
       address: '0xe000e4235975851085c0cd48fe1b207bd06b1c27',

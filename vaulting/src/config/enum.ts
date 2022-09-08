@@ -10,6 +10,18 @@ export enum MintJobResult {
   TokenMinted = 8,
 }
 
+export enum RelayerType {
+  Mint = 0,
+  Burn = 1,
+  Lock = 2,
+  Readonly = 3,
+}
+
+export enum ContractType {
+  ERC721 = 0,
+  ERC721Registry = 1,
+}
+
 export enum BurnJobResult {
   JobReceived = 0,
   NFTVerified = 1,
