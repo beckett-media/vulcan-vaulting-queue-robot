@@ -13,9 +13,9 @@ export module serviceConfig {
       apiSecret: process.env.VAULTING_AWSDEV_PINATA_API_SECRET,
     },
     prod: {
-      apiKey: process.env.PINATA_PROD_API_KEY,
-      apiSecret: process.env.PINATA_PROD_API_SECRET,
-      jwt: process.env.PINATA_PROD_JWT,
+      apiKey: process.env.VAULTING_PROD_PINATA_API_KEY,
+      apiSecret: process.env.VAULTING_PROD_PINATA_API_SECRET,
+      jwt: process.env.VAULTING_PROD_PINATA_JWT,
     },
   };
 }
