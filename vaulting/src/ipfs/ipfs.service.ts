@@ -54,6 +54,12 @@ export class IPFSService {
   }
 
   async sanityCheck(): Promise<[boolean, any]> {
+    const pinataConfig =
+      serviceConfig.Pinata[configuration()[process.env[RUNTIME_ENV]]['pinata']];
+    const settings = {
+      apiKey: pinataConfig['apiKey'].substr(0, 6) + '**************',
+    };
+
     try {
       // pin a file with random content
       const result = await this.getPinataClient().testAuthentication();
@@ -70,19 +76,11 @@ export class IPFSService {
         );
         unlinkSync(tmpFileName);
 
-        const pinataConfig =
-          serviceConfig.Pinata[
-            configuration()[process.env[RUNTIME_ENV]]['pinata']
-          ];
-
-        return [
-          true,
-          { apiKey: pinataConfig['apiKey'].substr(0, 6) + '**************' },
-        ];
+        return [true, settings];
       }
-      return [false, { error: 'Not authenticated' }];
+      return [false, { error: 'Not authenticated', config: settings }];
     } catch (e) {
-      return [false, { error: JSON.stringify(e) }];
+      return [false, { error: JSON.stringify(e), config: settings }];
     }
   }
 

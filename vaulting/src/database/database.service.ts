@@ -25,21 +25,20 @@ export class DatabaseService {
   ) {}
 
   async sanityCheck(): Promise<[boolean, any]> {
+    const env = process.env[RUNTIME_ENV];
+    const config = configuration()[env];
+    const settings = {
+      type: config['db']['type'],
+      host: config['db']['host'],
+      database: config['db']['name'],
+      sync: config['db']['sync'],
+      min_token_id: config['min_token_id'],
+    };
     try {
-      const env = process.env[RUNTIME_ENV];
-      const config = configuration()[env];
       await this.tokenRepo.find({ take: 1 });
-      return [
-        true,
-        {
-          type: config['db']['type'],
-          host: config['db']['host'],
-          database: config['db']['name'],
-          sync: config['db']['sync'],
-        },
-      ];
+      return [true, settings];
     } catch (e) {
-      return [false, { error: JSON.stringify(e) }];
+      return [false, { error: JSON.stringify(e), config: settings }];
     }
   }
 

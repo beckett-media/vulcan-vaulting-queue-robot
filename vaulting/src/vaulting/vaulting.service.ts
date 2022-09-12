@@ -445,12 +445,13 @@ export class VaultingService {
     // check redis queue connection
     var redisCheck = false;
     var redisReason = {};
+    var redisSettings = redisConfig(configuration()[process.env[RUNTIME_ENV]]);
     try {
       const anyJob = await this.mintQueue.getJob(1);
       redisCheck = true;
-      redisReason = redisConfig(configuration()[process.env[RUNTIME_ENV]]);
+      redisReason = redisSettings;
     } catch (err) {
-      redisReason = { error: JSON.stringify(err) };
+      redisReason = { error: JSON.stringify(err), config: redisSettings };
     }
 
     // check pinata connection
