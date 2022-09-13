@@ -178,6 +178,7 @@ export class BurnNFTConsumer {
     if (entity.token_id == token_id && entity.collection == collection) {
       progress = BurnJobResult.BeckettVerified;
       var result = await this.blockchainService.burnToken(collection, token_id);
+      const chain_id = await this.blockchainService.getChainid();
 
       // report nft status back to marketplace API
       try {
@@ -185,12 +186,12 @@ export class BurnNFTConsumer {
         await this.marketplaceService.reportNftStatus(
           VaultingUpdateType.Burned,
           VaultingStatus.Withdrawn,
-          0,
+          chain_id,
           beckett_id,
           '',
           result.tx_hash,
           '',
-          0,
+          token_id,
         );
       } catch (error) {
         this.logger.error(`Report burn NFT status: ${error}`);

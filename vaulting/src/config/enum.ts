@@ -100,9 +100,26 @@ export enum VaultingStatus {
   Withdrawn = 6,
 }
 
+export const VaultingStatusReadable = {
+  0: 'NotMinted',
+  1: 'Minting',
+  2: 'Minted',
+  3: 'Locking',
+  4: 'Locked',
+  5: 'Withdrawing',
+  6: 'Withdrawn',
+};
+
 export enum VaultingUpdateType {
   ToMint = 0,
   Minted = 1,
   ToBurn = 2,
   Burned = 3,
 }
+
+export const VaultingUpdateTypeReadable = {
+  0: 'ToMint',
+  1: 'Minted',
+  2: 'ToBurn',
+  3: 'Burned',
+};

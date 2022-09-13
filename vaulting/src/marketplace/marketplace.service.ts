@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import got from 'got/dist/source';
+import { VaultingStatus, VaultingStatusReadable } from 'src/config/enum';
 import configuration, { RUNTIME_ENV } from '../config/configuration';
 import { DetailedLogger } from '../logger/detailed.logger';
 import { removeBase64 } from '../util/format';
@@ -56,9 +57,11 @@ export class MarketplaceService {
     };
 
     this.logger.log(
-      `Report nft minted to marketplace: url => ${url}, header => ${JSON.stringify(
+      `Report nft ${token_id} ${
+        VaultingStatusReadable[status]
+      } to marketplace: url => ${url}, header => ${JSON.stringify(
         headers,
-      )} payload => ${JSON.stringify(removeBase64(payload))}`,
+      )}, payload => ${JSON.stringify(removeBase64(payload))}`,
     );
 
     try {
@@ -66,9 +69,9 @@ export class MarketplaceService {
         .put(url, { json: payload, headers: headers })
         .json();
       this.logger.log(
-        `Report nft minted to marketplace response => ${JSON.stringify(
-          response,
-        )}`,
+        `Report nft ${token_id} ${
+          VaultingStatusReadable[status]
+        } to marketplace, response => ${JSON.stringify(response)}`,
       );
     } catch (error) {
       this.logger.error(`Report nft minted to marketplace error: ${error}`);
