@@ -11,7 +11,6 @@ import { isNumber } from 'class-validator';
 import { MintJobResult, TokenStatus } from '../config/enum';
 import configuration, { RUNTIME_ENV } from '../config/configuration';
 import { DetailedLogger } from '../logger/detailed.logger';
-import { GetDBConnection } from './database.module';
 
 @Injectable()
 export class DatabaseService {
@@ -27,12 +26,15 @@ export class DatabaseService {
   async sanityCheck(): Promise<[boolean, any]> {
     const env = process.env[RUNTIME_ENV];
     const config = configuration()[env];
+    const maxTokenIds = await this.getMaxTokenIdForAllCollection();
     const settings = {
       type: config['db']['type'],
       host: config['db']['host'],
+      port: config['db']['port'],
       database: config['db']['name'],
       sync: config['db']['sync'],
-      min_token_id: config['min_token_id'],
+      min_token_id: config['min_token_id'] as number,
+      max_token_ids: maxTokenIds,
     };
     try {
       await this.tokenRepo.find({ take: 1 });
@@ -40,6 +42,20 @@ export class DatabaseService {
     } catch (e) {
       return [false, { error: JSON.stringify(e), config: settings }];
     }
+  }
+
+  async getMaxTokenIdForAllCollection(): Promise<Map<string, number>> {
+    const result = await this.tokenRepo
+      .createQueryBuilder('token')
+      .select('MAX(id)', 'max')
+      .addSelect('collection')
+      .groupBy('collection')
+      .getRawMany();
+    const map = new Map<string, number>();
+    result.forEach((r) => {
+      map.set(r['collection'], r['max'] as number);
+    });
+    return map;
   }
 
   async createNewVaulting(beckett_id: string, collection: string) {
@@ -62,8 +78,9 @@ export class DatabaseService {
         } else {
           // otherwise, this is the first time we see this beckett id
           // then issue a new token id
-          const min_token_id =
-            configuration()[process.env[RUNTIME_ENV]]['min_token_id'];
+          const min_token_id = configuration()[process.env[RUNTIME_ENV]][
+            'min_token_id'
+          ] as number;
           const result = await this.tokenRepo
             .createQueryBuilder('token')
             .select('MAX(id)', 'max')

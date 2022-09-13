@@ -8,6 +8,26 @@ import { removeBase64 } from '../util/format';
 export class MarketplaceService {
   private readonly logger = new DetailedLogger('MarketplaceService');
 
+  async sanitycheck(): Promise<[boolean, any]> {
+    const env = process.env[RUNTIME_ENV];
+    const config = configuration()[env];
+    const settings = config['marketplace'];
+    const url = settings['mint']['callback_url'];
+    // replace 'marketplace' with 'marketplace-sanitycheck' in url using regular expression
+    const healthUrl = url.replace(
+      '/marketplace/vaulting',
+      '/marketplace/health',
+    );
+
+    try {
+      const response = await got.get(healthUrl).json();
+      return [true, { response: response, config: settings }];
+    } catch (error) {
+      this.logger.error(`marketplace sanitycheck error: ${error}`);
+      return [false, { error: error, config: settings }];
+    }
+  }
+
   async reportNftStatus(
     type: number,
     status: number,
@@ -20,7 +40,7 @@ export class MarketplaceService {
   ) {
     const env = process.env[RUNTIME_ENV];
     const config = configuration()[env];
-    const url = config['marketplace']['mint']['url'];
+    const url = config['marketplace']['mint']['callback_url'];
     const headers = config['marketplace']['mint']['headers'];
 
     const payload = {

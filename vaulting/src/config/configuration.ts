@@ -1,7 +1,7 @@
 export default () => ({
   prod: {
-    api_port: process.env.VAULTING_PROD_API_PORT || 5000,
-    webhook_port: process.env.VAULTING_PROD_WEBHOOK_PORT || 5001,
+    api_port: process.env.VAULTING_PROD_API_PORT,
+    webhook_port: process.env.VAULTING_PROD_WEBHOOK_PORT,
     blockchain: {
       tx_config: {},
       mint_relayer: 'polygon_prod_mint',
@@ -19,15 +19,11 @@ export default () => ({
     },
     marketplace: {
       mint: {
-        url:
-          process.env.VAULTING_PROD_MARKETPLACE_MINT_URL ||
-          'http://localhost:3300/marketplace/vaulting',
+        callback_url: process.env.VAULTING_PROD_MARKETPLACE_MINT_URL,
         headers: { 'Content-Type': 'application/json' },
       },
       burn: {
-        url:
-          process.env.VAULTING_PROD_MARKETPLACE_BURN_URL ||
-          'http://localhost:3300/marketplace/vaulting',
+        callback_url: process.env.VAULTING_PROD_MARKETPLACE_BURN_URL,
         headers: { 'Content-Type': 'application/json' },
       },
     },
@@ -43,15 +39,15 @@ export default () => ({
       port: process.env.VAULTING_PROD_REDIS_PORT,
       enableTLS: true,
     },
-    min_token_id: process.env.VAULTING_PROD_MIN_TOKEN_ID || 1,
+    min_token_id: process.env.VAULTING_PROD_MIN_TOKEN_ID,
     pinata: 'prod',
     webhook_shared_secret:
       process.env.VAULTING_PROD_AUTOTASK_SHARED_SECRET_PROD,
     check_palantir_request_auth: true,
   },
   stage: {
-    api_port: process.env.VAULTING_STAGE_API_PORT || 4000,
-    webhook_port: process.env.VAULTING_STAGE_WEBHOOK_PORT || 4001,
+    api_port: process.env.VAULTING_STAGE_API_PORT,
+    webhook_port: process.env.VAULTING_STAGE_WEBHOOK_PORT,
     blockchain: {
       tx_config: {},
       mint_relayer: 'mumbai',
@@ -69,15 +65,11 @@ export default () => ({
     },
     marketplace: {
       mint: {
-        url:
-          process.env.VAULTING_STAGE_MARKETPLACE_MINT_URL ||
-          'http://localhost:3300/marketplace/vaulting',
+        callback_url: process.env.VAULTING_STAGE_MARKETPLACE_MINT_URL,
         headers: { 'Content-Type': 'application/json' },
       },
       burn: {
-        url:
-          process.env.VAULTING_STAGE_MARKETPLACE_BURN_URL ||
-          'http://localhost:3300/marketplace/vaulting',
+        callback_url: process.env.VAULTING_STAGE_MARKETPLACE_BURN_URL,
         headers: { 'Content-Type': 'application/json' },
       },
     },
@@ -93,14 +85,14 @@ export default () => ({
       port: process.env.VAULTING_STAGE_REDIS_PORT,
       enableTLS: true,
     },
-    min_token_id: process.env.VAULTING_STAGE_MIN_TOKEN_ID || 1,
+    min_token_id: process.env.VAULTING_STAGE_MIN_TOKEN_ID,
     pinata: 'stage',
     webhook_shared_secret: process.env.VAULTING_STAGE_AUTOTASK_SHARED_SECRET,
     check_palantir_request_auth: false,
   },
   awsdev: {
-    api_port: process.env.VAULTING_AWSDEV_API_PORT || 3000,
-    webhook_port: process.env.VAULTING_AWSDEV_WEBHOOK_PORT || 3001,
+    api_port: process.env.VAULTING_AWSDEV_API_PORT,
+    webhook_port: process.env.VAULTING_AWSDEV_WEBHOOK_PORT,
     blockchain: {
       tx_config: {},
       mint_relayer: 'mumbai',
@@ -109,26 +101,20 @@ export default () => ({
       readonly_relayer: 'mumbai',
     },
     db: {
-      name: process.env.VAULTING_AWSDEV_DB_NAME || 'beckett_dev',
+      name: process.env.VAULTING_AWSDEV_DB_NAME,
       sync: true,
-      host:
-        process.env.VAULTING_AWSDEV_DB_HOST ||
-        'vaulting-api-dev-stage.cluster-cgq6lc7ttzjk.us-west-1.rds.amazonaws.com',
-      port: process.env.VAULTING_AWSDEV_DB_PORT || 3306,
+      host: process.env.VAULTING_AWSDEV_DB_HOST,
+      port: process.env.VAULTING_AWSDEV_DB_PORT,
       username: process.env.VAULTING_AWSDEV_DB_USERNAME,
       password: process.env.VAULTING_AWSDEV_DB_PASSWORD,
     },
     marketplace: {
       mint: {
-        url:
-          process.env.VAULTING_AWSDEV_MARKETPLACE_MINT_URL ||
-          'https://dev.beckett.com:3300/marketplace/vaulting',
+        callback_url: process.env.VAULTING_AWSDEV_MARKETPLACE_MINT_URL,
         headers: { 'Content-Type': 'application/json' },
       },
       burn: {
-        url:
-          process.env.VAULTING_AWSDEV_MARKETPLACE_BURN_URL ||
-          'https://dev.beckett.com:3300/marketplace/vaulting',
+        callback_url: process.env.VAULTING_AWSDEV_MARKETPLACE_BURN_URL,
         headers: { 'Content-Type': 'application/json' },
       },
     },
@@ -140,13 +126,11 @@ export default () => ({
       limiter: { max: 1, duration: 10 },
     },
     redis: {
-      host:
-        process.env.VAULTING_AWSDEV_REDIS_HOST ||
-        'clustercfg.vaulting-redis-cluster.qux2cn.memorydb.us-west-1.amazonaws.com',
-      port: process.env.VAULTING_AWSDEV_REDIS_PORT || 6379,
+      host: process.env.VAULTING_AWSDEV_REDIS_HOST,
+      port: process.env.VAULTING_AWSDEV_REDIS_PORT,
       enableTLS: true,
     },
-    min_token_id: process.env.VAULTING_AWSDEV_MIN_TOKEN_ID || 1000000,
+    min_token_id: process.env.VAULTING_AWSDEV_MIN_TOKEN_ID,
     pinata: 'dev',
     webhook_shared_secret: process.env.VAULTING_AWSDEV_AUTOTASK_SHARED_SECRET,
     check_palantir_request_auth: false,
@@ -164,15 +148,16 @@ export default () => ({
     db: {
       name: process.env.VAULTING_DEV_DB_NAME,
       sync: true,
-      host: 'N/A',
+      host: process.env.VAULTING_DEV_DB_HOST,
+      port: process.env.VAULTING_DEV_DB_PORT,
     },
     marketplace: {
       mint: {
-        url: process.env.VAULTING_DEV_MARKETPLACE_MINT_URL,
+        callback_url: process.env.VAULTING_DEV_MARKETPLACE_MINT_URL,
         headers: { 'Content-Type': 'application/json' },
       },
       burn: {
-        url: process.env.VAULTING_DEV_MARKETPLACE_BURN_URL,
+        callback_url: process.env.VAULTING_DEV_MARKETPLACE_BURN_URL,
         headers: { 'Content-Type': 'application/json' },
       },
     },
@@ -188,7 +173,7 @@ export default () => ({
       port: process.env.VAULTING_DEV_REDIS_PORT,
       enableTLS: false,
     },
-    min_token_id: process.env.VAULTING_DEV_MIN_TOKEN_ID || 1,
+    min_token_id: process.env.VAULTING_DEV_MIN_TOKEN_ID,
     pinata: 'dev',
     webhook_shared_secret: process.env.VAULTING_DEV_AUTOTASK_SHARED_SECRET,
     check_palantir_request_auth: false,
@@ -207,14 +192,15 @@ export default () => ({
       name: 'beckett_db_test.sqlite',
       sync: true,
       host: 'N/A',
+      port: 'N/A',
     },
     marketplace: {
       mint: {
-        url: 'NOTUSED',
+        callback_url: 'NOTUSED',
         headers: { 'Content-Type': 'application/json' },
       },
       burn: {
-        url: 'NOTUSED',
+        callback_url: 'NOTUSED',
         headers: { 'Content-Type': 'application/json' },
       },
     },

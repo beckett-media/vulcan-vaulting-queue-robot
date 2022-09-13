@@ -30,6 +30,7 @@ import {
 } from '../config/enum';
 import { DetailedLogger } from '../logger/detailed.logger';
 import { IPFSService } from '../ipfs/ipfs.service';
+import { MarketplaceService } from 'src/marketplace/marketplace.service';
 
 @Injectable()
 export class VaultingService {
@@ -48,6 +49,7 @@ export class VaultingService {
     private execQueue: Queue,
     private databaseService: DatabaseService,
     private blockchainService: BlockchainService,
+    private marketplaceService: MarketplaceService,
     private ipfsService: IPFSService,
   ) {}
 
@@ -454,6 +456,10 @@ export class VaultingService {
       redisReason = { error: JSON.stringify(err), config: redisSettings };
     }
 
+    // check marketplace url
+    const [marketplaceCheck, marketplaceReason] =
+      await this.marketplaceService.sanitycheck();
+
     // check pinata connection
     const [pinataCheck, pinataReason] = await this.ipfsService.sanityCheck();
 
@@ -466,11 +472,13 @@ export class VaultingService {
       redis: redisCheck ? 'ok' : `failed`,
       pinata: pinataCheck ? 'ok' : `failed`,
       blockchain: blockchainCheck ? 'ok' : `failed`,
+      marketplace: marketplaceCheck ? 'ok' : `failed`,
       details: {
         db: dbReason,
         redis: redisReason,
         pinata: pinataReason,
         blockchain: blockchainReason,
+        marketplace: marketplaceReason,
       },
     };
   }
