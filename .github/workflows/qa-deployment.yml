@@ -1,0 +1,21 @@
+name: Build, Upload & Deploy [QA]
+
+on:
+  push:
+    branches:
+      - main
+    
+jobs:
+  deploy:
+    name: QA
+    
+    uses: beckett-media/vulcan-vaulting-queue-robot/.github/workflows/cont-deployment-base.yml@main
+    with:
+      ECS_CLUSTER: qa-vulcan-vaulting-api-cluster
+      ECS_SERVICE: qa-vulcan-vaulting-api-service
+      ECS_TASK:  qa-vulcan-vaulting-api-task
+      ECR_REPOSITORY: qa-vulcan-vaulting-api
+      CONTAINER_NAME: qa-vaulting-api
+      IMAGE_TAG: ${{ github.sha }}
+      ENVIRONMENT_VARIABLES: ${{ secrets.QA_ENVIRONMENT_VARIABLES }}
+    secrets: inherit

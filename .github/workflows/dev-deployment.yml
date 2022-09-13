@@ -1,4 +1,4 @@
-name: Build & Upload [DEV]
+name: Build, Upload & Deploy [DEV]
 
 on:
   push:
@@ -17,4 +17,5 @@ jobs:
       ECR_REPOSITORY: dev-vulcan-vaulting-api
       CONTAINER_NAME: dev-vaulting-api
       IMAGE_TAG: ${{ github.sha }}
+      ENVIRONMENT_VARIABLES: ${{ secrets.DEV_ENVIRONMENT_VARIABLES }}
     secrets: inherit
