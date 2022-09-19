@@ -14,8 +14,12 @@ export module serviceConfig {
   export const RelayConfig = {
     mumbai: {
       address: '0x18003c4f9eeae987b3899fe5136c85305e0e6749',
-      apiSecret: process.env.VAULTING_DEV_MINT_RELAYER_API_SECRET,
-      apiKey: process.env.VAULTING_DEV_MINT_RELAYER_API_KEY,
+      apiSecret: process.env.VAULTING_DEV_MINT_RELAYER_API_SECRET
+        ? process.env.VAULTING_DEV_MINT_RELAYER_API_SECRET
+        : process.env.VAULTING_AWSDEV_MINT_RELAYER_API_SECRET,
+      apiKey: process.env.VAULTING_DEV_MINT_RELAYER_API_KEY
+        ? process.env.VAULTING_DEV_MINT_RELAYER_API_KEY
+        : process.env.VAULTING_AWSDEV_MINT_RELAYER_API_KEY,
     },
     polygon_stage: {
       address: '0xb9e2ce59feb1848db71fc31304db613a9fe1bbf9',
