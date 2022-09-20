@@ -65,7 +65,7 @@ export class VaultingController {
 
   @Get('/health')
   health() {
-    return { status: 'ok' };
+    return { status: 'ok', api: 'bravo', runtime: process.env[RUNTIME_ENV] };
   }
 
   @Get('/sanitycheck')
