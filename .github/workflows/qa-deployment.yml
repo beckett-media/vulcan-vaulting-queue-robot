@@ -3,13 +3,13 @@ name: Build, Upload & Deploy [QA]
 on:
   push:
     branches:
-      - main
-    
+      - master
+
 jobs:
   deploy:
     name: QA
-    
-    uses: beckett-media/vulcan-vaulting-queue-robot/.github/workflows/cont-deployment-base.yml@main
+
+    uses: beckett-media/vulcan-vaulting-queue-robot/.github/workflows/cont-deployment-base.yml@master
     with:
       ECS_CLUSTER: qa-vulcan-vaulting-api-cluster
       ECS_SERVICE: qa-vulcan-vaulting-api-service
@@ -17,7 +17,7 @@ jobs:
       ECR_REPOSITORY: qa-vulcan-vaulting-api
       CONTAINER_NAME: qa-vaulting-api
       IMAGE_TAG: ${{ github.sha }}
-    secrets: 
+    secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       ENVIRONMENT_VARIABLES: ${{ secrets.QA_ENVIRONMENT_VARIABLES }}

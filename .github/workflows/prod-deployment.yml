@@ -1,15 +1,15 @@
-name: Build, Upload & Deploy [QA]
+name: Build, Upload & Deploy [PROD]
 
 on:
   push:
     tags:
       - 'v*'
-    
+
 jobs:
   deploy:
     name: PROD
-    
-    uses: beckett-media/vulcan-vaulting-queue-robot/.github/workflows/cont-deployment-base.yml@main
+
+    uses: beckett-media/vulcan-vaulting-queue-robot/.github/workflows/cont-deployment-base.yml@master
     with:
       ECS_CLUSTER: prod-vulcan-vaulting-api-cluster
       ECS_SERVICE: prod-vulcan-vaulting-api-service
@@ -17,7 +17,7 @@ jobs:
       ECR_REPOSITORY: prod-vulcan-vaulting-api
       CONTAINER_NAME: prod-vaulting-api
       IMAGE_TAG: ${{ github.sha }}
-    secrets: 
+    secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      ENVIRONMENT_VARIABLES: ${{ secrets.QA_ENVIRONMENT_VARIABLES }}
+      ENVIRONMENT_VARIABLES: ${{ secrets.PROD_ENVIRONMENT_VARIABLES }}
