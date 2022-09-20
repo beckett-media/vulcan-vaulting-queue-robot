@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - development
-    
+
 jobs:
   deploy:
     name: DEV
-    
+
     uses: beckett-media/vulcan-vaulting-queue-robot/.github/workflows/cont-deployment-base.yml@development
     with:
       ECS_CLUSTER: dev-vulcan-vaulting-api-cluster
@@ -21,4 +21,4 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       ENVIRONMENT_VARIABLES: ${{ secrets.DEV_ENVIRONMENT_VARIABLES }}
-      
+
