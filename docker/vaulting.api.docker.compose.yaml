@@ -1,0 +1,11 @@
+version: "3.2"
+services:
+  marketplace-api:
+    network_mode: host
+    container_name: vaulting_api
+    image: vaulting-api:master-20220920-41143c76
+    ports:
+      - "3000:3000"
+    restart: always
+    env_file:
+      /home/yifan/vaulting.dev.env
