@@ -31,6 +31,7 @@ import {
 import { DetailedLogger } from '../logger/detailed.logger';
 import { IPFSService } from '../ipfs/ipfs.service';
 import { MarketplaceService } from 'src/marketplace/marketplace.service';
+import { json } from 'express';
 
 @Injectable()
 export class VaultingService {
@@ -448,12 +449,17 @@ export class VaultingService {
     var redisCheck = false;
     var redisReason = {};
     var redisSettings = redisConfig(configuration()[process.env[RUNTIME_ENV]]);
+    var anyJob: any;
     try {
-      const anyJob = await this.mintQueue.getJob(1);
+      anyJob = await this.mintQueue.getJob(1);
       redisCheck = true;
-      redisReason = redisSettings;
+      redisReason = { config: redisSettings, anyJob: JSON.stringify(anyJob) };
     } catch (err) {
-      redisReason = { error: JSON.stringify(err), config: redisSettings };
+      redisReason = {
+        error: JSON.stringify(err),
+        config: redisSettings,
+        anyJob: JSON.stringify(anyJob),
+      };
     }
 
     // check marketplace url
