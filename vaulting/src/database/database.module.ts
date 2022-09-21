@@ -37,6 +37,30 @@ export function GetDBConnection(): TypeOrmModuleOptions {
         username: config['db']['username'],
         password: config['db']['password'],
       };
+    case 'stage':
+      return {
+        type: 'mysql',
+        database: config['db']['name'],
+        entities: [Vaulting, Token],
+        synchronize: config['db']['sync'],
+        keepConnectionAlive: true,
+        host: config['db']['host'],
+        port: config['db']['port'],
+        username: config['db']['username'],
+        password: config['db']['password'],
+      };
+    case 'prod':
+      return {
+        type: 'mysql',
+        database: config['db']['name'],
+        entities: [Vaulting, Token],
+        synchronize: config['db']['sync'],
+        keepConnectionAlive: true,
+        host: config['db']['host'],
+        port: config['db']['port'],
+        username: config['db']['username'],
+        password: config['db']['password'],
+      };
   }
 
   return {};

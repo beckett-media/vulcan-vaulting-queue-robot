@@ -57,7 +57,7 @@ export default () => ({
     },
     db: {
       name: process.env.VAULTING_STAGE_DB_NAME,
-      sync: false,
+      sync: true,
       host: process.env.VAULTING_STAGE_DB_HOST,
       port: process.env.VAULTING_STAGE_DB_PORT,
       username: process.env.VAULTING_STAGE_DB_USERNAME,
