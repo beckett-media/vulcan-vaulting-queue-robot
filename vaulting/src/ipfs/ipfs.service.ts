@@ -18,10 +18,7 @@ export class IPFSService {
 
   getPinataClient() {
     if (this.pinataClient == undefined) {
-      const pinataConfig =
-        serviceConfig.Pinata[
-          configuration()[process.env[RUNTIME_ENV]]['pinata']
-        ];
+      const pinataConfig = serviceConfig.Pinata[process.env[RUNTIME_ENV]];
       this.pinataClient = pinataClient(
         pinataConfig['apiKey'],
         pinataConfig['apiSecret'],
@@ -54,8 +51,7 @@ export class IPFSService {
   }
 
   async sanityCheck(): Promise<[boolean, any]> {
-    const pinataConfig =
-      serviceConfig.Pinata[configuration()[process.env[RUNTIME_ENV]]['pinata']];
+    const pinataConfig = serviceConfig.Pinata[process.env[RUNTIME_ENV]];
     const settings = {
       apiKey: pinataConfig['apiKey'].substr(0, 6) + '**************',
     };
