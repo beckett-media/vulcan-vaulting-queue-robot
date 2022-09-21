@@ -252,46 +252,46 @@ export class BlockchainService {
   }
 
   async sanityCheck(): Promise<[boolean, any]> {
+    const readonlyRelayer =
+      configuration()[process.env[RUNTIME_ENV]]['blockchain'][
+        'readonly_relayer'
+      ];
+    const readonlyRelayerConfig = serviceConfig.RelayConfig[readonlyRelayer];
+    const mintRelayer =
+      configuration()[process.env[RUNTIME_ENV]]['blockchain']['mint_relayer'];
+    const mintRelayerConfig = serviceConfig.RelayConfig[mintRelayer];
+    const burnRelayer =
+      configuration()[process.env[RUNTIME_ENV]]['blockchain']['burn_relayer'];
+    const burnRelayerConfig = serviceConfig.RelayConfig[burnRelayer];
+    const lockRelayer =
+      configuration()[process.env[RUNTIME_ENV]]['blockchain']['lock_relayer'];
+    const lockRelayerConfig = serviceConfig.RelayConfig[lockRelayer];
+    const blockchainSettings = {
+      contracts: serviceConfig.NftContractABISelector,
+      relayConfig: {
+        readonly_relayer: `${readonlyRelayer}:${
+          readonlyRelayerConfig['address']
+        }:${readonlyRelayerConfig['apiKey'].substr(0, 8)}******`,
+        mint_relayer: `${mintRelayer}:${
+          mintRelayerConfig['address']
+        }:${mintRelayerConfig['apiKey'].substr(0, 8)}******`,
+        burn_relayer: `${burnRelayer}:${
+          burnRelayerConfig['address']
+        }:${burnRelayerConfig['apiKey'].substr(0, 8)}******`,
+        lock_relayer: `${lockRelayer}:${
+          lockRelayerConfig['address']
+        }:${lockRelayerConfig['apiKey'].substr(0, 8)}******`,
+      },
+    };
     try {
       const chainid = await this.getChainid();
-      const readonlyRelayer =
-        configuration()[process.env[RUNTIME_ENV]]['blockchain'][
-          'readonly_relayer'
-        ];
-      const readonlyRelayerConfig = serviceConfig.RelayConfig[readonlyRelayer];
-      const mintRelayer =
-        configuration()[process.env[RUNTIME_ENV]]['blockchain']['mint_relayer'];
-      const mintRelayerConfig = serviceConfig.RelayConfig[mintRelayer];
-      const burnRelayer =
-        configuration()[process.env[RUNTIME_ENV]]['blockchain']['burn_relayer'];
-      const burnRelayerConfig = serviceConfig.RelayConfig[burnRelayer];
-      const lockRelayer =
-        configuration()[process.env[RUNTIME_ENV]]['blockchain']['lock_relayer'];
-      const lockRelayerConfig = serviceConfig.RelayConfig[lockRelayer];
-      return [
-        true,
-        {
-          chainid: chainid,
-          contracts: serviceConfig.NftContractABISelector,
-          relayConfig: {
-            readonly_relayer: `${readonlyRelayer}:${
-              readonlyRelayerConfig['address']
-            }:${readonlyRelayerConfig['apiKey'].substr(0, 8)}******`,
-            mint_relayer: `${mintRelayer}:${
-              mintRelayerConfig['address']
-            }:${mintRelayerConfig['apiKey'].substr(0, 8)}******`,
-            burn_relayer: `${burnRelayer}:${
-              burnRelayerConfig['address']
-            }:${burnRelayerConfig['apiKey'].substr(0, 8)}******`,
-            lock_relayer: `${lockRelayer}:${
-              lockRelayerConfig['address']
-            }:${lockRelayerConfig['apiKey'].substr(0, 8)}******`,
-          },
-        },
-      ];
+      blockchainSettings['chainid'] = chainid;
+      return [true, blockchainSettings];
     } catch (error) {
-      console.log(error);
-      return [false, { error: JSON.stringify(error) }];
+      return [
+        false,
+        { error: JSON.stringify(error), config: blockchainSettings },
+      ];
     }
   }
 
