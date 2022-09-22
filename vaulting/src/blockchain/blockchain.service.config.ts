@@ -4,8 +4,8 @@ export module serviceConfig {
   export const NftContractABISelector = {
     '0x17e95b844f8bdb32f0bcf57542f1e5cd79a2b342': ContractType.ERC721,
     '0x599b70873851c5ef6d52a613c574d6f688a53524': ContractType.ERC721Registry, // on polygon mumbai
-    '0x014869fBA7dB04d80090c5E3B4a37848583c1385': ContractType.ERC721Registry, // on polygon mainnet
-    '0x708F43793BfcCD527efF09DE91434e3e213dd606': ContractType.ERC721Registry,
+    '0x014869fba7db04d80090c5e3b4a37848583c1385': ContractType.ERC721Registry, // on polygon mainnet
+    '0x708f43793bfccd527eff09de91434e3e213dd606': ContractType.ERC721Registry,
   };
 
   export const MinimalForwarderAddress =
