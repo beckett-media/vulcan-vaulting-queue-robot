@@ -291,4 +291,46 @@ export class VaultingController {
     const jobStatus = await this.vaultingService.execJobStatus(job_id);
     return new JobStatusResponse(jobStatus);
   }
+
+  @Post('/dummy')
+  @ApiOperation({
+    summary: 'Test enqueue of dummy job',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Dummy job is submitted successfully',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Dummy job submission failed',
+  })
+  @ApiProduces('application/json')
+  async dummy(@Body() body: any): Promise<JobSubmitResponse> {
+    const job = await this.vaultingService.dummy(body);
+    return new JobSubmitResponse({
+      job_id: Number(job.id),
+      processed: false,
+      status: ExecJobResult.JobReceived,
+      status_desc: ExecJobResultReadable[ExecJobResult.JobReceived],
+    });
+  }
+
+  @Get('/dummy/:job_id')
+  @ApiOperation({
+    summary: 'Get dummy job status',
+  })
+  @ApiResponse({
+    status: 200,
+    type: MintStatus,
+    description: 'Return status of dummy job',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Can not find dummy job',
+  })
+  @ApiProduces('application/json')
+  async dummyStatus(@Param('job_id') job_id: number): Promise<any> {
+    const jobStatus = await this.vaultingService.dummyStatus(job_id);
+    return jobStatus;
+  }
 }

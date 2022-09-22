@@ -4,6 +4,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 import configuration, {
+  BECKETT_DUMMY_QUEUE,
   redisConfig,
   RUNTIME_ENV,
 } from '../config/configuration';
@@ -48,6 +49,8 @@ export class VaultingService {
     private lockQueue: Queue,
     @InjectQueue(configuration()[process.env[RUNTIME_ENV]]['queue']['exec'])
     private execQueue: Queue,
+    @InjectQueue(BECKETT_DUMMY_QUEUE)
+    private dummyQueue: Queue,
     private databaseService: DatabaseService,
     private blockchainService: BlockchainService,
     private marketplaceService: MarketplaceService,
@@ -83,6 +86,21 @@ export class VaultingService {
     forwardRequest.collection = forwardRequest.collection.toLowerCase();
     const job = await this.execQueue.add(forwardRequest);
     return job;
+  }
+
+  async dummy(dummyRequest: any) {
+    const job = await this.dummyQueue.add(dummyRequest);
+    return job;
+  }
+
+  async dummyStatus(id: number): Promise<any> {
+    const job = await this.dummyQueue.getJob(id);
+    console.log(JSON.stringify(job));
+    return {
+      id: id,
+      finishedOn: job.finishedOn,
+      return: job.returnvalue,
+    };
   }
 
   async getTokenStatus(collection: string, token_id: number) {

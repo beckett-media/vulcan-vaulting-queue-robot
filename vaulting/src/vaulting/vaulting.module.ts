@@ -1,4 +1,5 @@
 import { BullModule } from '@nestjs/bull';
+import Redis from 'ioredis';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 
 import configuration, {
@@ -10,6 +11,7 @@ import {
   ExecConsumer,
   LockNFTConsumer,
   MintNFTConsumer,
+  DummyConsumer,
 } from './vaulting.consumer';
 import { VaultingController } from './vaulting.controller';
 import { VaultingService } from './vaulting.service';
@@ -21,6 +23,7 @@ import {
   BullBurnQueueModule,
   BullLockQueueModule,
   BullExecQueueModule,
+  BullDummyQueueModule,
 } from '../queue/queue.module';
 import { RequestLoggerMiddleware } from '../middleware/logger';
 import { ResponseInterceptor } from '../interceptors/response';
@@ -37,6 +40,7 @@ import { MarketplaceService } from '../marketplace/marketplace.service';
     BurnNFTConsumer,
     LockNFTConsumer,
     ExecConsumer,
+    DummyConsumer,
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
@@ -47,11 +51,40 @@ import { MarketplaceService } from '../marketplace/marketplace.service';
     IPFSModule,
     MarketplaceModule,
     DatabaseModule,
-    BullModule.forRoot(redisConfig(configuration()[process.env[RUNTIME_ENV]])),
+    BullModule.forRoot({
+      createClient: () => {
+        const runtime = process.env[RUNTIME_ENV];
+        const config = redisConfig(configuration()[runtime]);
+        // if runtime in ['test', 'dev'], use normal redis
+        // otherwise use redis cluster
+        if (runtime === 'test' || runtime === 'dev') {
+          return new Redis(config['redis']['host'], config['redis']['port'], {
+            maxRetriesPerRequest: null,
+            enableReadyCheck: false,
+          });
+        } else {
+          return new Redis.Cluster(
+            [
+              {
+                host: config['redis']['host'],
+                port: config['redis']['port'],
+              },
+            ],
+            {
+              dnsLookup: (address, callback) => callback(null, address),
+              redisOptions: {
+                tls: {},
+              },
+            },
+          );
+        }
+      },
+    }),
     BullMintQueueModule,
     BullBurnQueueModule,
     BullLockQueueModule,
     BullExecQueueModule,
+    BullDummyQueueModule,
   ],
 })
 export class VaultingModule implements NestModule {

@@ -1,6 +1,21 @@
 #########################################################################################################################
 ## dev
 
+POST http://yifan-hp-z620:3000/vaulting/dummy
+Content-Type: application/json
+
+{
+  "name": "dummy",
+  "description": "dummy",
+  "type": "dummy",
+  "config": {
+    "dummy": "dummy"
+  }
+}
+
+### Get dummy job
+GET http://yifan-hp-z620:3000/vaulting/dummy/1
+
 ### mint nft normal
 POST http://127.0.0.1:3000/vaulting/mint
 Content-Type: application/json

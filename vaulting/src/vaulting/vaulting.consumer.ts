@@ -1,5 +1,8 @@
 import { Job } from 'bull';
-import configuration, { RUNTIME_ENV } from '../config/configuration';
+import configuration, {
+  BECKETT_DUMMY_QUEUE,
+  RUNTIME_ENV,
+} from '../config/configuration';
 
 import { Process, Processor } from '@nestjs/bull';
 import { InternalServerErrorException } from '@nestjs/common';
@@ -259,5 +262,16 @@ export class ExecConsumer {
       signature,
     );
     return result;
+  }
+}
+
+@Processor(BECKETT_DUMMY_QUEUE)
+export class DummyConsumer {
+  private readonly logger = new DetailedLogger('DummyConsumer');
+
+  @Process()
+  async dummy(job: Job<unknown>) {
+    this.logger.log(`Dummy queue request: ${JSON.stringify(job.data)}`);
+    return { result: 'ok dummy' };
   }
 }

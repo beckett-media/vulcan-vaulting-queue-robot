@@ -243,3 +243,4 @@ export function redisConfig(config) {
 }
 
 export const RUNTIME_ENV = 'VAULTING_RUNTIME';
+export const BECKETT_DUMMY_QUEUE = '{beckett_dummy}';
