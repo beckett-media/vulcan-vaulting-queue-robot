@@ -51,7 +51,7 @@ export class MarketplaceService {
       mint_tx_hash: mint_tx_hash,
       burn_tx_hash: burn_tx_hash,
       collection: collection,
-      token_id: token_id,
+      token_id: Number(token_id),
       status: status,
       burn_job_id: 0,
     };
