@@ -46,18 +46,6 @@ function InProd() {
   return 'prod' == process.env[RUNTIME_ENV];
 }
 
-function check_auth(request: any) {
-  const should_check_auth =
-    configuration()[process.env[RUNTIME_ENV]]['check_palantir_request_auth'];
-  const auth =
-    configuration()[process.env[RUNTIME_ENV]]['palantir_request_auth'];
-  if (should_check_auth) {
-    return request.auth == auth;
-  } else {
-    return true;
-  }
-}
-
 @Controller('vaulting')
 @UseInterceptors(ClassSerializerInterceptor)
 export class VaultingController {
@@ -110,10 +98,6 @@ export class VaultingController {
   })
   @ApiProduces('application/json')
   async mintNFT(@Body() body: MintRequest): Promise<JobSubmitResponse> {
-    if (!check_auth(body)) {
-      throw new BadRequestException('Auth fields missing');
-    }
-
     // Check if the collection's ABI is known
     if (
       !blockchainConfig.NftContractABISelector[body.collection.toLowerCase()]
@@ -176,9 +160,6 @@ export class VaultingController {
   })
   @ApiProduces('application/json')
   async burnNFT(@Body() body: BurnRequest): Promise<JobSubmitResponse> {
-    if (!check_auth(body)) {
-      throw new BadRequestException('Auth fields missing');
-    }
     // Check if the collection's ABI is known
     if (
       !blockchainConfig.NftContractABISelector[body.collection.toLowerCase()]
