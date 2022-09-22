@@ -469,7 +469,7 @@ export class VaultingService {
     var redisSettings = redisConfig(configuration()[process.env[RUNTIME_ENV]]);
     var anyJob: any;
     try {
-      anyJob = await this.mintQueue.getJob(1);
+      anyJob = await this.dummyQueue.getJob(1);
       redisCheck = true;
       redisReason = { config: redisSettings, anyJob: JSON.stringify(anyJob) };
     } catch (err) {
