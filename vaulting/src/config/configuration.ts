@@ -150,6 +150,8 @@ export default () => ({
       sync: true,
       host: process.env.VAULTING_DEV_DB_HOST,
       port: process.env.VAULTING_DEV_DB_PORT,
+      username: process.env.VAULTING_DEV_DB_USERNAME,
+      password: process.env.VAULTING_DEV_DB_PASSWORD,
     },
     marketplace: {
       mint: {
