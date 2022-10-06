@@ -6,6 +6,18 @@ From the root of the repo directly:
 make install
 ```
 
+## Connect to Marketplace API
+
+Since NFT minting & burning operations are async, the vaulting API needs to report to the Marketplace API the result of the operation in a separate API call. \
+The following two envs are used to indicate the reporting endpoints for NFT minting and burnning.
+
+```
+VAULTING_{DEV}_MARKETPLACE_MINT_URL={http://localhost:3300}/marketplace/vaulting
+VAULTING_{DEV}_MARKETPLACE_BURN_URL={http://localhost:3300}/marketplace/vaulting
+```
+
+Replace the runtime name(DEV) & domain URL (http://localhost:3000) between {} with the actual value of your deployment.
+
 ## Setup envs:
 
 ```
